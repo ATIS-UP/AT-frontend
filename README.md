@@ -1,20 +1,34 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+  <img src="./assets/readme-banner.svg" alt="Sistema de Alertas Tempranas UNIPAMPLONA" width="100%" />
 </div>
 
-# Run and deploy your AI Studio app
+# Sistema de Alertas Tempranas UNIPAMPLONA
 
-This contains everything you need to run your app locally.
+Sistema web de seguimiento académico para la Facultad de Ingeniería de Sistemas de la Universidad de Pamplona.
 
-View your app in AI Studio: https://ai.studio/apps/bb3d1627-b035-471c-953d-dc45d2332f9a
+## Propósito del proyecto
 
-## Run Locally
+Este proyecto proporciona una plataforma para:
 
-**Prerequisites:**  Node.js
+- visualizar el estado académico de los estudiantes
+- detectar alertas de riesgo y potenciales pérdidas académicas
+- gestionar artefactos de seguimiento y documentación
+- consultar perfiles de estudiante desde un tablero de control centralizado
 
+La aplicación está diseñada para uso interno en entornos educativos, con foco en la mejora del acompañamiento académico y la toma de decisiones basada en indicadores.
 
-1. Install dependencies:
+## Tecnologías principales
+
+- React 19 con TypeScript
+- Vite
+- Tailwind CSS v4
+- Recharts para gráficos
+- Motion para animaciones
+
+## Uso local
+
+1. Instala las dependencias:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Inicia el servidor de desarrollo:
    `npm run dev`
+3. Abre `http://localhost:3000`
