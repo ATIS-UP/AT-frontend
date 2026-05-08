@@ -1,25 +1,38 @@
 import React, { useState } from 'react';
 import { ShieldCheck, ArrowRight, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useAuthStore } from '../store/authStore';
+import { useNavigate } from 'react-router-dom';
 
-export const Login = ({ onLogin }: { onLogin: () => void }) => {
+export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const login = useAuthStore((state) => state.login);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      onLogin();
-    }, 1500);
+    setError('');
+    try {
+      await login(email, password);
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Credenciales inválidas');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-brand-background relative overflow-hidden">
       {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-primary/5 rounded-full blur-[120px]" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-secondary/10 rounded-full blur-[120px]" />
-      <div className="absolute top-[20%] left-[10%] w-[20%] h-[20%] bg-brand-primary/5 rounded-full blur-[80px]" />
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-primary/5 rounded-sm blur-[120px]" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-secondary/10 rounded-sm blur-[120px]" />
+      <div className="absolute top-[20%] left-[10%] w-[20%] h-[20%] bg-brand-primary/5 rounded-sm blur-[80px]" />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -37,12 +50,21 @@ export const Login = ({ onLogin }: { onLogin: () => void }) => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 shrink-0" />
+                {error}
+              </div>
+            )}
+            
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Usuario / E-mail</label>
               <div className="relative group">
                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand-primary transition-colors" />
                  <input 
                    required
+                   value={email}
+                   onChange={(e) => setEmail(e.target.value)}
                    type="text" 
                    placeholder="Ej: d.valbuena@unipamplona.edu.co"
                    className="w-full bg-white/50 border border-slate-200 pl-11 pr-4 py-3.5 rounded-xl text-sm focus:bg-white focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/5 outline-none transition-all"
@@ -59,6 +81,8 @@ export const Login = ({ onLogin }: { onLogin: () => void }) => {
                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand-primary transition-colors" />
                  <input 
                    required
+                   value={password}
+                   onChange={(e) => setPassword(e.target.value)}
                    type={showPassword ? "text" : "password"} 
                    placeholder="••••••••••••"
                    className="w-full bg-white/50 border border-slate-200 pl-11 pr-11 py-3.5 rounded-xl text-sm focus:bg-white focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/5 outline-none transition-all"
@@ -79,7 +103,7 @@ export const Login = ({ onLogin }: { onLogin: () => void }) => {
               className="w-full bg-brand-primary text-white py-4 rounded-xl font-display text-sm font-bold tracking-tight shadow-lg shadow-brand-primary/20 hover:bg-brand-primary/95 hover:translate-y-[-2px] active:translate-y-[0px] disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 group"
             >
               {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-sm animate-spin" />
               ) : (
                 <>
                   Ingresar al sistema

@@ -12,11 +12,11 @@ interface Artifact {
 }
 
 const artifacts: Artifact[] = [
-  { factor: 'FACTOR 1', title: 'Misión y Proyecto Institucional', author: 'Dr. Carlos Mendoza', date: '12 Oct 2023', status: 'completed', progress: [12, 12] },
+  { factor: 'FACTOR 1', title: 'Misión y Proyecto Institucional', author: 'Dr. Carlos Mendoza', date: '12 Oct 2026', status: 'completed', progress: [12, 12] },
   { factor: 'FACTOR 3', title: 'Informe de Retención Estudiantil', author: 'Dra. Elena Gómez', date: 'Hoy, 09:30 AM', status: 'review', progress: [7, 9] },
   { factor: 'FACTOR 4', title: 'Estructura Curricular y Sílabos', author: 'Ing. Marcos Silva', date: 'Pendiente de inicio', status: 'pending', progress: [0, 15] },
-  { factor: 'FACTOR 5', title: 'Plan de Desarrollo 2024-2030', author: 'Dra. Martha Lucia', date: '15 Oct 2023', status: 'review', progress: [4, 8] },
-  { factor: 'FACTOR 2', title: 'Estatuto Docente Actualizado', author: 'Dr. Julián Andrés', date: '05 Oct 2023', status: 'completed', progress: [10, 10] },
+  { factor: 'FACTOR 5', title: 'Plan de Desarrollo 2024-2030', author: 'Dra. Martha Lucia', date: '15 Oct 2026', status: 'review', progress: [4, 8] },
+  { factor: 'FACTOR 2', title: 'Estatuto Docente Actualizado', author: 'Dr. Julián Andrés', date: '05 Oct 2026', status: 'completed', progress: [10, 10] },
 ];
 
 const ArtifactCard = ({ artifact }: { artifact: Artifact }) => (
@@ -55,10 +55,10 @@ const ArtifactCard = ({ artifact }: { artifact: Artifact }) => (
 
     <div className="pt-4 border-t border-slate-100/50 flex flex-col gap-3">
        <div className="flex items-center gap-3">
-          <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+          <div className="flex-1 h-1.5 bg-slate-100 rounded-sm overflow-hidden">
              <div 
                className={cn(
-                 "h-full rounded-full transition-all duration-500",
+                 "h-full rounded-sm transition-all duration-500",
                  artifact.status === 'completed' ? 'bg-emerald-500' :
                  artifact.status === 'review' ? 'bg-brand-secondary' : 'bg-slate-300'
                )} 
@@ -91,8 +91,8 @@ export const Artifacts = () => {
            <div className="flex items-center gap-3 mb-1">
               <h1 className="font-display text-2xl font-bold text-brand-primary tracking-tight">Artefactos</h1>
               <div className="h-4 w-px bg-slate-200" />
-              <button className="flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-full shadow-sm hover:border-brand-primary transition-all text-xs font-semibold text-slate-600">
-                Periodo: 2023-2
+              <button className="flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-sm shadow-sm hover:border-brand-primary transition-all text-xs font-semibold text-slate-600">
+                Periodo: 2026-2
                 <ChevronDown className="w-3.5 h-3.5 opacity-50" />
               </button>
            </div>
@@ -132,7 +132,7 @@ export const Artifacts = () => {
                    "flex items-center gap-2 text-sm p-2 rounded-md transition-all cursor-pointer",
                    i === 2 ? "bg-brand-primary/5 text-brand-primary font-bold border-l-2 border-brand-primary" : "text-slate-500 hover:bg-slate-100"
                  )}>
-                   <div className={cn("w-1.5 h-1.5 rounded-full", i < 2 ? "bg-emerald-500" : i === 2 ? "bg-brand-secondary" : "bg-slate-200")} />
+                   <div className={cn("w-1.5 h-1.5 rounded-sm", i < 2 ? "bg-emerald-500" : i === 2 ? "bg-brand-secondary" : "bg-slate-200")} />
                    {item}
                  </div>
                ))}
@@ -140,7 +140,7 @@ export const Artifacts = () => {
             <div className="flex-1 p-8 overflow-y-auto bg-white topo-bg">
                <h3 className="font-display text-lg font-bold text-slate-800 mb-4 tracking-tight">3.2 Factores de Riesgo Identificados</h3>
                <p className="text-slate-600 text-sm leading-relaxed mb-4">
-                 De acuerdo con el análisis cruzado del Sistema de Alertas Tempranas correspondiente al periodo 2023-1, se han consolidado los siguientes factores primarios...
+                 De acuerdo con el análisis cruzado del Sistema de Alertas Tempranas correspondiente al periodo 2026-1, se han consolidado los siguientes factores primarios...
                </p>
                <div className="h-px bg-slate-100 my-6" />
                <p className="text-slate-300 italic text-sm">Redacte aquí el análisis detallado...</p>

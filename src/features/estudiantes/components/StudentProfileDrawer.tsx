@@ -29,7 +29,7 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
               <button onClick={onClose} className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors">
                 <X className="w-6 h-6" />
               </button>
-              <div className="w-16 h-16 rounded-full bg-brand-primary/5 flex items-center justify-center text-brand-primary text-xl font-display font-bold shrink-0 border border-brand-primary/10 overflow-hidden">
+              <div className="w-16 h-16 rounded-sm bg-brand-primary/5 flex items-center justify-center text-brand-primary text-xl font-display font-bold shrink-0 border border-brand-primary/10 overflow-hidden">
                 {student.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
               </div>
               <div className="flex-1 min-w-0 pr-10">
@@ -37,7 +37,7 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-medium text-slate-400">Cód: {student.id}</span>
                   <span className={cn(
-                    "status-pill py-0 px-2 text-[9px] uppercase",
+                    " py-0 px-2 text-[9px] uppercase",
                     student.alert === 'critical' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
                   )}>
                     {student.alert === 'critical' ? 'Riesgo Alto' : 'Estable'}

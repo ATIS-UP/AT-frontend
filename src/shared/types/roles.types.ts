@@ -3,3 +3,10 @@ export enum Rol {
   DIRECTOR = 'DIRECTOR',
   ADMINISTRADOR = 'ADMINISTRADOR',
 }
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  rol: Rol;
+}

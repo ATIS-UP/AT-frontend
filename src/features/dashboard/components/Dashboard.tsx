@@ -17,7 +17,7 @@ const data = [
   { year: '2020', value: 18 },
   { year: '2021', value: 9 },
   { year: '2022', value: 11 },
-  { year: '2023', value: 6 },
+  { year: '2026', value: 6 },
 ];
 
 const needsData = [
@@ -52,7 +52,7 @@ export const Dashboard = () => {
                   <span>Satisfacción Docente</span>
                   <span>78%</span>
                 </div>
-                <div className="w-full bg-slate-200 h-1 rounded-full overflow-hidden">
+                <div className="w-full bg-slate-200 h-1 rounded-sm overflow-hidden">
                   <div className="bg-brand-primary h-full" style={{ width: '78%' }}></div>
                 </div>
              </div>
@@ -61,7 +61,7 @@ export const Dashboard = () => {
                   <span>Clima Académico</span>
                   <span>42%</span>
                 </div>
-                <div className="w-full bg-slate-200 h-1 rounded-full overflow-hidden">
+                <div className="w-full bg-slate-200 h-1 rounded-sm overflow-hidden">
                   <div className="bg-brand-secondary h-full" style={{ width: '42%' }}></div>
                 </div>
              </div>
@@ -75,15 +75,15 @@ export const Dashboard = () => {
               <span className="text-2xl font-bold text-slate-900 leading-none">135</span>
               <span className="text-[12px] text-slate-400">Totales</span>
             </div>
-            <div className="w-full h-2 rounded-full overflow-hidden flex shadow-inner">
+            <div className="w-full h-2 rounded-sm overflow-hidden flex shadow-inner">
                <div className="bg-red-500 h-full" style={{ width: '9%' }}></div>
                <div className="bg-amber-400 h-full" style={{ width: '25%' }}></div>
                <div className="bg-blue-300 h-full" style={{ width: '66%' }}></div>
             </div>
             <div className="flex justify-between text-[10px] text-slate-500 font-medium tracking-tight">
-               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>12 Críticos</span>
-               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-amber-400 rounded-full"></span>34 Alerta</span>
-               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-blue-300 rounded-full"></span>89 Normal</span>
+               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-red-500 rounded-sm"></span>12 Críticos</span>
+               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-amber-400 rounded-sm"></span>34 Alerta</span>
+               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-blue-300 rounded-sm"></span>89 Normal</span>
             </div>
           </div>
         </div>
@@ -107,7 +107,7 @@ export const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="glass-panel rounded-card p-6 h-[340px] flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="font-display text-lg font-bold text-slate-900 tracking-tight">Deserción por periodo 2018-2023</h2>
+            <h2 className="font-display text-lg font-bold text-slate-900 tracking-tight">Deserción por periodo 2018-2026</h2>
             <button className="text-slate-400 hover:text-slate-600 transition-colors">
               <MoreVertical className="w-5 h-5" />
             </button>
@@ -161,7 +161,7 @@ export const Dashboard = () => {
       <div className="flex flex-col gap-4">
         <h2 className="font-display text-lg font-bold text-slate-900 flex items-center gap-2">
           Artefactos Recientes
-          <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tight">14 activos</span>
+          <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded-sm font-bold uppercase tracking-tight">14 activos</span>
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
           {[...Array(7)].map((_, i) => (
@@ -171,7 +171,7 @@ export const Dashboard = () => {
                   <span className="text-[9px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">Activo</span>
                </div>
                <h4 className="text-[12px] font-bold text-slate-800 leading-tight mb-1 line-clamp-1">Plan Acción Tutorías</h4>
-               <p className="text-[10px] text-slate-400">Oct 12, 2023</p>
+               <p className="text-[10px] text-slate-400">Oct 12, 2026</p>
             </div>
           ))}
           {[...Array(7)].map((_, i) => (
@@ -181,7 +181,7 @@ export const Dashboard = () => {
                   <span className="text-[9px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">Revisión</span>
                </div>
                <h4 className="text-[12px] font-bold text-slate-800 leading-tight mb-1 line-clamp-1">Reporte Cohorte A</h4>
-               <p className="text-[10px] text-slate-400">Oct 10, 2023</p>
+               <p className="text-[10px] text-slate-400">Oct 10, 2026</p>
             </div>
           ))}
         </div>

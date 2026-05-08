@@ -112,7 +112,7 @@ export const StudentList = ({ onSelectStudent }: { onSelectStudent: (student: St
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-blue-50 text-brand-primary text-xs font-bold">{student.semester}</span>
                   </td>
                   <td className="py-3 px-6 text-center">
-                    <span className="text-brand-primary bg-brand-primary/5 px-2 py-0.5 rounded-full font-bold text-[11px]">{student.stratum}</span>
+                    <span className="text-brand-primary bg-brand-primary/5 px-2 py-0.5 rounded-sm font-bold text-[11px]">{student.stratum}</span>
                   </td>
                   <td className="py-3 px-6">
                     <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200/50">{student.origin}</span>
@@ -125,7 +125,7 @@ export const StudentList = ({ onSelectStudent }: { onSelectStudent: (student: St
                   </td>
                   <td className="py-3 px-6 text-center">
                     <div className={cn(
-                      "w-2 h-2 rounded-full mx-auto shadow-sm",
+                      "w-2 h-2 rounded-sm mx-auto shadow-sm",
                       student.alert === 'stable' ? 'bg-emerald-500 shadow-emerald-200' :
                       student.alert === 'warning' ? 'bg-amber-400 shadow-amber-200' :
                       'bg-red-500 shadow-red-200'
@@ -133,7 +133,7 @@ export const StudentList = ({ onSelectStudent }: { onSelectStudent: (student: St
                   </td>
                   <td className="py-3 px-6">
                     <span className={cn(
-                      "status-pill inline-block text-[9px]",
+                      " inline-block text-[9px]",
                       student.status === 'enrolled' ? 'text-emerald-700 bg-emerald-50' : 
                       student.status === 'suspended' ? 'text-red-700 bg-red-50' : 
                       'text-slate-500 bg-slate-50'
