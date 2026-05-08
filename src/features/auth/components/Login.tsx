@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ShieldCheck, ArrowRight, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -17,111 +16,182 @@ export const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    
+    // Si el usuario solo ingresa el nombre de usuario, completamos con el dominio
+    const fullEmail = email.includes('@') ? email : `${email}@unipamplona.edu.co`;
+    
     try {
-      await login(email, password);
+      await login(fullEmail, password);
       navigate('/dashboard');
     } catch (err) {
-      setError('Credenciales inválidas');
+      setError('Credenciales académicas inválidas. Por favor intente de nuevo.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-brand-background relative overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-primary/5 rounded-sm blur-[120px]" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-secondary/10 rounded-sm blur-[120px]" />
-      <div className="absolute top-[20%] left-[10%] w-[20%] h-[20%] bg-brand-primary/5 rounded-sm blur-[80px]" />
-
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-[420px] relative z-10"
-      >
-        <div className="glass-panel p-10 rounded-[28px] border border-white/60 bg-white/70 shadow-[0_20px_50px_rgba(2,36,72,0.12)]">
-          <div className="flex flex-col items-center mb-10">
-            <div className="w-16 h-16 bg-brand-primary rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-brand-primary/20">
-              <ShieldCheck className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="font-display text-2xl font-bold text-brand-primary tracking-tight mb-2">Sistema de Gestión</h1>
-            <p className="text-slate-500 font-medium text-sm text-center">Acceso institucional UNIPAMPLONA</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 shrink-0" />
-                {error}
-              </div>
-            )}
-            
-            <div className="space-y-1.5">
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Usuario / E-mail</label>
-              <div className="relative group">
-                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand-primary transition-colors" />
-                 <input 
-                   required
-                   value={email}
-                   onChange={(e) => setEmail(e.target.value)}
-                   type="text" 
-                   placeholder="Ej: d.valbuena@unipamplona.edu.co"
-                   className="w-full bg-white/50 border border-slate-200 pl-11 pr-4 py-3.5 rounded-xl text-sm focus:bg-white focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/5 outline-none transition-all"
-                 />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center px-1">
-                 <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400">Contraseña</label>
-                 <button type="button" className="text-[10px] font-bold text-brand-secondary uppercase tracking-wider hover:underline">¿Olvidaste tu clave?</button>
-              </div>
-              <div className="relative group">
-                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand-primary transition-colors" />
-                 <input 
-                   required
-                   value={password}
-                   onChange={(e) => setPassword(e.target.value)}
-                   type={showPassword ? "text" : "password"} 
-                   placeholder="••••••••••••"
-                   className="w-full bg-white/50 border border-slate-200 pl-11 pr-11 py-3.5 rounded-xl text-sm focus:bg-white focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/5 outline-none transition-all"
-                 />
-                 <button 
-                   type="button"
-                   onClick={() => setShowPassword(!showPassword)}
-                   className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                 >
-                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                 </button>
-              </div>
-            </div>
-
-            <button 
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-brand-primary text-white py-4 rounded-xl font-display text-sm font-bold tracking-tight shadow-lg shadow-brand-primary/20 hover:bg-brand-primary/95 hover:translate-y-[-2px] active:translate-y-[0px] disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 group"
+    <div className="bg-surface text-on-surface antialiased h-screen w-full flex flex-col overflow-hidden">
+      {/* Main Split Layout */}
+      <main className="flex-1 flex w-full">
+        {/* Left Panel: 60% Brutalist Editorial */}
+        <section className="hidden lg:flex w-[60%] border-r border-primary-container relative p-16 flex-col justify-between overflow-hidden bg-surface">
+          {/* Custom Technical SVG Background Element */}
+          <div className="absolute inset-0 z-0 pointer-events-none opacity-20 flex items-center justify-center">
+            <svg 
+              className="stroke-primary-container" 
+              fill="none" 
+              height="100%" 
+              strokeWidth="1" 
+              viewBox="0 0 800 800" 
+              width="100%" 
+              xmlns="http://www.w3.org/2000/svg"
             >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-sm animate-spin" />
-              ) : (
-                <>
-                  Ingresar al sistema
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-10 pt-10 border-t border-slate-100/60 text-center">
-             <p className="text-[11px] text-slate-400 font-medium">Ingeniería de Sistemas - Facultad de Ingenierías y Arquitectura</p>
+              <path d="M 100 0 V 800 M 300 0 V 800 M 500 0 V 800 M 700 0 V 800" strokeDasharray="4 4" />
+              <path d="M 0 200 H 800 M 0 400 H 800 M 0 600 H 800" strokeDasharray="4 4" />
+              <rect height="100" strokeWidth="2" width="100" x="250" y="350" />
+              <rect height="150" strokeWidth="2" width="150" x="450" y="250" />
+              <path d="M 350 400 L 450 325" strokeWidth="2" />
+              <circle cx="250" cy="350" fill="#0b1f4b" r="4" />
+              <circle cx="450" cy="325" fill="#0b1f4b" r="4" />
+              <path d="M 100 600 L 250 450 L 450 450 L 700 700" strokeWidth="2" />
+              <circle cx="700" cy="700" fill="#0b1f4b" r="6" />
+            </svg>
           </div>
-        </div>
 
-        <div className="mt-8 flex justify-center gap-6">
-           <img src="https://www.unipamplona.edu.co/unipamplona/portalIG/paginas_propias/img/logo_unipamplona.png" alt="UNIPAMPLONA" className="h-10 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer" />
-        </div>
-      </motion.div>
+          <div className="relative z-10">
+            {/* Se agregaron las clases 'flex', 'items-center' y 'gap-4' para alinear el logo y el texto */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="flex items-center gap-4"
+            >
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Escudo_Universidad_de_Pamplona.svg/250px-Escudo_Universidad_de_Pamplona.svg.png" 
+                alt="Universidad de Pamplona" 
+                className="h-26"
+              />
+              <h1 className="font-display-xl text-display-xl text-primary-container leading-tight">
+                <strong>SAT</strong>
+              </h1>
+            </motion.div>
+          </div>
+
+          <div className="relative z-10 flex items-center gap-8">
+            
+          </div>
+        </section>
+
+        {/* Right Panel: 40% Precision Form */}
+        <section className="w-full lg:w-[40%] bg-surface-container-lowest flex flex-col justify-center px-8 lg:px-24 relative">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="w-full max-w-sm mx-auto"
+          >
+            {/* Institutional Header */}
+            <div className="mb-16">
+              <h2 className="font-headline-md text-headline-md text-primary-container mb-2">Acceso Institucional</h2>
+              <p className="font-body-md text-body-md text-on-surface-variant">Ingrese sus credenciales académicas para acceder al sistema.</p>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="mb-8 p-4 bg-error-container text-error text-sm flex items-start gap-3 border-l-4 border-error"
+              >
+                <span className="material-symbols-outlined text-[20px]">error</span>
+                <p>{error}</p>
+              </motion.div>
+            )}
+
+            {/* Precision Form */}
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Email Field */}
+              <div className="relative group">
+                <label className="block font-technical-sm text-technical-sm text-primary-container mb-2 uppercase tracking-wide" htmlFor="email">
+                  Correo Institucional
+                </label>
+                <div className="flex items-end border-b-2 border-primary-container focus-within:border-secondary transition-colors pb-2">
+                  <input 
+                    className="flex-1 bg-transparent border-none p-0 font-body-md text-body-md text-primary-container placeholder:text-outline focus:ring-0 outline-none" 
+                    id="email" 
+                    name="email" 
+                    placeholder="usuario" 
+                    required 
+                    type="text"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  {!email.includes('@') && (
+                    <span className="font-technical-sm text-technical-sm text-on-surface-variant pl-2 select-none">
+                      @unipamplona.edu.co
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div className="relative group">
+                <div className="flex justify-between items-baseline mb-2">
+                  <label className="block font-technical-sm text-technical-sm text-primary-container uppercase tracking-wide" htmlFor="password">
+                    Contraseña
+                  </label>
+                  <button type="button" className="font-technical-sm text-technical-sm text-secondary hover:underline decoration-secondary underline-offset-4 bg-transparent border-none p-0 cursor-pointer">
+                    ¿Olvidó su contraseña?
+                  </button>
+                </div>
+                <div className="flex items-end border-b-2 border-primary-container focus-within:border-secondary transition-colors pb-2">
+                  <input 
+                    className="flex-1 bg-transparent border-none p-0 font-body-md text-body-md text-primary-container placeholder:text-outline focus:ring-0 outline-none" 
+                    id="password" 
+                    name="password" 
+                    placeholder="••••••••" 
+                    required 
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button 
+                    aria-label="Toggle password visibility" 
+                    className="text-primary-container hover:text-secondary transition-colors flex items-center justify-center p-1 bg-transparent border-none cursor-pointer" 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">
+                      {showPassword ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="pt-8">
+                <button 
+                  className="w-full bg-primary-container text-surface-container-lowest font-label-caps text-label-caps py-4 px-6 rounded-none uppercase tracking-[0.2em] hover:bg-secondary transition-all duration-300 ease-out flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed" 
+                  type="submit"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-surface-container-lowest/30 border-t-surface-container-lowest rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <span>Ingresar al Sistema</span>
+                      <span className="material-symbols-outlined text-[16px] transform group-hover:translate-x-1 transition-transform">
+                        arrow_forward
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </section>
+      </main>
     </div>
   );
 };
