@@ -34,8 +34,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const data = await response.json();
       
       set({
-        user: { id: data.user.id, email: data.user.email, nombre: data.user.name },
-        rol: data.user.rol,
+        user: { id: data.usuario.id, email: data.usuario.email, nombre: data.usuario.nombre },
+        rol: data.usuario.rol,
         isAuthenticated: true,
       });
     } catch (error) {
