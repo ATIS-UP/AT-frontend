@@ -13,7 +13,11 @@ export interface AlertaAcademica {
 }
 
 export interface AlertasStats {
+  total: number;
   critico: number;
   medio: number;
-  normal: number;
+  bajo: number;
+  pendientes: number;
+  en_proceso: number;
+  resueltos: number;
 }

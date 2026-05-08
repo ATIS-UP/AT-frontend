@@ -10,6 +10,7 @@ interface AuthUser {
 interface AuthStore {
   user: AuthUser | null;
   rol: Rol | null;
+  token: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -18,6 +19,7 @@ interface AuthStore {
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   rol: null,
+  token: null,
   isAuthenticated: false,
   login: async (email, password) => {
     try {
@@ -36,6 +38,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       set({
         user: { id: data.usuario.id, email: data.usuario.email, nombre: data.usuario.nombre },
         rol: data.usuario.rol,
+        token: data.access_token,
         isAuthenticated: true,
       });
     } catch (error) {
@@ -45,11 +48,18 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
   logout: async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      const token = useAuthStore.getState().token;
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
     } catch (e) {
       console.error(e);
     } finally {
-      set({ user: null, rol: null, isAuthenticated: false });
+      set({ user: null, rol: null, token: null, isAuthenticated: false });
     }
   },
 }));

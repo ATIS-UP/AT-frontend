@@ -63,7 +63,7 @@ export function Alertas() {
         </Card>
         <Card className="text-center hover:border-emerald-300 transition-colors cursor-pointer group">
           <div className="text-4xl font-bold text-emerald-600 mb-1 group-hover:scale-110 transition-transform">
-            {stats?.normal || 0}
+            {stats?.bajo || 0}
           </div>
           <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Normal</div>
         </Card>
