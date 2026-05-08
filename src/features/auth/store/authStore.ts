@@ -12,15 +12,17 @@ interface AuthStore {
   rol: Rol | null;
   token: string | null;
   isAuthenticated: boolean;
+  getRol: () => Rol | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   rol: null,
   token: null,
   isAuthenticated: false,
+  getRol: () => get().rol,
   login: async (email, password) => {
     try {
       const response = await fetch('/api/auth/login', {

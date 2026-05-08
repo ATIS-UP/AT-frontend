@@ -47,7 +47,23 @@ const NavItem = ({ icon: Icon, label, to, onClick }: NavItemProps) => {
 };
 
 export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { logout } = useAuthStore();
+  const { logout, rol } = useAuthStore();
+  const isApoyo = rol === 'APOYO';
+
+  const menuItems = isApoyo 
+    ? [
+        { icon: LayoutDashboard, label: 'Panel', to: '/apoyo/panel' },
+        { icon: Users, label: 'Estudiantes', to: '/estudiantes' },
+        { icon: AlertTriangle, label: 'Alertas', to: '/alertas' },
+      ]
+    : [
+        { icon: LayoutDashboard, label: 'Tablero', to: '/dashboard' },
+        { icon: Users, label: 'Estudiantes', to: '/estudiantes' },
+        { icon: AlertTriangle, label: 'Alertas y Pérdidas', to: '/alertas' },
+        { icon: BarChart3, label: 'Encuestas', to: '/encuestas' },
+        { icon: PlusCircle, label: 'Actividades', to: '/actividades' },
+        { icon: FileText, label: 'Artefactos', to: '/artefactos' },
+      ];
 
   return (
     <>
@@ -76,17 +92,14 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
           </div>
           
           <ul className="flex flex-col w-full">
-            <NavItem icon={LayoutDashboard} label="Tablero" to="/dashboard" onClick={onClose} />
-            <NavItem icon={Users} label="Estudiantes" to="/estudiantes" onClick={onClose} />
-            <NavItem icon={AlertTriangle} label="Alertas y Pérdidas" to="/alertas" onClick={onClose} />
-            <NavItem icon={BarChart3} label="Encuestas" to="/encuestas" onClick={onClose} />
-            <NavItem icon={PlusCircle} label="Actividades" to="/actividades" onClick={onClose} />
-            <NavItem icon={FileText} label="Artefactos" to="/artefactos" onClick={onClose} />
+            {menuItems.map((item) => (
+              <NavItem key={item.to} icon={item.icon} label={item.label} to={item.to} onClick={onClose} />
+            ))}
           </ul>
         </div>
 
         <ul className="flex flex-col w-full border-t border-white/10 pt-4">
-          <NavItem icon={Settings} label="Parámetros" to="/parametrizacion" onClick={onClose} />
+          {!isApoyo && <NavItem icon={Settings} label="Parámetros" to="/parametrizacion" onClick={onClose} />}
           <li>
             <button
               onClick={() => {

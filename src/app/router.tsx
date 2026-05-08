@@ -7,6 +7,7 @@ import { Rol } from '../shared/types/roles.types';
 // Pages
 import LoginPage from '../pages/LoginPage';
 import DashboardPage from '../pages/DashboardPage';
+import ApoyoPage from '../pages/ApoyoPage';
 import EstudiantesPage from '../pages/EstudiantesPage';
 import AlertasPage from '../pages/AlertasPage';
 import EncuestasPage from '../pages/EncuestasPage';
@@ -23,7 +24,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE, Rol.DIRECTOR]}>
+      <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE, Rol.APOYO]}>
         <AppShell />
       </RoleGuard>
     ),
@@ -53,7 +54,7 @@ export const router = createBrowserRouter([
       {
         path: 'perfil',
         element: (
-          <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE, Rol.DIRECTOR]}>
+          <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE, Rol.APOYO]}>
             <PerfilPage />
           </RoleGuard>
         ),
@@ -61,11 +62,23 @@ export const router = createBrowserRouter([
       {
         path: 'parametrizacion',
         element: (
-          <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DIRECTOR]}>
+          <RoleGuard allowedRoles={[Rol.ADMINISTRADOR]}>
             <ParametrizacionPage />
           </RoleGuard>
         ),
       },
+    ],
+  },
+  {
+    path: '/apoyo',
+    element: (
+      <RoleGuard allowedRoles={[Rol.APOYO]}>
+        <AppShell />
+      </RoleGuard>
+    ),
+    children: [
+      { index: true, element: <Navigate to="/apoyo/panel" replace /> },
+      { path: 'panel', element: <ApoyoPage /> },
     ],
   },
 ]);

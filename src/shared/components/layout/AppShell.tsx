@@ -10,6 +10,7 @@ export function AppShell() {
   const location = useLocation();
 
   const getViewTitle = () => {
+    if (location.pathname.includes('/apoyo')) return { title: 'Panel de Apoyo', subtitle: 'Acciones Disponibles' };
     if (location.pathname.includes('/dashboard')) return { title: 'Tablero de Control', subtitle: 'Ingeniería de Sistemas' };
     if (location.pathname.includes('/estudiantes')) return { title: 'Estudiantes', subtitle: 'Listado Maestro' };
     if (location.pathname.includes('/alertas')) return { title: 'Alertas y Pérdidas', subtitle: 'Monitor de Riesgo' };

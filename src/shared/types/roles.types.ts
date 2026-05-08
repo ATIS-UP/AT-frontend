@@ -1,7 +1,7 @@
 export enum Rol {
-  DOCENTE = 'DOCENTE',
-  DIRECTOR = 'DIRECTOR',
   ADMINISTRADOR = 'ADMINISTRADOR',
+  DOCENTE = 'DOCENTE',
+  APOYO = 'APOYO',
 }
 
 export interface User {

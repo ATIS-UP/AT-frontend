@@ -10,6 +10,7 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const login = useAuthStore((state) => state.login);
+  const getRol = useAuthStore((state) => state.getRol);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,12 +18,16 @@ export const Login = () => {
     setIsLoading(true);
     setError('');
     
-    // Si el usuario solo ingresa el nombre de usuario, completamos con el dominio
     const fullEmail = email.includes('@') ? email : `${email}@unipamplona.edu.co`;
     
     try {
       await login(fullEmail, password);
-      navigate('/dashboard');
+      const userRol = getRol();
+      if (userRol === 'APOYO') {
+        navigate('/apoyo');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError('Credenciales académicas inválidas. Por favor intente de nuevo.');
     } finally {
