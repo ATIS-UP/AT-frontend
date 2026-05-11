@@ -1,25 +1,44 @@
 import React from 'react';
-import { Search, Bell, Menu, UserCircle, Settings, LogOut } from 'lucide-react';
+import { Search, Menu, UserCircle, Settings, LogOut, Bell, CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../features/auth/store/authStore';
+import { useNotificationStore } from '../../stores/notification.store';
 
 interface TopbarProps {
   title: string;
   subtitle?: string;
   onMenuClick?: () => void;
+  sidebarCollapsed?: boolean;
 }
 
-export const Topbar = ({ title, subtitle, onMenuClick }: TopbarProps) => {
+// icon and color mapping for notification types
+const notificationIconMap: Record<string, React.ReactNode> = {
+  success: <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />,
+  error: <XCircle className="w-4 h-4 text-red-500 shrink-0" />,
+  warning: <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0" />,
+  info: <Info className="w-4 h-4 text-blue-500 shrink-0" />,
+};
+
+export const Topbar = ({ title, subtitle, onMenuClick, sidebarCollapsed = false }: TopbarProps) => {
   const [profileOpen, setProfileOpen] = React.useState(false);
+  const [notifOpen, setNotifOpen] = React.useState(false);
   const profileMenuRef = React.useRef<HTMLDivElement>(null);
+  const notifMenuRef = React.useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
+  const notifications = useNotificationStore((state) => state.notifications);
+  const removeNotification = useNotificationStore((state) => state.remove);
+  const clearNotifications = useNotificationStore((state) => state.clear);
 
+  // close profile dropdown on outside click
   React.useEffect(() => {
     const onClickOutside = (event: MouseEvent) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setProfileOpen(false);
+      }
+      if (notifMenuRef.current && !notifMenuRef.current.contains(event.target as Node)) {
+        setNotifOpen(false);
       }
     };
 
@@ -33,8 +52,15 @@ export const Topbar = ({ title, subtitle, onMenuClick }: TopbarProps) => {
     navigate('/login');
   };
 
+  // dynamic left offset based on sidebar collapsed state
+  const leftClass = sidebarCollapsed ? 'lg:left-[64px]' : 'lg:left-[236px]';
+
+  // last 10 notifications (most recent first)
+  const recentNotifications = [...notifications].reverse().slice(0, 10);
+  const hasUnread = notifications.length > 0;
+
   return (
-    <header className="h-[56px] fixed top-0 right-0 left-0 lg:left-[236px] z-40 glass-panel border-b border-white/55 flex items-center justify-between px-4 md:px-6 transition-all duration-300">
+    <header className={`h-[56px] fixed top-0 right-0 left-0 ${leftClass} z-40 glass-panel border-b border-white/55 flex items-center justify-between px-4 md:px-6 transition-all duration-300`}>
       <div className="flex items-center gap-4">
         <button 
           onClick={onMenuClick}
@@ -63,13 +89,67 @@ export const Topbar = ({ title, subtitle, onMenuClick }: TopbarProps) => {
             type="text" 
           />
         </div>
-        
-        <div className="flex items-center gap-1 md:gap-2 border-l border-slate-200 pl-2 md:pl-4">
-          <button className="w-8 h-8 flex items-center justify-center rounded-sm text-slate-600 hover:bg-slate-100 transition-all relative">
-            <Bell className="w-[18px] md:w-[20px] h-[18px] md:h-[20px]" />
-            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-600 rounded-full border border-white"></span>
+
+        {/* notification bell */}
+        <div className="relative" ref={notifMenuRef}>
+          <button
+            onClick={() => setNotifOpen((prev) => !prev)}
+            className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-sm transition-colors"
+            title="Notificaciones"
+          >
+            <Bell className="w-5 h-5" />
+            {hasUnread && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+            )}
           </button>
 
+          {notifOpen && (
+            <div className="absolute right-0 mt-2 w-80 max-h-[400px] overflow-y-auto glass-panel bg-white border border-slate-200 shadow-lg rounded-sm z-50">
+              {/* header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 sticky top-0 bg-white z-10">
+                <span className="text-sm font-bold text-slate-700">Notificaciones</span>
+                {notifications.length > 0 && (
+                  <button
+                    onClick={() => {
+                      clearNotifications();
+                      setNotifOpen(false);
+                    }}
+                    className="text-xs text-brand-primary hover:underline font-medium"
+                  >
+                    Limpiar todo
+                  </button>
+                )}
+              </div>
+
+              {/* notification list */}
+              {recentNotifications.length === 0 ? (
+                <div className="px-4 py-8 text-center text-sm text-slate-400">
+                  Sin notificaciones nuevas
+                </div>
+              ) : (
+                <ul className="divide-y divide-slate-100">
+                  {recentNotifications.map((n) => (
+                    <li key={n.id} className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
+                      <div className="mt-0.5">
+                        {notificationIconMap[n.type] ?? notificationIconMap.info}
+                      </div>
+                      <p className="flex-1 text-sm text-slate-700 leading-snug">{n.message}</p>
+                      <button
+                        onClick={() => removeNotification(n.id)}
+                        className="p-0.5 text-slate-400 hover:text-slate-600 shrink-0"
+                        title="Descartar"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-1 md:gap-2 border-l border-slate-200 pl-2 md:pl-4">
           <div className="relative ml-1" ref={profileMenuRef}>
             <button
               onClick={() => setProfileOpen((prev) => !prev)}

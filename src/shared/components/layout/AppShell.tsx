@@ -2,11 +2,13 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { BottomBar } from './BottomBar';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 
 export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const location = useLocation();
 
   const getViewTitle = () => {
@@ -26,13 +28,19 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen bg-brand-background flex">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+      />
       
-      <main className="flex-1 flex flex-col min-h-screen transition-all duration-300 lg:ml-[236px]">
+      <main className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-[64px]' : 'lg:ml-[236px]'}`}>
         <Topbar 
           title={title} 
           subtitle={subtitle} 
-          onMenuClick={() => setSidebarOpen(true)} 
+          onMenuClick={() => setSidebarOpen(true)}
+          sidebarCollapsed={sidebarCollapsed}
         />
         
         <div className="px-4 md:px-10 py-8 flex-1 mt-[56px]">
@@ -49,12 +57,15 @@ export function AppShell() {
           </AnimatePresence>
         </div>
         
-        <footer className="px-4 md:px-10 py-6 border-t border-slate-100/60 bg-white/50 text-center">
+        <footer className="px-4 md:px-10 py-6 border-t border-slate-100/60 bg-white/50 text-center pb-20 md:pb-6">
            <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400">
              © 2026 Universidad de Pamplona - Programa de Ingeniería de Sistemas
            </p>
         </footer>
       </main>
+
+      {/* mobile bottom navigation */}
+      <BottomBar />
     </div>
   );
 }
