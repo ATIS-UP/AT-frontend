@@ -8,7 +8,7 @@ interface TopbarProps {
   title: string;
   subtitle?: string;
   onMenuClick?: () => void;
-  sidebarCollapsed?: boolean;
+  sidebarWidth?: number;
 }
 
 // icon and color mapping for notification types
@@ -19,7 +19,7 @@ const notificationIconMap: Record<string, React.ReactNode> = {
   info: <Info className="w-4 h-4 text-blue-500 shrink-0" />,
 };
 
-export const Topbar = ({ title, subtitle, onMenuClick, sidebarCollapsed = false }: TopbarProps) => {
+export const Topbar = ({ title, subtitle, onMenuClick, sidebarWidth = 236 }: TopbarProps) => {
   const [profileOpen, setProfileOpen] = React.useState(false);
   const [notifOpen, setNotifOpen] = React.useState(false);
   const profileMenuRef = React.useRef<HTMLDivElement>(null);
@@ -52,15 +52,14 @@ export const Topbar = ({ title, subtitle, onMenuClick, sidebarCollapsed = false 
     navigate('/login');
   };
 
-  // dynamic left offset based on sidebar collapsed state
-  const leftClass = sidebarCollapsed ? 'lg:left-[64px]' : 'lg:left-[236px]';
+  // sidebar width used for dynamic positioning via css class in AppShell
 
   // last 10 notifications (most recent first)
   const recentNotifications = [...notifications].reverse().slice(0, 10);
   const hasUnread = notifications.length > 0;
 
   return (
-    <header className={`h-[56px] fixed top-0 right-0 left-0 ${leftClass} z-40 glass-panel border-b border-white/55 flex items-center justify-between px-4 md:px-6 transition-all duration-300`}>
+    <header className="app-topbar-offset h-[56px] fixed top-0 right-0 left-0 z-40 glass-panel border-b border-white/55 flex items-center justify-between px-4 md:px-6 transition-all duration-150">
       <div className="flex items-center gap-4">
         <button 
           onClick={onMenuClick}

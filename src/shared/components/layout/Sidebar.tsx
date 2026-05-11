@@ -42,7 +42,7 @@ const NavItem = ({ icon: Icon, label, to, collapsed, onClick }: NavItemProps) =>
       >
         <Icon className={cn("w-[18px] h-[18px] shrink-0", active ? "text-brand-secondary" : "group-hover:text-white/60")} />
         {!collapsed && (
-          <span className="font-display text-[11px] uppercase tracking-[0.05em] font-bold">
+          <span className="font-display text-[11px] uppercase tracking-[0.05em] font-bold whitespace-nowrap overflow-hidden">
             {label}
           </span>
         )}
@@ -56,9 +56,11 @@ interface SidebarProps {
   onClose: () => void;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+  width?: number;
+  onResizeStart?: (e: React.MouseEvent) => void;
 }
 
-export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse }: SidebarProps) => {
+export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, width = 236, onResizeStart }: SidebarProps) => {
   const { logout, rol } = useAuthStore();
   const isApoyo = rol === 'APOYO';
   const navRef = React.useRef<HTMLElement>(null);
@@ -86,7 +88,6 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse }
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (touchStartX.current === null) return;
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-    // swipe left to close (threshold: 60px)
     if (deltaX < -60) {
       onClose();
     }
@@ -109,22 +110,25 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse }
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         className={cn(
-          "h-screen fixed left-0 top-0 z-50 bg-[#10192A] border-r border-white/10 shadow-2xl flex flex-col justify-between py-6 transition-all duration-300 lg:translate-x-0",
-          // mobile always full width
+          "h-screen fixed left-0 top-0 z-50 bg-[#10192A] border-r border-white/10 shadow-2xl flex flex-col justify-between py-6 lg:translate-x-0 transition-[width] duration-150",
+          // mobile: always 236px
           "w-[236px]",
-          // desktop collapsed width
-          collapsed ? "lg:w-[64px]" : "lg:w-[236px]",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
+        style={{ width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? `${width}px` : undefined }}
       >
-        <div>
+        {/* override width on desktop via css */}
+        <style>{`@media (min-width: 1024px) { .sidebar-nav { width: ${width}px !important; } }`}</style>
+
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* header with title and collapse toggle */}
-          <div className={cn("px-4 mb-8 flex items-center", collapsed ? "lg:justify-center lg:px-2" : "justify-between")}>
-            {/* title text - hidden when collapsed on desktop */}
-            <div className={cn("flex flex-col min-w-0", collapsed && "lg:hidden")}>
-              <span className="text-white font-black tracking-tighter text-base leading-none">UNIPAMPLONA</span>
-              <span className="text-white/60 font-display text-[9px] uppercase tracking-[0.05em] font-bold">Gestión Académica</span>
-            </div>
+          <div className={cn("px-4 mb-8 flex items-center shrink-0", collapsed ? "justify-center px-2" : "justify-between")}>
+            {!collapsed && (
+              <div className="flex flex-col min-w-0 overflow-hidden">
+                <span className="text-white font-black tracking-tighter text-base leading-none whitespace-nowrap">UNIPAMPLONA</span>
+                <span className="text-white/60 font-display text-[9px] uppercase tracking-[0.05em] font-bold whitespace-nowrap">Gestión Académica</span>
+              </div>
+            )}
             {/* collapse toggle (desktop only) */}
             <button
               onClick={onToggleCollapse}
@@ -135,14 +139,13 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse }
             </button>
           </div>
           
-          <ul className="flex flex-col w-full">
+          <ul className="flex flex-col w-full flex-1">
             {menuItems.map((item) => (
               <NavItem
                 key={item.to}
                 icon={item.icon}
                 label={item.label}
                 to={item.to}
-                // only apply collapsed on desktop (lg+), mobile always shows full
                 collapsed={collapsed}
                 onClick={onClose}
               />
@@ -170,18 +173,25 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse }
                 title={collapsed ? "Cerrar Sesión" : undefined}
                 className={cn(
                   "w-full flex items-center gap-3 px-6 py-3 transition-all duration-200 group text-left text-slate-500 hover:text-white/80 hover:bg-white/5",
-                  collapsed && "lg:justify-center lg:px-0"
+                  collapsed && "justify-center px-0"
                 )}
               >
                 <LogOut className="w-[18px] h-[18px] shrink-0 group-hover:text-white/60" />
-                {/* hide label on desktop when collapsed */}
-                <span className={cn("font-display text-[11px] uppercase tracking-[0.05em] font-bold", collapsed && "lg:hidden")}>
-                  Cerrar Sesión
-                </span>
+                {!collapsed && (
+                  <span className="font-display text-[11px] uppercase tracking-[0.05em] font-bold whitespace-nowrap">
+                    Cerrar Sesión
+                  </span>
+                )}
               </button>
             </li>
           </ul>
         </div>
+
+        {/* resize drag handle on the right edge (desktop only) */}
+        <div
+          onMouseDown={onResizeStart}
+          className="hidden lg:block absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-brand-secondary/40 active:bg-brand-secondary/60 transition-colors z-[60]"
+        />
       </nav>
     </>
   );
