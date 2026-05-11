@@ -11,7 +11,6 @@ import ApoyoPage from '../pages/ApoyoPage';
 import EstudiantesPage from '../pages/EstudiantesPage';
 import AlertasPage from '../pages/AlertasPage';
 import EncuestasPage from '../pages/EncuestasPage';
-import ActividadesPage from '../pages/ActividadesPage';
 import ArtefactosPage from '../pages/ArtefactosPage';
 import ParametrizacionPage from '../pages/ParametrizacionPage';
 import PerfilPage from '../pages/PerfilPage';
@@ -44,7 +43,7 @@ export const router = createBrowserRouter([
           { index: true, element: <EncuestasPage /> },
         ],
       },
-      { path: 'actividades', element: <ActividadesPage /> },
+
       {
         path: 'artefactos',
         children: [
@@ -62,7 +61,7 @@ export const router = createBrowserRouter([
       {
         path: 'parametrizacion',
         element: (
-          <RoleGuard allowedRoles={[Rol.ADMINISTRADOR]}>
+          <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE]}>
             <ParametrizacionPage />
           </RoleGuard>
         ),
