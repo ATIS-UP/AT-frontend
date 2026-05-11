@@ -1,16 +1,93 @@
-import { useQuery } from '@tanstack/react-query';
-import { alertasService } from '../services/alertas.service';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { alertasService, AlertaListParams } from '../services/alertasService';
+import { useNotificationStore } from '@/src/shared/stores/notification.store';
 
-export const useAlertas = () => {
-  return useQuery({
-    queryKey: ['alertas'],
-    queryFn: () => alertasService.getAlertas(),
-  });
+const ALL_KEY = ['alertas'] as const;
+
+const KEYS = {
+  all: ALL_KEY,
+  list: (params?: AlertaListParams) => [...ALL_KEY, 'list', params] as const,
+  stats: [...ALL_KEY, 'stats'] as const,
+  detail: (id: string) => [...ALL_KEY, 'detail', id] as const,
+  actividades: (id: string) => [...ALL_KEY, 'actividades', id] as const,
 };
 
-export const useAlertasStats = () => {
+export function useAlertas(params?: AlertaListParams) {
   return useQuery({
-    queryKey: ['alertas-stats'],
-    queryFn: () => alertasService.getStats(),
+    queryKey: KEYS.list(params),
+    queryFn: () => alertasService.listar(params),
   });
-};
+}
+
+export function useAlertasStats() {
+  return useQuery({
+    queryKey: KEYS.stats,
+    queryFn: () => alertasService.stats(),
+  });
+}
+
+export function useAlerta(id: string) {
+  return useQuery({
+    queryKey: KEYS.detail(id),
+    queryFn: () => alertasService.obtener(id),
+    enabled: !!id,
+  });
+}
+
+export function useCrearAlerta() {
+  const queryClient = useQueryClient();
+  const notify = useNotificationStore.getState().add;
+
+  return useMutation({
+    mutationFn: (data: Record<string, unknown>) => alertasService.crear(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: KEYS.all });
+      notify({ type: 'success', message: 'Alerta creada correctamente' });
+    },
+    onError: () => {
+      notify({ type: 'error', message: 'Error al crear la alerta' });
+    },
+  });
+}
+
+export function useCambiarEstadoAlerta() {
+  const queryClient = useQueryClient();
+  const notify = useNotificationStore.getState().add;
+
+  return useMutation({
+    mutationFn: ({ id, estado }: { id: string; estado: string }) =>
+      alertasService.cambiarEstado(id, estado),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: KEYS.all });
+      notify({ type: 'success', message: 'Estado actualizado' });
+    },
+    onError: () => {
+      notify({ type: 'error', message: 'Error al cambiar estado' });
+    },
+  });
+}
+
+export function useAlertaActividades(alertaId: string) {
+  return useQuery({
+    queryKey: KEYS.actividades(alertaId),
+    queryFn: () => alertasService.listarActividades(alertaId),
+    enabled: !!alertaId,
+  });
+}
+
+export function useCrearActividad() {
+  const queryClient = useQueryClient();
+  const notify = useNotificationStore.getState().add;
+
+  return useMutation({
+    mutationFn: ({ alertaId, data }: { alertaId: string; data: Record<string, unknown> }) =>
+      alertasService.crearActividad(alertaId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: KEYS.all });
+      notify({ type: 'success', message: 'Actividad registrada correctamente' });
+    },
+    onError: () => {
+      notify({ type: 'error', message: 'Error al registrar actividad' });
+    },
+  });
+}
