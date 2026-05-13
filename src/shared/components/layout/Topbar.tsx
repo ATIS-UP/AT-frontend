@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, Menu, UserCircle, Settings, LogOut, Bell, CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../../features/auth/store/authStore';
+import { useAuthStore } from '../../../features/auth/store/auth.store';
 import { useNotificationStore } from '../../stores/notification.store';
 
 interface TopbarProps {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../store/auth.store';
 import { useNavigate } from 'react-router-dom';
 
 export const Login = () => {
@@ -9,8 +9,7 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const login = useAuthStore((state) => state.login);
-  const getRol = useAuthStore((state) => state.getRol);
+  const loginWithCredentials = useAuthStore((state) => state.loginWithCredentials);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,12 +17,9 @@ export const Login = () => {
     setIsLoading(true);
     setError('');
     
-    const fullEmail = email.includes('@') ? email : `${email}@unipamplona.edu.co`;
-    
     try {
-      await login(fullEmail, password);
-      const userRol = getRol();
-      if (userRol === 'APOYO') {
+      const user = await loginWithCredentials(email, password);
+      if (user.rol === 'APOYO') {
         navigate('/apoyo');
       } else {
         navigate('/dashboard');

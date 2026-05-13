@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useBuscarEstudiante, useCrearRegistro, useActualizarRegistro, useAgregarHistorial } from '../hooks/useCasosEspeciales';
+import { useBuscarEstudiante, useCrearRegistro, useActualizarRegistro, useAgregarHistorial, useEliminarRegistro } from '../hooks/useCasosEspeciales';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Card } from '@/src/shared/components/ui/Card';
 import { Badge } from '@/src/shared/components/ui/Badge';
 import { Modal } from '@/src/shared/components/ui/Modal';
-import { Search, Plus, Eye } from 'lucide-react';
+import { Search, Plus, Eye, Trash2 } from 'lucide-react';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
 import type { BusquedaEstudiante, EstudianteInfo, RegistroCaso, TipoRegistro, EstadoRegistro } from '../types/casosEspeciales.types';
 import { TIPOS_REGISTRO, ESTADOS_REGISTRO } from '../types/casosEspeciales.types';
@@ -37,9 +37,11 @@ export function CasosEspeciales() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const { data: busquedaResults, isLoading, refetch } = useBuscarEstudiante(searchTerm, pagina, searchTerm.length >= 2);
   const crearRegistro = useCrearRegistro();
+  const eliminarRegistro = useEliminarRegistro();
   const notification = useNotificationStore();
 
   const results: BusquedaEstudiante[] = busquedaResults?.resultados || [];
@@ -98,6 +100,25 @@ export function CasosEspeciales() {
     setShowViewModal(true);
   };
 
+  const handleDeleteClick = (registro: RegistroCaso) => {
+    setDeleteConfirmId(registro.id);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteConfirmId) return;
+    eliminarRegistro.mutate(deleteConfirmId, {
+      onSuccess: () => {
+        setDeleteConfirmId(null);
+        notification.add({ type: 'success', message: 'Registro eliminado exitosamente' });
+        refetch();
+      },
+      onError: () => {
+        setDeleteConfirmId(null);
+        notification.add({ type: 'error', message: 'Error al eliminar el registro' });
+      },
+    });
+  };
+
   return (
     <div className="space-y-8 fade-in">
       <div className="flex items-center justify-between">
@@ -108,17 +129,17 @@ export function CasosEspeciales() {
       </div>
 
       <Card>
-        <form onSubmit={handleSearch} className="flex gap-3">
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
-              placeholder="Buscar por cédula, nombre, apellido o código..."
+              placeholder="Buscar por código, cédula, nombre o apellido..."
             />
           </div>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
             <Search className="w-4 h-4 mr-2" />
             Buscar
           </Button>
@@ -138,11 +159,11 @@ export function CasosEspeciales() {
       )}
 
       {!isLoading && results.length > 0 && (
-        <div className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-lg">
-          <div className="text-sm text-slate-500">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border border-slate-200 rounded-lg">
+          <div className="text-sm text-slate-500 text-center sm:text-left">
             Mostrando <span className="font-medium text-slate-700">{results.length}</span> de <span className="font-medium text-slate-700">{totalResultados}</span> resultado{totalResultados !== 1 ? 's' : ''}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-center">
             <Button
               variant="outline"
               size="sm"
@@ -151,7 +172,7 @@ export function CasosEspeciales() {
             >
               Anterior
             </Button>
-            <span className="text-sm text-slate-600 px-2">Página {pagina} de {totalPaginas || 1}</span>
+            <span className="text-sm text-slate-600 px-2 whitespace-nowrap">Página {pagina} de {totalPaginas || 1}</span>
             <Button
               variant="outline"
               size="sm"
@@ -195,36 +216,46 @@ export function CasosEspeciales() {
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px] bg-slate-50/50">
-                      <th className="pb-3 pt-4 px-6 font-semibold">#</th>
-                      <th className="pb-3 pt-4 px-6 font-semibold">Tipo</th>
-                      <th className="pb-3 pt-4 px-6 font-semibold">Estado</th>
-                      <th className="pb-3 pt-4 px-6 font-semibold">Fecha Ini</th>
-                      <th className="pb-3 pt-4 px-6 font-semibold text-right">Acción</th>
+                      <th className="pb-3 pt-4 px-4 font-semibold">#</th>
+                      <th className="pb-3 pt-4 px-4 font-semibold hidden md:table-cell">Tipo</th>
+                      <th className="pb-3 pt-4 px-4 font-semibold">Estado</th>
+                      <th className="pb-3 pt-4 px-4 font-semibold hidden sm:table-cell">Fecha</th>
+                      <th className="pb-3 pt-4 px-4 font-semibold text-right">Acción</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {result.registros.map((registro, index) => (
                       <tr key={registro.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="py-4 px-6 text-slate-500">{index + 1}</td>
-                        <td className="py-4 px-6">
+                        <td className="py-4 px-4 text-slate-500">{index + 1}</td>
+                        <td className="py-4 px-4 hidden md:table-cell">
                           <Badge variant="outline">{getTipoLabel(registro.tipo)}</Badge>
                         </td>
-                        <td className="py-4 px-6">
+                        <td className="py-4 px-4">
                           <Badge variant={getEstadoVariant(registro.estado)}>{registro.estado}</Badge>
                         </td>
-                        <td className="py-4 px-6 text-slate-500 text-xs">
+                        <td className="py-4 px-4 text-slate-500 text-xs hidden sm:table-cell">
                           {new Date(registro.created_at).toLocaleDateString('es-CO')}
                         </td>
-                        <td className="py-4 px-6 text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-brand-primary hover:text-brand-primary/80"
-                            onClick={() => handleVerRegistro(registro)}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Ver
-                          </Button>
+                        <td className="py-4 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-brand-primary hover:text-brand-primary/80"
+                              onClick={() => handleVerRegistro(registro)}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              Ver
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500 hover:text-red-700"
+                              onClick={() => handleDeleteClick(registro)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -334,6 +365,40 @@ export function CasosEspeciales() {
           />
         )}
       </Modal>
+
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Confirmar eliminación</h3>
+                <p className="text-sm text-slate-500">Esta acción no se puede deshacer</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600 mb-6">
+              ¿Está seguro de que desea eliminar este registro de caso especial?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => setDeleteConfirmId(null)}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                variant="danger"
+                isLoading={eliminarRegistro.isPending}
+                onClick={confirmDelete}
+              >
+                Eliminar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -55,7 +55,7 @@ export function HistorialRegistro({ registroId }: { registroId: string }) {
       ) : historiales.length === 0 ? (
         <p className="text-sm text-slate-400 py-4">Sin historial registrado</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[250px] overflow-y-auto">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px] bg-slate-50/50">
