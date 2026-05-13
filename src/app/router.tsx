@@ -1,25 +1,32 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { RoleGuard } from './guards/RoleGuard';
+import { ErrorBoundary } from './guards/ErrorBoundary';
 import { AppShell } from '../shared/components/layout/AppShell';
 import { Rol } from '../shared/types/roles.types';
 
-// Pages
-import LoginPage from '../pages/LoginPage';
-import DashboardPage from '../pages/DashboardPage';
-import ApoyoPage from '../pages/ApoyoPage';
-import EstudiantesPage from '../pages/EstudiantesPage';
-import AlertasPage from '../pages/AlertasPage';
-import EncuestasPage from '../pages/EncuestasPage';
-import ArtefactosPage from '../pages/ArtefactosPage';
-import ParametrizacionPage from '../pages/ParametrizacionPage';
-import PerfilPage from '../pages/PerfilPage';
-import CasosEspecialesPage from '../pages/CasosEspecialesPage';
+// Lazy load pages for better performance
+const LoginPage = lazy(() => import('../pages/LoginPage'));
+const DashboardPage = lazy(() => import('../pages/DashboardPage'));
+const ApoyoPage = lazy(() => import('../pages/ApoyoPage'));
+const EstudiantesPage = lazy(() => import('../pages/EstudiantesPage'));
+const AlertasPage = lazy(() => import('../pages/AlertasPage'));
+const EncuestasPage = lazy(() => import('../pages/EncuestasPage'));
+const ArtefactosPage = lazy(() => import('../pages/ArtefactosPage'));
+const ParametrizacionPage = lazy(() => import('../pages/ParametrizacionPage'));
+const PerfilPage = lazy(() => import('../pages/PerfilPage'));
+const CasosEspecialesPage = lazy(() => import('../pages/CasosEspecialesPage'));
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[400px]">
+    <div className="w-8 h-8 border-3 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
+  </div>
+);
 
 export const router = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />,
+    element: <Suspense fallback={<PageLoader />}><LoginPage /></Suspense>,
   },
   {
     path: '/',
@@ -30,42 +37,50 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'dashboard', element: <Suspense fallback={<PageLoader />}><ErrorBoundary><DashboardPage /></ErrorBoundary></Suspense> },
       {
         path: 'estudiantes',
         children: [
-          { index: true, element: <EstudiantesPage /> },
+          { index: true, element: <Suspense fallback={<PageLoader />}><ErrorBoundary><EstudiantesPage /></ErrorBoundary></Suspense> },
         ],
       },
-      { path: 'alertas', element: <AlertasPage /> },
-      { path: 'casos-especiales', element: <CasosEspecialesPage /> },
+      { path: 'alertas', element: <Suspense fallback={<PageLoader />}><ErrorBoundary><AlertasPage /></ErrorBoundary></Suspense> },
+      { path: 'casos-especiales', element: <Suspense fallback={<PageLoader />}><ErrorBoundary><CasosEspecialesPage /></ErrorBoundary></Suspense> },
       {
         path: 'encuestas',
         children: [
-          { index: true, element: <EncuestasPage /> },
+          { index: true, element: <Suspense fallback={<PageLoader />}><ErrorBoundary><EncuestasPage /></ErrorBoundary></Suspense> },
         ],
       },
 
       {
         path: 'artefactos',
         children: [
-          { index: true, element: <ArtefactosPage /> },
+          { index: true, element: <Suspense fallback={<PageLoader />}><ErrorBoundary><ArtefactosPage /></ErrorBoundary></Suspense> },
         ],
       },
       {
         path: 'perfil',
         element: (
-          <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE, Rol.APOYO]}>
-            <PerfilPage />
-          </RoleGuard>
+          <Suspense fallback={<PageLoader />}>
+            <ErrorBoundary>
+              <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE, Rol.APOYO]}>
+                <PerfilPage />
+              </RoleGuard>
+            </ErrorBoundary>
+          </Suspense>
         ),
       },
       {
         path: 'parametrizacion',
         element: (
-          <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE]}>
-            <ParametrizacionPage />
-          </RoleGuard>
+          <Suspense fallback={<PageLoader />}>
+            <ErrorBoundary>
+              <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE]}>
+                <ParametrizacionPage />
+              </RoleGuard>
+            </ErrorBoundary>
+          </Suspense>
         ),
       },
     ],
@@ -79,7 +94,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/apoyo/panel" replace /> },
-      { path: 'panel', element: <ApoyoPage /> },
+      { path: 'panel', element: <Suspense fallback={<PageLoader />}><ErrorBoundary><ApoyoPage /></ErrorBoundary></Suspense> },
     ],
   },
 ]);

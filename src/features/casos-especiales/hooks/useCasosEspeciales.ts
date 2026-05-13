@@ -60,3 +60,13 @@ export const useAgregarHistorial = () => {
     },
   });
 };
+
+export const useEliminarRegistro = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => casosEspecialesService.eliminar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['casos-especiales'] });
+    },
+  });
+};

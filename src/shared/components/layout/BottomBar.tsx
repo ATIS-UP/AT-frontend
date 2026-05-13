@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, AlertTriangle, BarChart3, Settings } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-import { useAuthStore } from '../../../features/auth/store/authStore';
+import { useAuthStore } from '../../../features/auth/store/auth.store';
 
 interface BottomNavItem {
   icon: React.ElementType;
@@ -12,7 +12,8 @@ interface BottomNavItem {
 
 export function BottomBar() {
   const location = useLocation();
-  const { rol } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const rol = user?.rol;
   const isApoyo = rol === 'APOYO';
 
   const items: BottomNavItem[] = isApoyo

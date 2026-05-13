@@ -5,7 +5,21 @@ import { router } from './router';
 import { ToastContainer } from '../shared/components/ui/Toast';
 import { useAuthStore } from '../features/auth/store/auth.store';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: 1,
+    },
+    mutations: {
+      retry: 0,
+    },
+  },
+});
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
   const restoreSession = useAuthStore((s) => s.restoreSession);

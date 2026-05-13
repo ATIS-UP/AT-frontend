@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../../../features/auth/store/authStore';
+import { useAuthStore } from '../../../features/auth/store/auth.store';
 import { 
   LayoutDashboard, 
   Users, 
@@ -62,7 +62,8 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, width = 236, onResizeStart }: SidebarProps) => {
-  const { logout, rol } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const rol = user?.rol;
   const isApoyo = rol === 'APOYO';
   const navRef = React.useRef<HTMLElement>(null);
   const touchStartX = React.useRef<number | null>(null);
@@ -169,9 +170,9 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
             )}
             <li>
               <button
-                onClick={() => {
+                onClick={async () => {
                   onClose();
-                  logout();
+                  await logout();
                 }}
                 title={collapsed ? "Cerrar Sesión" : undefined}
                 className={cn(

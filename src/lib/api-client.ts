@@ -1,6 +1,7 @@
 import type { ApiError } from './api-client.types';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const REQUEST_TIMEOUT_MS = 30000;
 
 const TOKEN_KEY = 'sat_access_token';
 const REFRESH_TOKEN_KEY = 'sat_refresh_token';
@@ -111,13 +112,25 @@ class ApiClient {
   private async request<T>(url: string, options: RequestInit): Promise<T> {
     let response: Response;
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
     try {
-      response = await fetch(url, options);
+      response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
     } catch (error) {
+      clearTimeout(timeoutId);
+      if ((error as Error).name === 'AbortError') {
+        throw new Error('Request timed out. Please try again.');
+      }
       throw new Error(
         `Network error: ${error instanceof Error ? error.message : 'Unable to reach server'}`
       );
     }
+
+    clearTimeout(timeoutId);
 
     if (response.status === 401) {
       try {

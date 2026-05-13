@@ -34,4 +34,7 @@ export const casosEspecialesService = {
 
   agregarHistorial: (id: string, data: HistorialCreate) =>
     apiClient.post<RegistroCaso>(`/api/registros-casos/${id}/historial`, data),
+
+  eliminar: (id: string) =>
+    apiClient.delete<void>(`/api/registros-casos/${id}`),
 };
