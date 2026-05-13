@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useBuscarEstudiante, useCrearRegistro, useActualizarRegistro, useAgregarHistorial, useEliminarRegistro } from '../hooks/useCasosEspeciales';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Card } from '@/src/shared/components/ui/Card';
@@ -26,19 +26,11 @@ const getTipoLabel = (tipo: string): string => {
 
 export function CasosEspeciales() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [pagina, setPagina] = useState(1);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     setPagina(1);
-  }, [debouncedSearchTerm]);
+  }, [searchTerm]);
   const [selectedEstudiante, setSelectedEstudiante] = useState<EstudianteInfo | null>(null);
   const [selectedRegistro, setSelectedRegistro] = useState<RegistroCaso | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -47,7 +39,7 @@ export function CasosEspeciales() {
   const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const { data: busquedaResults, isLoading, refetch } = useBuscarEstudiante(debouncedSearchTerm, pagina, debouncedSearchTerm.length >= 2);
+  const { data: busquedaResults, isLoading, refetch } = useBuscarEstudiante(searchTerm, pagina, searchTerm.length >= 2);
   const crearRegistro = useCrearRegistro();
   const eliminarRegistro = useEliminarRegistro();
   const notification = useNotificationStore();
@@ -66,6 +58,9 @@ export function CasosEspeciales() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    if (searchTerm.length >= 2) {
+      refetch();
+    }
   };
 
   const handleCreateRegistro = (e: React.FormEvent) => {
@@ -157,7 +152,7 @@ export function CasosEspeciales() {
         </div>
       )}
 
-      {!isLoading && debouncedSearchTerm.length >= 2 && results.length === 0 && (
+      {!isLoading && searchTerm.length >= 2 && results.length === 0 && (
         <Card className="text-center py-8">
           <p className="text-slate-500">Estudiante no está en la base de datos</p>
         </Card>
