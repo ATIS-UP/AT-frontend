@@ -11,6 +11,8 @@ interface ModalProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  shouldClose?: () => boolean;
+  onBlocked?: () => void;
 }
 
 export function Modal({
@@ -21,9 +23,19 @@ export function Modal({
   children,
   footer,
   className,
+  shouldClose,
+  onBlocked,
 }: ModalProps) {
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen && shouldClose && !shouldClose()) {
+      onBlocked?.();
+      return;
+    }
+    onOpenChange(isOpen);
+  };
+
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <Dialog.Content
