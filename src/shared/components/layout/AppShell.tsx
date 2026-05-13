@@ -73,6 +73,7 @@ export function AppShell() {
     if (location.pathname.includes('/dashboard')) return { title: 'Tablero de Control', subtitle: 'Ingeniería de Sistemas' };
     if (location.pathname.includes('/estudiantes')) return { title: 'Estudiantes', subtitle: 'Listado Maestro' };
     if (location.pathname.includes('/alertas')) return { title: 'Alertas y Pérdidas', subtitle: 'Monitor de Riesgo' };
+    if (location.pathname.includes('/casos-especiales')) return { title: 'Casos Especiales', subtitle: 'Gestión y Seguimiento' };
     if (location.pathname.includes('/encuestas')) return { title: 'Encuestas', subtitle: 'Satisfacción y Seguimiento' };
     if (location.pathname.includes('/artefactos')) return { title: 'Documentos', subtitle: 'Evidencias y Archivos' };
     if (location.pathname.includes('/perfil')) return { title: 'Mi Perfil', subtitle: 'Datos de Cuenta y Sesión' };

@@ -14,6 +14,7 @@ import EncuestasPage from '../pages/EncuestasPage';
 import ArtefactosPage from '../pages/ArtefactosPage';
 import ParametrizacionPage from '../pages/ParametrizacionPage';
 import PerfilPage from '../pages/PerfilPage';
+import CasosEspecialesPage from '../pages/CasosEspecialesPage';
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
         ],
       },
       { path: 'alertas', element: <AlertasPage /> },
+      { path: 'casos-especiales', element: <CasosEspecialesPage /> },
       {
         path: 'encuestas',
         children: [
