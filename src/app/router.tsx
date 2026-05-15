@@ -16,6 +16,7 @@ const ArtefactosPage = lazy(() => import('../pages/ArtefactosPage'));
 const ParametrizacionPage = lazy(() => import('../pages/ParametrizacionPage'));
 const PerfilPage = lazy(() => import('../pages/PerfilPage'));
 const CasosEspecialesPage = lazy(() => import('../pages/CasosEspecialesPage'));
+const ActividadesPage = lazy(() => import('../pages/ActividadesPage'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[400px]">
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       },
       { path: 'alertas', element: <Suspense fallback={<PageLoader />}><ErrorBoundary><AlertasPage /></ErrorBoundary></Suspense> },
       { path: 'casos-especiales', element: <Suspense fallback={<PageLoader />}><ErrorBoundary><CasosEspecialesPage /></ErrorBoundary></Suspense> },
+      { path: 'actividades', element: <Suspense fallback={<PageLoader />}><ErrorBoundary><ActividadesPage /></ErrorBoundary></Suspense> },
       {
         path: 'encuestas',
         children: [

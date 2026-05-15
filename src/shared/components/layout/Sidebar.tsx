@@ -11,7 +11,8 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
-  Briefcase
+  Briefcase,
+  Calendar
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
@@ -74,12 +75,14 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
         { icon: Users, label: 'Estudiantes', to: '/estudiantes' },
         { icon: AlertTriangle, label: 'Alertas', to: '/alertas' },
         { icon: Briefcase, label: 'Casos Especiales', to: '/casos-especiales' },
+        { icon: Calendar, label: 'Actividades', to: '/actividades' },
       ]
     : [
         { icon: LayoutDashboard, label: 'Tablero', to: '/dashboard' },
         { icon: Users, label: 'Estudiantes', to: '/estudiantes' },
         { icon: AlertTriangle, label: 'Alertas y Pérdidas', to: '/alertas' },
         { icon: Briefcase, label: 'Casos Especiales', to: '/casos-especiales' },
+        { icon: Calendar, label: 'Actividades', to: '/actividades' },
         { icon: BarChart3, label: 'Encuestas', to: '/encuestas' },
         { icon: FileText, label: 'Documentos', to: '/artefactos' },
       ];
