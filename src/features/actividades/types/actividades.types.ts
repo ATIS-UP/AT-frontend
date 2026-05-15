@@ -105,3 +105,14 @@ export const TIPO_COLORS: Record<TipoActividad, string> = {
   TUTORIA: 'border-pink-200 text-pink-700 bg-pink-50',
   OTRO: 'border-slate-200 text-slate-600 bg-slate-50',
 };
+
+/** Accent color for card top border */
+export const TIPO_ACCENT: Record<TipoActividad, string> = {
+  CLASE: 'border-t-indigo-400',
+  REFUERZO: 'border-t-violet-400',
+  TORNEO: 'border-t-orange-400',
+  TALLER: 'border-t-teal-400',
+  SEMINARIO: 'border-t-cyan-400',
+  TUTORIA: 'border-t-pink-400',
+  OTRO: 'border-t-slate-400',
+};

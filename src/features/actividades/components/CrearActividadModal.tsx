@@ -107,6 +107,7 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
   const [anexos, setAnexos] = useState<AnexoFile[]>([]);
   const [horaInicio, setHoraInicio] = useState('');
   const [horaFin, setHoraFin] = useState('');
+  const [timeError, setTimeError] = useState('');
 
   const toDateOnly = (iso: string) => iso ? iso.slice(0, 10) : '';
 
@@ -139,6 +140,7 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
     control,
     handleSubmit,
     reset,
+    getValues,
     formState: { isSubmitting, errors },
   } = useForm<ActividadFormData>({ defaultValues });
 
@@ -147,6 +149,7 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
       setAnexos([]);
       setHoraInicio('');
       setHoraFin('');
+      setTimeError('');
       reset(defaultValues);
     }
   }, [open, actividad]);
@@ -175,8 +178,17 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
       data.lugar_enlace = sanitizeText(data.lugar_enlace);
       data.observaciones = sanitizeText(data.observaciones);
 
-      data.fecha_inicio = parseDateTime(data.fecha_inicio, horaInicio);
-      data.fecha_fin = parseDateTime(data.fecha_fin, horaFin);
+      const startDateTime = new Date(parseDateTime(data.fecha_inicio, horaInicio));
+      const endDateTime = new Date(parseDateTime(data.fecha_fin, horaFin));
+
+      if (endDateTime < startDateTime) {
+        setTimeError('La fecha/hora de fin debe ser posterior a la de inicio');
+        return;
+      }
+      setTimeError('');
+
+      data.fecha_inicio = startDateTime.toISOString();
+      data.fecha_fin = endDateTime.toISOString();
 
       if (isEditing && actividad) {
         await actualizarActividad.mutateAsync({ id: actividad.id, data });
@@ -270,7 +282,14 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
                 label="Fecha de fin"
                 type="date"
                 control={control}
-                rules={{ required: 'Indica la fecha de fin' }}
+                rules={{
+                  required: 'Indica la fecha de fin',
+                  validate: (val: string) => {
+                    const inicio = getValues('fecha_inicio');
+                    if (!inicio || !val) return true;
+                    return val >= inicio || 'La fecha de fin debe ser igual o posterior a la de inicio';
+                  },
+                }}
               />
               <div className="flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -278,6 +297,11 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
               </div>
             </div>
           </div>
+          {timeError && (
+            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+              {timeError}
+            </p>
+          )}
           <Input
             name="encargado"
             label="Responsable"
