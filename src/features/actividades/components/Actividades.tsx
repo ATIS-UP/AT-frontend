@@ -1,13 +1,81 @@
 import React, { useState } from 'react';
 import { useActividadesList, useEliminarActividad } from '../hooks/useActividades';
+import { useAnexosActividad } from '../hooks/useAnexosActividades';
+import { anexosActividadesService } from '../services/anexosActividadesService';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Card } from '@/src/shared/components/ui/Card';
 import { Modal } from '@/src/shared/components/ui/Modal';
 import { CrearActividadModal } from './CrearActividadModal';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
-import { Calendar, MapPin, Plus, Pencil, Trash2, Clock } from 'lucide-react';
+import { Calendar, MapPin, Plus, Pencil, Trash2, Clock, FileText, Download, X } from 'lucide-react';
 import { TIPO_OPTIONS, ESTADO_OPTIONS, ESTADO_COLORS, TIPO_COLORS } from '../types/actividades.types';
 import type { ActividadInstitucional } from '../types/actividades.types';
+import type { AnexoActividad } from '../types/anexosActividades.types';
+
+function AnexosCell({ actividad }: { actividad: ActividadInstitucional }) {
+  const [open, setOpen] = useState(false);
+  const { data, isLoading } = useAnexosActividad(actividad.id, open);
+
+  if (actividad.total_anexos === 0) {
+    return <span className="text-slate-400">—</span>;
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="inline-flex items-center gap-1.5 text-xs text-brand-primary hover:text-brand-primary/80 font-medium transition-colors"
+      >
+        <FileText className="w-3.5 h-3.5" />
+        {actividad.total_anexos} archivo(s)
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 top-full mt-1 z-20 w-72 bg-white border border-slate-200 rounded-lg shadow-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-slate-700">Anexos</p>
+              <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="w-4 h-4 border-2 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
+              </div>
+            ) : (
+              <ul className="space-y-1 max-h-40 overflow-y-auto">
+                {data?.anexos?.map((anexo: AnexoActividad) => (
+                  <li key={anexo.id} className="flex items-center gap-2 text-xs">
+                    <FileText className="w-3 h-3 text-slate-400 shrink-0" />
+                    <a
+                      href={anexosActividadesService.descargarUrl(anexo.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 truncate text-slate-600 hover:text-brand-primary"
+                    >
+                      {anexo.nombre}
+                    </a>
+                    <a
+                      href={anexosActividadesService.descargarUrl(anexo.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1 text-slate-400 hover:text-brand-primary"
+                      title="Descargar"
+                    >
+                      <Download className="w-3 h-3" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 export function Actividades() {
   const [pagina, setPagina] = useState(1);
@@ -65,7 +133,7 @@ export function Actividades() {
       <div className="flex justify-between items-end border-b border-slate-200 pb-4">
         <div>
           <h2 className="text-2xl font-bold font-display text-primary">Actividades Institucionales</h2>
-          <p className="text-secondary text-sm">Eventos de bienestar y apoyo académico</p>
+          <p className="text-slate-500 text-sm">Eventos de bienestar y apoyo académico</p>
         </div>
         <Button onClick={() => setShowCreateModal(true)}>
           <Plus className="w-4 h-4 mr-1.5" />
@@ -112,6 +180,7 @@ export function Actividades() {
                   <th className="px-4 py-3 font-semibold">Programación</th>
                   <th className="px-4 py-3 font-semibold">Tipo</th>
                   <th className="px-4 py-3 font-semibold">Modalidad</th>
+                  <th className="px-4 py-3 font-semibold">Anexos</th>
                   <th className="px-4 py-3 font-semibold">Estado</th>
                   <th className="px-4 py-3 font-semibold">Creador</th>
                   <th className="px-4 py-3 font-semibold text-right">Acción</th>
@@ -145,6 +214,9 @@ export function Actividades() {
                     </td>
                     <td className="px-4 py-4">
                       <span className="text-xs text-slate-600">{act.modalidad}</span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <AnexosCell actividad={act} />
                     </td>
                     <td className="px-4 py-4">
                       <span className={`px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider ${ESTADO_COLORS[act.estado] || 'border-slate-200 text-slate-500 bg-slate-50'}`}>

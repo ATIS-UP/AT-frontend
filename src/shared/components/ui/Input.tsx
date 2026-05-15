@@ -11,6 +11,7 @@ interface InputProps<T extends FieldValues> {
   rules?: RegisterOptions<T, Path<T>>;
   disabled?: boolean;
   className?: string;
+  maxLength?: number;
 }
 
 export function Input<T extends FieldValues>({
@@ -22,6 +23,7 @@ export function Input<T extends FieldValues>({
   rules,
   disabled,
   className,
+  maxLength,
 }: InputProps<T>) {
   const {
     field,
@@ -43,6 +45,7 @@ export function Input<T extends FieldValues>({
         type={type}
         placeholder={placeholder}
         disabled={disabled}
+        maxLength={maxLength}
         aria-invalid={!!error}
         aria-describedby={error ? errorId : undefined}
         className={cn(

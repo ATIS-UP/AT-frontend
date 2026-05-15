@@ -28,6 +28,7 @@ export interface ActividadInstitucional {
   encargado: string;
   observaciones: string | null;
   anexos: string | null;
+  total_anexos: number;
   creador_id: string;
   creador_nombre: string;
   modalidad: Modalidad;
