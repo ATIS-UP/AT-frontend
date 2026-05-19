@@ -44,8 +44,9 @@ export function useCrearAlerta() {
       queryClient.invalidateQueries({ queryKey: KEYS.all });
       notify({ type: 'success', message: 'Alerta creada correctamente' });
     },
-    onError: () => {
-      notify({ type: 'error', message: 'Error al crear la alerta' });
+    onError: (error: Error) => {
+      const apiError = error as unknown as Record<string, string>;
+      notify({ type: 'error', message: apiError?.message || 'Error al crear la alerta' });
     },
   });
 }
