@@ -11,6 +11,7 @@ interface ModalProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  bodyClassName?: string;
   shouldClose?: () => boolean;
   onBlocked?: () => void;
 }
@@ -23,6 +24,7 @@ export function Modal({
   children,
   footer,
   className,
+  bodyClassName,
   shouldClose,
   onBlocked,
 }: ModalProps) {
@@ -74,7 +76,7 @@ export function Modal({
           </div>
 
           {/* body */}
-          <div className="p-6 max-h-[70vh] overflow-y-auto">{children}</div>
+          <div className={cn('p-6 overflow-y-auto', bodyClassName ?? 'max-h-[70vh]')}>{children}</div>
 
           {/* footer */}
           {footer && (

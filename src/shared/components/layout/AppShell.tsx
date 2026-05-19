@@ -78,6 +78,7 @@ export function AppShell() {
     if (location.pathname.includes('/artefactos')) return { title: 'Documentos', subtitle: 'Evidencias y Archivos' };
     if (location.pathname.includes('/perfil')) return { title: 'Mi Perfil', subtitle: 'Datos de Cuenta y Sesión' };
     if (location.pathname.includes('/parametrizacion')) return { title: 'Configuración', subtitle: 'Parámetros del Sistema' };
+    if (location.pathname.includes('/actividades')) return { title: 'Actividades', subtitle: 'Eventos de bienestar y apoyo académico' };
     return { title: 'UNIPAMPLONA', subtitle: 'Gestión Académica' };
   };
 
