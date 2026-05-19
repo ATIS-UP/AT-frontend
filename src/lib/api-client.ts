@@ -49,7 +49,8 @@ class ApiClient {
   }
 
   private buildUrl(url: string, params?: Record<string, string | number | boolean | undefined>): string {
-    const fullUrl = new URL(url, this.baseUrl);
+    const baseUrl = this.baseUrl || window.location.origin;
+    const fullUrl = new URL(url, baseUrl);
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) {
