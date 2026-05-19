@@ -59,7 +59,7 @@ export function ToastContainer() {
   if (visible.length === 0) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 w-80">
+    <div className="fixed top-4 right-4 z-[60] flex flex-col gap-2 w-80">
       {visible.map((n) => (
         <ToastItem key={n.id} {...n} />
       ))}
