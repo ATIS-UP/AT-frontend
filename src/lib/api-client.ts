@@ -1,6 +1,6 @@
 import type { ApiError } from './api-client.types';
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 const REQUEST_TIMEOUT_MS = 30000;
 
 const TOKEN_KEY = 'sat_access_token';

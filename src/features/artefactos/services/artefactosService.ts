@@ -19,7 +19,7 @@ export const artefactosService = {
     apiClient.upload<any>('/api/artefactos', file, params),
 
   descargar: (id: string) =>
-    `${import.meta.env.VITE_API_URL ?? 'http://localhost:8000'}/api/artefactos/${id}/download`,
+    `${import.meta.env.VITE_API_URL ?? ''}/api/artefactos/${id}/download`,
 
   eliminar: (id: string) =>
     apiClient.delete(`/api/artefactos/${id}`),

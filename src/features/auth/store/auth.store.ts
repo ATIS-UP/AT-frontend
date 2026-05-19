@@ -4,7 +4,7 @@ import { apiClient } from '@/src/lib/api-client';
 
 const TOKEN_KEY = 'sat_access_token';
 const REFRESH_TOKEN_KEY = 'sat_refresh_token';
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL ?? '';
 
 interface AuthUser {
   id: string;
