@@ -67,6 +67,11 @@ export function CasosEspeciales() {
     e.preventDefault();
     if (!selectedEstudiante) return;
 
+    if (selectedEstudiante.estado !== 'ACTIVO') {
+      notification.add({ type: 'error', message: `No se pueden crear registros para estudiantes en estado ${selectedEstudiante.estado}` });
+      return;
+    }
+
     if (!form.observaciones.trim()) {
       setObservacionesError(true);
       notification.add({ type: 'error', message: 'Debe ingresar las observaciones del caso' });

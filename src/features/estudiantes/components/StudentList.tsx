@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import {
   Search,
-  MoreVertical,
   UserPlus,
   FileUp,
   ChevronLeft,
   ChevronRight,
+  Pencil,
+  Trash2,
+  AlertTriangle,
+  Trash2 as TrashIcon,
+  UserX,
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-import { useEstudiantes, useCrearEstudiante } from '../hooks/useEstudiantes';
+import { useEstudiantes, useCrearEstudiante, useActualizarEstudiante, useEliminarEstudiante, useConteoRelaciones, useCambiarEstadoEstudiante } from '../hooks/useEstudiantes';
 import { Modal } from '@/src/shared/components/ui/Modal';
 import { Button } from '@/src/shared/components/ui/Button';
 import { CargaMasiva } from './CargaMasiva';
@@ -18,12 +22,30 @@ interface StudentListProps {
   onSelectStudent: (student: any) => void;
 }
 
+const EMPTY_FORM = {
+  nombres: '',
+  apellidos: '',
+  codigo: '',
+  email: '',
+  programa: '',
+  semestre: 1,
+  documento: '',
+  telefono: '',
+};
+
 export const StudentList = ({ onSelectStudent }: StudentListProps) => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [semestre, setSemestre] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCargaModal, setShowCargaModal] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<any>(null);
+  const [actionStudent, setActionStudent] = useState<any>(null);
+  const [showOptionsModal, setShowOptionsModal] = useState(false);
+  const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
+  const [showConfirmCreateModal, setShowConfirmCreateModal] = useState(false);
+  const [showReactivarModal, setShowReactivarModal] = useState(false);
+  const [pendingCreateData, setPendingCreateData] = useState<any>(null);
   const limit = 20;
 
   const { data, isLoading, isError } = useEstudiantes({
@@ -34,20 +56,53 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
   });
 
   const crearEstudiante = useCrearEstudiante();
+  const actualizarEstudiante = useActualizarEstudiante();
+  const eliminarEstudiante = useEliminarEstudiante();
+  const cambiarEstado = useCambiarEstadoEstudiante();
   const notify = useNotificationStore.getState().add;
 
-  const [form, setForm] = useState({
-    nombres: '',
-    apellidos: '',
-    codigo: '',
-    email: '',
-    programa: '',
-    semestre: 1,
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!form.nombres.trim()) errors.nombres = 'Requerido';
+    else if (!/^[a-zA-ZáéíóúüñÑÁÉÍÓÚÜ\s]+$/.test(form.nombres)) errors.nombres = 'Solo letras';
+    else if (form.nombres.length > 100) errors.nombres = 'Máx 100 caracteres';
+
+    if (!form.apellidos.trim()) errors.apellidos = 'Requerido';
+    else if (!/^[a-zA-ZáéíóúüñÑÁÉÍÓÚÜ\s]+$/.test(form.apellidos)) errors.apellidos = 'Solo letras';
+    else if (form.apellidos.length > 100) errors.apellidos = 'Máx 100 caracteres';
+
+    if (!form.codigo.trim()) errors.codigo = 'Requerido';
+    else if (!/^\d+$/.test(form.codigo)) errors.codigo = 'Solo números';
+    else if (form.codigo.length > 20) errors.codigo = 'Máx 20 caracteres';
+
+    if (form.email && form.email.trim()) {
+      if (!form.email.includes('@')) errors.email = 'Debe contener @';
+      else if (form.email.length > 100) errors.email = 'Máx 100 caracteres';
+    }
+
+    if (!form.documento.trim()) errors.documento = 'Requerido';
+    else if (!/^\d+$/.test(form.documento)) errors.documento = 'Solo números';
+    else if (form.documento.length > 100) errors.documento = 'Máx 100 caracteres';
+
+    if (!form.telefono.trim()) errors.telefono = 'Requerido';
+    else if (!/^\d+$/.test(form.telefono)) errors.telefono = 'Solo números';
+    else if (form.telefono.length > 100) errors.telefono = 'Máx 100 caracteres';
+
+    if (!form.programa.trim()) errors.programa = 'Requerido';
+    else if (form.programa.length > 100) errors.programa = 'Máx 100 caracteres';
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const estudiantes = data?.estudiantes ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / limit) || 1;
+  const isEditing = !!editingStudent;
 
   const clearFilters = () => {
     setSearch('');
@@ -55,18 +110,89 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
     setPage(1);
   };
 
-  const handleCreateStudent = (e: React.FormEvent) => {
+  const openCreateModal = () => {
+    setForm(EMPTY_FORM);
+    setEditingStudent(null);
+    setShowCreateModal(true);
+  };
+
+  const openEditModal = (student: any) => {
+    setEditingStudent(student);
+    setForm({
+      nombres: student.nombres || '',
+      apellidos: student.apellidos || '',
+      codigo: student.codigo || '',
+      email: student.email || '',
+      programa: student.programa || '',
+      semestre: student.semestre || 1,
+      documento: student.documento || '',
+      telefono: student.telefono || '',
+    });
+    setShowCreateModal(true);
+  };
+
+  const handleSubmitStudent = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nombres || !form.apellidos || !form.codigo) {
-      notify({ type: 'warning', message: 'Complete los campos obligatorios (nombres, apellidos, código)' });
-      return;
+    if (!validateForm()) return;
+
+    if (isEditing && editingStudent) {
+      const payload: Record<string, unknown> = {};
+      (Object.keys(form) as (keyof typeof form)[]).forEach((key) => {
+        if (form[key] !== editingStudent[key] && form[key] !== '') {
+          payload[key] = form[key];
+        }
+      });
+      if (Object.keys(payload).length === 0) {
+        notify({ type: 'info', message: 'No hay cambios para guardar' });
+        return;
+      }
+      actualizarEstudiante.mutate(
+        { id: editingStudent.id, data: payload },
+        {
+          onSuccess: () => {
+            setShowCreateModal(false);
+            setEditingStudent(null);
+            setForm(EMPTY_FORM);
+          },
+        },
+      );
+    } else {
+      setPendingCreateData({ ...form });
+      setShowConfirmCreateModal(true);
     }
-    crearEstudiante.mutate(form as any, {
+  };
+
+  const handleDeleteStudent = (id: string) => {
+    eliminarEstudiante.mutate(id, {
+      onSuccess: () => setDeleteConfirmId(null),
+    });
+  };
+
+  const handleConfirmCreate = () => {
+    if (!pendingCreateData) return;
+    crearEstudiante.mutate(pendingCreateData as any, {
       onSuccess: () => {
+        setShowConfirmCreateModal(false);
         setShowCreateModal(false);
-        setForm({ nombres: '', apellidos: '', codigo: '', email: '', programa: '', semestre: 1 });
+        setPendingCreateData(null);
+        setForm(EMPTY_FORM);
       },
     });
+  };
+
+  const handleReactivar = () => {
+    if (!editingStudent) return;
+    cambiarEstado.mutate(
+      { id: editingStudent.id, estado: 'ACTIVO' },
+      {
+        onSuccess: () => {
+          setShowReactivarModal(false);
+          setShowCreateModal(false);
+          setEditingStudent(null);
+          setForm(EMPTY_FORM);
+        },
+      },
+    );
   };
 
   return (
@@ -85,7 +211,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
             Cargar lista
           </button>
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={openCreateModal}
             className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-btn font-display text-[11px] font-bold uppercase tracking-wider hover:bg-brand-primary/90 transition-all shadow-sm"
           >
             <UserPlus className="w-4 h-4" />
@@ -191,10 +317,23 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                         {est.estado}
                       </span>
                     </td>
-                    <td className="py-3 px-6 text-right">
-                      <button className="text-slate-300 hover:text-brand-primary transition-colors opacity-0 group-hover:opacity-100">
-                        <MoreVertical className="w-5 h-5" />
-                      </button>
+                    <td className="py-3 px-6 text-right relative">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openEditModal(est); }}
+                          className="p-1.5 rounded-lg hover:bg-brand-primary/10 text-slate-400 hover:text-brand-primary transition-colors"
+                          title="Editar estudiante"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setActionStudent(est); setShowOptionsModal(true); }}
+                          className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
+                          title="Eliminar estudiante"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -233,34 +372,41 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
         )}
       </div>
 
-      {/* create student modal */}
+      {/* create/edit student modal */}
       <Modal
         open={showCreateModal}
-        onOpenChange={setShowCreateModal}
-        title="Nuevo Estudiante"
-        description="Registrar un nuevo estudiante en el sistema"
+        onOpenChange={(open) => {
+          if (!open) { setEditingStudent(null); setForm(EMPTY_FORM); }
+          setShowCreateModal(open);
+        }}
+        title={isEditing ? 'Editar Estudiante' : 'Nuevo Estudiante'}
+        description={isEditing ? `Editando: ${editingStudent.nombres} ${editingStudent.apellidos}` : 'Registrar un nuevo estudiante en el sistema'}
       >
-        <form onSubmit={handleCreateStudent} className="space-y-4">
+        <form onSubmit={handleSubmitStudent} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Nombres *</label>
               <input
                 type="text"
                 value={form.nombres}
-                onChange={(e) => setForm({ ...form, nombres: e.target.value })}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
+                maxLength={100}
+                onChange={(e) => { setForm({ ...form, nombres: e.target.value }); setFormErrors({ ...formErrors, nombres: '' }); }}
+                className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.nombres ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Nombres"
               />
+              {formErrors.nombres && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.nombres}</p>}
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Apellidos *</label>
               <input
                 type="text"
                 value={form.apellidos}
-                onChange={(e) => setForm({ ...form, apellidos: e.target.value })}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
+                maxLength={100}
+                onChange={(e) => { setForm({ ...form, apellidos: e.target.value }); setFormErrors({ ...formErrors, apellidos: '' }); }}
+                className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.apellidos ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Apellidos"
               />
+              {formErrors.apellidos && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.apellidos}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -269,35 +415,68 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
               <input
                 type="text"
                 value={form.codigo}
-                onChange={(e) => setForm({ ...form, codigo: e.target.value })}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
+                maxLength={20}
+                onChange={(e) => { setForm({ ...form, codigo: e.target.value }); setFormErrors({ ...formErrors, codigo: '' }); }}
+                className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.codigo ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Código estudiantil"
+                disabled={isEditing}
               />
+              {formErrors.codigo && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.codigo}</p>}
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Email</label>
               <input
                 type="email"
                 value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
+                maxLength={100}
+                onChange={(e) => { setForm({ ...form, email: e.target.value }); setFormErrors({ ...formErrors, email: '' }); }}
+                className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="correo@ejemplo.com"
               />
+              {formErrors.email && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.email}</p>}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Programa</label>
+              <label className="block text-xs font-bold text-slate-600 mb-1">Documento *</label>
+              <input
+                type="text"
+                value={form.documento}
+                maxLength={100}
+                onChange={(e) => { setForm({ ...form, documento: e.target.value }); setFormErrors({ ...formErrors, documento: '' }); }}
+                className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.documento ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
+                placeholder="Número de documento"
+              />
+              {formErrors.documento && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.documento}</p>}
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-600 mb-1">Teléfono *</label>
+              <input
+                type="text"
+                value={form.telefono}
+                maxLength={100}
+                onChange={(e) => { setForm({ ...form, telefono: e.target.value }); setFormErrors({ ...formErrors, telefono: '' }); }}
+                className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.telefono ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
+                placeholder="Número de teléfono"
+              />
+              {formErrors.telefono && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.telefono}</p>}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-600 mb-1">Programa *</label>
               <input
                 type="text"
                 value={form.programa}
-                onChange={(e) => setForm({ ...form, programa: e.target.value })}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
+                maxLength={100}
+                onChange={(e) => { setForm({ ...form, programa: e.target.value }); setFormErrors({ ...formErrors, programa: '' }); }}
+                className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.programa ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Programa académico"
               />
+              {formErrors.programa && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.programa}</p>}
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Semestre</label>
+              <label className="block text-xs font-bold text-slate-600 mb-1">Semestre *</label>
               <select
                 value={form.semestre}
                 onChange={(e) => setForm({ ...form, semestre: Number(e.target.value) })}
@@ -309,12 +488,31 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
               </select>
             </div>
           </div>
+
+          {isEditing && editingStudent?.estado === 'INACTIVO' && (
+            <div className="border-t border-amber-200 pt-4">
+              <button
+                type="button"
+                onClick={() => setShowReactivarModal(true)}
+                className="w-full flex items-center gap-3 p-3 border border-amber-200 rounded-lg hover:bg-amber-50 transition-colors text-left group"
+              >
+                <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-colors">
+                  <UserX className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-800">Reactivar Estudiante</p>
+                  <p className="text-xs text-slate-500">Cambia el estado de INACTIVO a ACTIVO</p>
+                </div>
+              </button>
+            </div>
+          )}
+
           <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
+            <Button type="button" variant="outline" onClick={() => { setShowCreateModal(false); setEditingStudent(null); setForm(EMPTY_FORM); setFormErrors({}); }}>
               Cancelar
             </Button>
-            <Button type="submit" isLoading={crearEstudiante.isPending}>
-              Crear Estudiante
+            <Button type="submit" isLoading={crearEstudiante.isPending || actualizarEstudiante.isPending}>
+              {isEditing ? 'Guardar Cambios' : 'Crear Estudiante'}
             </Button>
           </div>
         </form>
@@ -330,6 +528,214 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
       >
         <CargaMasiva onClose={() => setShowCargaModal(false)} />
       </Modal>
+
+      {/* 3-option action modal */}
+      <ActionStudentModal
+        student={actionStudent}
+        open={showOptionsModal}
+        onOpenChange={(open) => { if (!open) { setShowOptionsModal(false); setActionStudent(null); } }}
+        onEliminarTodo={() => { setShowOptionsModal(false); setShowFinalConfirmModal(true); }}
+        onInactivar={() => {
+          if (actionStudent) {
+            cambiarEstado.mutate({ id: actionStudent.id, estado: 'INACTIVO' }, {
+              onSuccess: () => { setShowOptionsModal(false); setActionStudent(null); },
+            });
+          }
+        }}
+        isPending={cambiarEstado.isPending}
+      />
+
+      {/* final confirmation modal before cascade delete */}
+      <Modal
+        open={showFinalConfirmModal}
+        onOpenChange={(open) => { if (!open) setShowFinalConfirmModal(false); }}
+        title="¿Estás completamente seguro?"
+        description="Esta acción es irreversible"
+        className="max-w-sm"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-100 rounded-lg">
+            <AlertTriangle className="w-6 h-6 text-red-500 shrink-0" />
+            <p className="text-sm text-red-700">
+              Esta acción borrará al estudiante y <strong>todos sus datos asociados</strong> de forma permanente. No se puede deshacer.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => setShowFinalConfirmModal(false)}>
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={() => {
+                if (actionStudent) {
+                  eliminarEstudiante.mutate(actionStudent.id, {
+                    onSuccess: () => { setShowFinalConfirmModal(false); setActionStudent(null); },
+                  });
+                }
+              }}
+              isLoading={eliminarEstudiante.isPending}
+            >
+              Sí, eliminar todo
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* confirm create student modal */}
+      <Modal
+        open={showConfirmCreateModal}
+        onOpenChange={(open) => { if (!open) { setShowConfirmCreateModal(false); setPendingCreateData(null); } }}
+        title="Confirmar registro de estudiante"
+        description="Revisa los datos antes de crear. El código no podrá ser modificado después."
+        className="max-w-sm"
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5 text-sm">
+            <div className="flex justify-between"><span className="text-slate-500">Nombres:</span><span className="font-semibold text-slate-800">{pendingCreateData?.nombres}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Apellidos:</span><span className="font-semibold text-slate-800">{pendingCreateData?.apellidos}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Código:</span><span className="font-semibold text-slate-800">{pendingCreateData?.codigo}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Documento:</span><span className="font-semibold text-slate-800">{pendingCreateData?.documento}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Teléfono:</span><span className="font-semibold text-slate-800">{pendingCreateData?.telefono}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Email:</span><span className="font-semibold text-slate-800">{pendingCreateData?.email || '—'}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Programa:</span><span className="font-semibold text-slate-800">{pendingCreateData?.programa}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Semestre:</span><span className="font-semibold text-slate-800">{pendingCreateData?.semestre}</span></div>
+          </div>
+          <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-lg">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <p className="text-xs text-amber-700">
+              El código del estudiante no podrá ser modificado después de la creación.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => { setShowConfirmCreateModal(false); setPendingCreateData(null); }}>
+              Cancelar
+            </Button>
+            <Button type="button" onClick={handleConfirmCreate} isLoading={crearEstudiante.isPending}>
+              Sí, crear estudiante
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* confirm reactivar modal */}
+      <Modal
+        open={showReactivarModal}
+        onOpenChange={(open) => { if (!open) setShowReactivarModal(false); }}
+        title="Reactivar estudiante"
+        description="El estudiante volverá al estado ACTIVO"
+        className="max-w-sm"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-lg">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <p className="text-sm text-amber-700">
+              El estudiante <strong>{editingStudent?.nombres} {editingStudent?.apellidos}</strong> pasará de <strong>INACTIVO</strong> a <strong>ACTIVO</strong> y podrá tener nuevas alertas, casos especiales, encuestas y artefactos.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => setShowReactivarModal(false)}>
+              Cancelar
+            </Button>
+            <Button type="button" onClick={handleReactivar} isLoading={cambiarEstado.isPending}>
+              Sí, reactivar
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
+  );
+};
+
+
+// -- Action student modal (3 options) --
+
+interface ActionStudentModalProps {
+  student: any;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onEliminarTodo: () => void;
+  onInactivar: () => void;
+  isPending: boolean;
+}
+
+const ActionStudentModal = ({ student, open, onOpenChange, onEliminarTodo, onInactivar, isPending }: ActionStudentModalProps) => {
+  const { data: conteo, isLoading: conteoLoading } = useConteoRelaciones(student?.id ?? '');
+
+  if (!student) return null;
+
+  const totalRelaciones = conteo
+    ? conteo.alertas + conteo.casos + conteo.inscripciones + conteo.respuestas_encuestas + conteo.artefactos
+    : 0;
+
+  return (
+    <Modal
+      open={open}
+      onOpenChange={(val) => {
+        if (!val && !isPending) onOpenChange(val);
+      }}
+      title="Gestión de Estudiante"
+      description={`${student.nombres} ${student.apellidos} — Cód: ${student.codigo}`}
+      className="max-w-md"
+    >
+      <div className="space-y-5">
+        {/* conteo de relaciones */}
+        <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+          {conteoLoading ? (
+            <p className="text-sm text-slate-400">Cargando datos asociados...</p>
+          ) : (
+            <>
+              <p className="text-sm font-semibold text-slate-700 mb-2">Datos asociados:</p>
+              <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
+                <span>Alertas: <strong>{conteo?.alertas ?? 0}</strong></span>
+                <span>Casos: <strong>{conteo?.casos ?? 0}</strong></span>
+                <span>Inscripciones: <strong>{conteo?.inscripciones ?? 0}</strong></span>
+                <span>Respuestas: <strong>{conteo?.respuestas_encuestas ?? 0}</strong></span>
+                <span className="col-span-2">Artefactos: <strong>{conteo?.artefactos ?? 0}</strong></span>
+              </div>
+            </>
+          )}
+        </div>
+
+        <p className="text-sm text-slate-600">
+          ¿Qué deseas hacer con este estudiante?
+        </p>
+
+        <div className="space-y-3">
+          <button
+            onClick={onEliminarTodo}
+            className="w-full flex items-center gap-3 p-3 border border-red-200 rounded-lg hover:bg-red-50 transition-colors text-left group"
+          >
+            <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+              <TrashIcon className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-800">Eliminar Todo</p>
+              <p className="text-xs text-slate-500">Borra el estudiante y toda su data asociada en cascada</p>
+            </div>
+          </button>
+
+          <button
+            onClick={onInactivar}
+            disabled={isPending}
+            className="w-full flex items-center gap-3 p-3 border border-amber-200 rounded-lg hover:bg-amber-50 transition-colors text-left group disabled:opacity-50"
+          >
+            <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-colors">
+              <UserX className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-800">Inactivar</p>
+              <p className="text-xs text-slate-500">Cambia el estado a INACTIVO, conserva datos históricos</p>
+            </div>
+          </button>
+        </div>
+
+        <div className="flex justify-end">
+          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={isPending}>
+            Cancelar
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 };

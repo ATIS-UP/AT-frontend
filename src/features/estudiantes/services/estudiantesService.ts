@@ -33,4 +33,12 @@ export const estudiantesService = {
       '/api/estudiantes/carga-masiva',
       file,
     ),
+
+  obtenerConteoRelaciones: (id: string) =>
+    apiClient.get<{ alertas: number; casos: number; inscripciones: number; respuestas_encuestas: number; artefactos: number }>(
+      `/api/estudiantes/${id}/relaciones-conteo`,
+    ),
+
+  cambiarEstado: (id: string, data: { estado: string }) =>
+    apiClient.put<any>(`/api/estudiantes/${id}/estado`, data),
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, User, FileText, Mail, Hash, BookOpen } from 'lucide-react';
+import { X, User, FileText, Mail, Hash, BookOpen, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/src/lib/utils';
 import { Badge } from '@/src/shared/components/ui/Badge';
@@ -16,6 +16,11 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
       case 'INACTIVO': return 'warning' as const;
       default: return 'default' as const;
     }
+  };
+
+  const formatPromedio = (val: number | null | undefined) => {
+    if (val === null || val === undefined) return '—';
+    return val.toFixed(2);
   };
 
   return (
@@ -85,6 +90,24 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
                 </div>
               </section>
 
+              {/* Grades Info */}
+              <section className="glass-panel p-5 rounded-card space-y-4">
+                <h3 className="font-display text-[15px] font-bold text-slate-800 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-brand-primary" />
+                  Rendimiento Académico
+                </h3>
+                <div className="grid grid-cols-2 gap-y-4 gap-x-4">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Promedio General</label>
+                    <p className="text-sm font-semibold text-slate-700">{formatPromedio(student.promedio_general)}</p>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Promedio Acumulado</label>
+                    <p className="text-sm font-semibold text-slate-700">{formatPromedio(student.promedio_acumulado)}</p>
+                  </div>
+                </div>
+              </section>
+
               {/* Contact Info */}
               <section className="glass-panel p-5 rounded-card space-y-4">
                 <h3 className="font-display text-[15px] font-bold text-slate-800 flex items-center gap-2">
@@ -92,24 +115,18 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
                   Información de Contacto
                 </h3>
                 <div className="space-y-3">
-                  {student.email && (
-                    <div className="flex items-center gap-3">
-                      <Mail className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm text-slate-700">{student.email}</span>
-                    </div>
-                  )}
-                  {student.telefono && (
-                    <div className="flex items-center gap-3">
-                      <Hash className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm text-slate-700">{student.telefono}</span>
-                    </div>
-                  )}
-                  {student.documento && (
-                    <div className="flex items-center gap-3">
-                      <BookOpen className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm text-slate-700">Doc: {student.documento}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-700">{student.email || '—'}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Hash className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-700">{student.telefono || '—'}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-700">Doc: {student.documento || '—'}</span>
+                  </div>
                 </div>
               </section>
             </div>

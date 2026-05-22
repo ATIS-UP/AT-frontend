@@ -73,10 +73,35 @@ export function useEliminarEstudiante() {
     mutationFn: (id: string) => estudiantesService.eliminar(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.all });
-      notify({ type: 'success', message: 'Estudiante eliminado' });
+      notify({ type: 'success', message: 'Estudiante eliminado correctamente' });
     },
     onError: () => {
       notify({ type: 'error', message: 'Error al eliminar estudiante' });
+    },
+  });
+}
+
+export function useConteoRelaciones(id: string) {
+  return useQuery({
+    queryKey: [...KEYS.all, 'relaciones', id],
+    queryFn: () => estudiantesService.obtenerConteoRelaciones(id),
+    enabled: !!id,
+  });
+}
+
+export function useCambiarEstadoEstudiante() {
+  const queryClient = useQueryClient();
+  const notify = useNotificationStore.getState().add;
+
+  return useMutation({
+    mutationFn: ({ id, estado }: { id: string; estado: string }) =>
+      estudiantesService.cambiarEstado(id, { estado }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: KEYS.all });
+      notify({ type: 'success', message: `Estudiante cambiado a ${data.estado || 'nuevo estado'}` });
+    },
+    onError: () => {
+      notify({ type: 'error', message: 'Error al cambiar estado del estudiante' });
     },
   });
 }
