@@ -30,8 +30,8 @@ export const Dashboard = () => {
   const isLoading = loadingResumen || loadingEstados || loadingRecientes;
 
   // extract real values
-  const estudiantesActivos = resumen?.estudiantes?.activos ?? resumen?.total_estudiantes ?? 0;
-  const totalAlertas = resumen?.alertas?.total ?? resumen?.total_alertas ?? 0;
+  const estudiantesActivos = resumen?.estudiantes?.activos ?? 0;
+  const totalAlertas = resumen?.alertas?.total ?? 0;
   const pendientes = resumen?.alertas?.pendientes ?? 0;
   const enProceso = resumen?.alertas?.en_proceso ?? 0;
   const resueltas = resumen?.alertas?.resueltas ?? 0;
@@ -41,24 +41,22 @@ export const Dashboard = () => {
   // build trend data from resumen.tendencias
   const tendencias = resumen?.tendencias ?? [];
   const trendData = tendencias.length > 0
-    ? tendencias.map((t: any) => ({ year: t.periodo, value: t.total }))
+    ? tendencias.map((t) => ({ year: t.periodo, value: t.total }))
     : [{ year: 'Sin datos', value: 0 }];
 
   // build chart data from estados
   const nivelData = estados?.niveles_riesgo
-    ? estados.niveles_riesgo.map((n: any) => ({ name: n.nivel, value: n.total }))
-    : estados?.por_nivel
-      ? Object.entries(estados.por_nivel).map(([name, value]) => ({ name, value }))
-      : [];
+    ? estados.niveles_riesgo.map((n) => ({ name: n.nivel, value: n.total }))
+    : [];
 
   // risk breakdown for the bar
-  const totalRojo = nivelData.find((d: any) => d.name === 'ROJO')?.value ?? criticas;
-  const totalAmarillo = nivelData.find((d: any) => d.name === 'AMARILLO')?.value ?? 0;
-  const totalVerde = nivelData.find((d: any) => d.name === 'VERDE')?.value ?? 0;
+  const totalRojo = nivelData.find((d) => d.name === 'ROJO')?.value ?? criticas;
+  const totalAmarillo = nivelData.find((d) => d.name === 'AMARILLO')?.value ?? 0;
+  const totalVerde = nivelData.find((d) => d.name === 'VERDE')?.value ?? 0;
   const totalNiveles = totalRojo + totalAmarillo + totalVerde || 1;
 
   // recent alerts
-  const alertasRecientes = recientes?.alertas_recientes ?? recientes ?? [];
+  const alertasRecientes = recientes?.alertas_recientes ?? [];
 
   if (isLoading) {
     return (
@@ -250,10 +248,10 @@ export const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {alertasRecientes.map((alerta: any, idx: number) => (
+                  {alertasRecientes.map((alerta, idx) => (
                     <tr key={alerta.id ?? idx} className="hover:bg-slate-50/50 transition-colors">
                       <td className="py-3 px-6 font-medium text-slate-800">
-                        {alerta.estudiante_nombre || `ID: ${alerta.estudiante_id?.slice(0, 8)}...`}
+                        {`ID: ${alerta.estudiante_id?.slice(0, 8)}...`}
                       </td>
                       <td className="py-3 px-6">
                         <Badge

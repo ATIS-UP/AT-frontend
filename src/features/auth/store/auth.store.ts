@@ -34,7 +34,7 @@ interface AuthStore {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (tokens: Tokens, user: AuthUser) => void;
-  loginWithCredentials: (email: string, password: string) => Promise<void>;
+  loginWithCredentials: (email: string, password: string) => Promise<AuthUser>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
 }
@@ -104,15 +104,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         isAuthenticated: true,
         isLoading: false,
       });
-    } catch (error) {
-      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-      if (refreshToken && (error as Error)?.message !== 'Session expired. Please log in again.') {
-        set({ isLoading: false });
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(REFRESH_TOKEN_KEY);
-      } else {
-        set({ isLoading: false });
-      }
+    } catch {
+      set({ isLoading: false });
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
     }
   },
 }));

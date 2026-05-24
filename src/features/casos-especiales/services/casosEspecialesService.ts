@@ -41,7 +41,7 @@ export const casosEspecialesService = {
     apiClient.post<RegistroCaso>(`/api/registros-casos/${id}/historial`, data),
 
   eliminar: (id: string) =>
-    apiClient.delete<void>(`/api/registros-casos/${id}`),
+    apiClient.delete(`/api/registros-casos/${id}`),
 
   listarNovedades: (tipo_caso?: string) =>
     apiClient.get<NovedadCaso[]>('/api/novedades-casos', {
@@ -56,5 +56,5 @@ export const casosEspecialesService = {
     apiClient.put<NovedadCaso>(`/api/novedades-casos/${id}`, data),
 
   eliminarNovedad: (id: string) =>
-    apiClient.delete<void>(`/api/novedades-casos/${id}`),
+    apiClient.delete(`/api/novedades-casos/${id}`),
 };

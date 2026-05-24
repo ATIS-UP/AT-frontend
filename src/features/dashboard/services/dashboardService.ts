@@ -1,15 +1,29 @@
 import { apiClient } from '@/src/lib/api-client';
 
 export interface DashboardResumen {
-  total_estudiantes: number;
-  total_alertas: number;
-  alertas_activas: number;
-  encuestas_activas: number;
+  estudiantes: { total: number; activos: number };
+  alertas: { total: number; criticas: number; pendientes: number; en_proceso: number; resueltas: number };
+  programas: { programa: string; total: number }[];
+  tendencias: { periodo: string; total: number }[];
 }
 
 export interface DashboardEstados {
-  por_estado: Record<string, number>;
-  por_nivel: Record<string, number>;
+  estudiantes: { estado: string; total: number }[];
+  alertas: { estado: string; total: number }[];
+  niveles_riesgo: { nivel: string; total: number }[];
+}
+
+export interface AlertaReciente {
+  id: string;
+  estudiante_id: string;
+  nivel_riesgo: string;
+  estado_seguimiento: string;
+  periodo: string;
+  created_at: string;
+}
+
+export interface DashboardRecientes {
+  alertas_recientes: AlertaReciente[];
 }
 
 export const dashboardService = {
@@ -20,5 +34,5 @@ export const dashboardService = {
     apiClient.get<DashboardEstados>('/api/dashboard/estados'),
 
   recientes: (limite = 10) =>
-    apiClient.get<any[]>('/api/dashboard/recientes', { limite }),
+    apiClient.get<DashboardRecientes>('/api/dashboard/recientes', { limite }),
 };

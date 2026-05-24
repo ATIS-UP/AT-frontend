@@ -162,12 +162,6 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
     }
   };
 
-  const handleDeleteStudent = (id: string) => {
-    eliminarEstudiante.mutate(id, {
-      onSuccess: () => setDeleteConfirmId(null),
-    });
-  };
-
   const handleConfirmCreate = () => {
     if (!pendingCreateData) return;
     crearEstudiante.mutate(pendingCreateData as any, {
