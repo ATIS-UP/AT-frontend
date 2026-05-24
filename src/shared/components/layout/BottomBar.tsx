@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, AlertTriangle, BarChart3, Settings } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
+import { LayoutDashboard, Users, AlertTriangle, BarChart3, Settings, Shield } from 'lucide-react';
 import { useAuthStore } from '../../../features/auth/store/auth.store';
+import { cn } from '@/src/lib/utils';
 
 interface BottomNavItem {
   icon: React.ElementType;
@@ -16,7 +16,9 @@ export function BottomBar() {
   const rol = user?.rol;
   const isApoyo = rol === 'APOYO';
 
-  const items: BottomNavItem[] = isApoyo
+  const isAdmin = rol === 'ADMINISTRADOR';
+
+  const baseItems: BottomNavItem[] = isApoyo
     ? [
         { icon: LayoutDashboard, label: 'Panel', to: '/apoyo/panel' },
         { icon: Users, label: 'Estudiantes', to: '/estudiantes' },
@@ -27,8 +29,10 @@ export function BottomBar() {
         { icon: Users, label: 'Estudiantes', to: '/estudiantes' },
         { icon: AlertTriangle, label: 'Alertas', to: '/alertas' },
         { icon: BarChart3, label: 'Encuestas', to: '/encuestas' },
+        ...(isAdmin ? [{ icon: Shield, label: 'Admin', to: '/admin' }] : []),
         { icon: Settings, label: 'Parámetros', to: '/parametrizacion' },
       ];
+  const items = baseItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-slate-200 shadow-lg">

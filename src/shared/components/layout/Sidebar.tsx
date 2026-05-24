@@ -12,7 +12,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Briefcase,
-  Calendar
+  Calendar,
+  Shield
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
@@ -69,6 +70,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
   const navRef = React.useRef<HTMLElement>(null);
   const touchStartX = React.useRef<number | null>(null);
 
+  const isAdmin = rol === 'ADMINISTRADOR';
+
   const menuItems = isApoyo 
     ? [
         { icon: LayoutDashboard, label: 'Panel', to: '/apoyo/panel' },
@@ -85,6 +88,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
         { icon: Calendar, label: 'Actividades', to: '/actividades' },
         { icon: BarChart3, label: 'Encuestas', to: '/encuestas' },
         { icon: FileText, label: 'Documentos', to: '/artefactos' },
+        ...(isAdmin ? [{ icon: Shield, label: 'Admin', to: '/admin' }] : []),
       ];
 
   // swipe-to-close gesture for mobile drawer
