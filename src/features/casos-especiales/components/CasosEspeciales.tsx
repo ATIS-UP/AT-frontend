@@ -55,7 +55,7 @@ export function CasosEspeciales() {
     if (buscarNuevoEstudiante.length < 2) return;
     setSearching(true);
     try {
-      const res = await apiClient.get<{ estudiantes: any[]; total: number }>('/api/estudiantes', { search: buscarNuevoEstudiante, limit: 10 });
+      const res = await apiClient.get<{ estudiantes: any[]; total: number }>('/api/estudiantes', { buscar: buscarNuevoEstudiante, por_pagina: 10 });
       setStudentResults(res.estudiantes || []);
     } catch {
       setStudentResults([]);

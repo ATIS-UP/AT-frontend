@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useAlertas, useAlertasStats, useCrearAlerta, useCrearActividad } from '../hooks/useAlertas';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAlertas, useAlertasStats, useCrearAlerta, useCrearActividad, useCambiarEstadoAlerta } from '../hooks/useAlertas';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Card } from '@/src/shared/components/ui/Card';
 import { Badge } from '@/src/shared/components/ui/Badge';
@@ -8,6 +8,7 @@ import { useNotificationStore } from '@/src/shared/stores/notification.store';
 import { Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { parametrizacionService } from '@/src/features/parametrizacion/services/parametrizacionService';
+import { apiClient } from '@/src/lib/api-client';
 
 type NivelRiesgo = 'ROJO' | 'AMARILLO' | 'VERDE';
 type EstadoSeguimiento = 'PENDIENTE' | 'EN_PROCESO' | 'RESUELTO';
@@ -16,11 +17,15 @@ export function Alertas() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showActividadModal, setShowActividadModal] = useState(false);
   const [selectedAlertaId, setSelectedAlertaId] = useState<string | null>(null);
+  const [showEstadoModal, setShowEstadoModal] = useState(false);
+  const [selectedEstadoAlerta, setSelectedEstadoAlerta] = useState<any | null>(null);
+  const [nuevoEstado, setNuevoEstado] = useState('');
 
   const { data, isLoading, isError } = useAlertas();
   const { data: stats, isLoading: isLoadingStats } = useAlertasStats();
   const crearAlerta = useCrearAlerta();
   const crearActividad = useCrearActividad();
+  const cambiarEstado = useCambiarEstadoAlerta();
 
   const alertas = data?.alertas ?? [];
 
@@ -31,6 +36,9 @@ export function Alertas() {
     descripcion: '',
     periodo: '',
   });
+  const [estudianteValido, setEstudianteValido] = useState<'ok' | 'error' | 'checking' | null>(null);
+  const [estudianteNombre, setEstudianteNombre] = useState<string | null>(null);
+  const [errorEstudiante, setErrorEstudiante] = useState<string | null>(null);
 
   const { data: paramsData } = useQuery({
     queryKey: ['parametrizacion'],
@@ -47,11 +55,67 @@ export function Alertas() {
     }
   }, [showCreateModal, paramsData]);
 
+  const verificarEstudiante = useCallback(async (value: string) => {
+    if (!value.trim()) {
+      setEstudianteValido(null);
+      setEstudianteNombre(null);
+      setErrorEstudiante(null);
+      return;
+    }
+    // reject pure letters (no digits)
+    if (/^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+$/.test(value)) {
+      setEstudianteValido('error');
+      setEstudianteNombre(null);
+      setErrorEstudiante('ID inválido: debe ser un código numérico o UUID');
+      return;
+    }
+    setEstudianteValido('checking');
+    setErrorEstudiante(null);
+    try {
+      let data: any;
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (uuidPattern.test(value)) {
+        data = await apiClient.get<any>(`/api/estudiantes/${value}`);
+      } else {
+        const res = await apiClient.get<{ estudiantes: any[]; total: number }>('/api/estudiantes', { buscar: value, por_pagina: 1 });
+        data = res.estudiantes?.[0];
+      }
+      if (data?.nombres) {
+        setEstudianteNombre(`${data.nombres} ${data.apellidos || ''}`.trim());
+        setEstudianteValido('ok');
+      } else {
+        setEstudianteNombre(null);
+        setEstudianteValido('error');
+        setErrorEstudiante('Estudiante no encontrado');
+      }
+    } catch {
+      setEstudianteNombre(null);
+      setEstudianteValido('error');
+      setErrorEstudiante('Estudiante no encontrado');
+    }
+  }, []);
+
+  const handleEstudianteIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setForm((prev) => ({ ...prev, estudiante_id: value }));
+    setEstudianteValido(null);
+    setEstudianteNombre(null);
+    setErrorEstudiante(null);
+  };
+
+  const handleBlurEstudianteId = () => {
+    if (form.estudiante_id.trim()) {
+      verificarEstudiante(form.estudiante_id);
+    }
+  };
+
   const [actividadForm, setActividadForm] = useState({
     tipo: 'LLAMADA',
     descripcion: '',
     resultado: '',
   });
+
+  const DESCRIPCION_MAX_LENGTH = 500;
 
   const getStatusVariant = (nivel: NivelRiesgo) => {
     switch (nivel) {
@@ -77,10 +141,17 @@ export function Alertas() {
       useNotificationStore.getState().add({ type: 'warning', message: 'Complete todos los campos requeridos' });
       return;
     }
+    if (estudianteValido !== 'ok') {
+      useNotificationStore.getState().add({ type: 'warning', message: 'Verifique que el estudiante existe antes de crear la alerta' });
+      return;
+    }
     crearAlerta.mutate(form, {
       onSuccess: () => {
         setShowCreateModal(false);
         setForm({ estudiante_id: '', tipo: 'ACADEMICA', nivel_riesgo: 'AMARILLO', descripcion: '', periodo: '' });
+        setEstudianteValido(null);
+        setEstudianteNombre(null);
+        setErrorEstudiante(null);
       },
     });
   };
@@ -198,17 +269,31 @@ export function Alertas() {
                     <span className="text-xs text-slate-500">{item.periodo}</span>
                   </td>
                   <td className="py-4 px-6 text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-brand-primary hover:text-brand-primary/80 underline underline-offset-4"
-                      onClick={() => {
-                        setSelectedAlertaId(item.id);
-                        setShowActividadModal(true);
-                      }}
-                    >
-                      Registrar actividad
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-brand-primary hover:text-brand-primary/80 underline underline-offset-4"
+                        onClick={() => {
+                          setSelectedAlertaId(item.id);
+                          setShowActividadModal(true);
+                        }}
+                      >
+                        Registrar actividad
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => {
+                          setSelectedEstadoAlerta(item);
+                          setNuevoEstado(item.estado_seguimiento);
+                          setShowEstadoModal(true);
+                        }}
+                      >
+                        Estado ▾
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -220,7 +305,14 @@ export function Alertas() {
       {/* create alert modal */}
       <Modal
         open={showCreateModal}
-        onOpenChange={setShowCreateModal}
+        onOpenChange={(open) => {
+          setShowCreateModal(open);
+          if (!open) {
+            setEstudianteValido(null);
+            setEstudianteNombre(null);
+            setErrorEstudiante(null);
+          }
+        }}
         title="Nueva Alerta"
         description="Registrar una nueva alerta de riesgo académico"
       >
@@ -230,10 +322,26 @@ export function Alertas() {
             <input
               type="text"
               value={form.estudiante_id}
-              onChange={(e) => setForm({ ...form, estudiante_id: e.target.value })}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
+              onChange={handleEstudianteIdChange}
+              onBlur={handleBlurEstudianteId}
+              className={`w-full border rounded-lg px-3 py-2 text-sm outline-none ${
+                estudianteValido === 'ok'
+                  ? 'border-green-400 focus:border-green-500'
+                  : estudianteValido === 'error'
+                    ? 'border-red-400 focus:border-red-500'
+                    : 'border-slate-200 focus:border-brand-primary'
+              }`}
               placeholder="Código o ID del estudiante"
             />
+            {estudianteValido === 'checking' && (
+              <p className="text-xs text-slate-400 mt-1">Verificando estudiante...</p>
+            )}
+            {estudianteValido === 'ok' && estudianteNombre && (
+              <p className="text-xs text-green-600 mt-1 font-medium">✅ {estudianteNombre}</p>
+            )}
+            {estudianteValido === 'error' && errorEstudiante && (
+              <p className="text-xs text-red-500 mt-1">❌ {errorEstudiante}</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -276,10 +384,14 @@ export function Alertas() {
             <label className="block text-xs font-bold text-slate-600 mb-1">Descripción *</label>
             <textarea
               value={form.descripcion}
+              maxLength={DESCRIPCION_MAX_LENGTH}
               onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none"
               placeholder="Describa la situación del estudiante"
             />
+            <div className="flex justify-end mt-1">
+              <span className="text-[10px] text-slate-400">{form.descripcion.length}/{DESCRIPCION_MAX_LENGTH}</span>
+            </div>
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
@@ -318,10 +430,14 @@ export function Alertas() {
             <label className="block text-xs font-bold text-slate-600 mb-1">Descripción *</label>
             <textarea
               value={actividadForm.descripcion}
+              maxLength={DESCRIPCION_MAX_LENGTH}
               onChange={(e) => setActividadForm({ ...actividadForm, descripcion: e.target.value })}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none"
               placeholder="Describa la actividad realizada"
             />
+            <div className="flex justify-end mt-1">
+              <span className="text-[10px] text-slate-400">{actividadForm.descripcion.length}/{DESCRIPCION_MAX_LENGTH}</span>
+            </div>
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Resultado</label>
@@ -342,6 +458,66 @@ export function Alertas() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* estado change modal */}
+      <Modal
+        open={showEstadoModal}
+        onOpenChange={(open) => {
+          setShowEstadoModal(open);
+          if (!open) setSelectedEstadoAlerta(null);
+        }}
+        title="Cambiar estado de alerta"
+        description={selectedEstadoAlerta ? `Alerta #${selectedEstadoAlerta.id.slice(0, 8)} - ${selectedEstadoAlerta.estudiante_nombre || selectedEstadoAlerta.estudiante_id}` : ''}
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg">
+            <div>
+              <p className="text-xs text-slate-500">Estado actual</p>
+              <Badge variant={getTrackingVariant(selectedEstadoAlerta?.estado_seguimiento)}>
+                {selectedEstadoAlerta?.estado_seguimiento?.replace('_', ' ')}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Nivel de riesgo</p>
+              <Badge variant={getStatusVariant(selectedEstadoAlerta?.nivel_riesgo)}>
+                {selectedEstadoAlerta?.nivel_riesgo}
+              </Badge>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-600 mb-1">Nuevo estado</label>
+            <select
+              value={nuevoEstado}
+              onChange={(e) => setNuevoEstado(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none"
+            >
+              <option value="PENDIENTE">Pendiente</option>
+              <option value="EN_PROCESO">En proceso</option>
+              <option value="RESUELTO">Resuelto</option>
+              <option value="DESCARTADO">Descartado</option>
+            </select>
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={() => setShowEstadoModal(false)}>Cancelar</Button>
+            <Button
+              onClick={() => {
+                if (selectedEstadoAlerta) {
+                  cambiarEstado.mutate(
+                    { id: selectedEstadoAlerta.id, estado: nuevoEstado },
+                    {
+                      onSuccess: () => setShowEstadoModal(false),
+                    }
+                  );
+                }
+              }}
+              isLoading={cambiarEstado.isPending}
+              disabled={nuevoEstado === selectedEstadoAlerta?.estado_seguimiento}
+            >
+              Guardar cambio
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

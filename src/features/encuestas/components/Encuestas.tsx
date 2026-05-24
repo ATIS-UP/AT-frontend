@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Calendar, Plus, Eye, Send, Lock, Trash2 } from 'lucide-react';
+import { FileText, Calendar, Plus, Eye, Send, Lock, Trash2, Share2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { encuestasService } from '../services/encuestasService';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
@@ -69,10 +69,31 @@ export function Encuestas() {
     },
   });
 
-  // form state
-  const [form, setForm] = useState({ titulo: '', descripcion: '', preguntas: '' });
+  const PREGUNTA_MAX_LENGTH = 500;
 
-  const resetForm = () => setForm({ titulo: '', descripcion: '', preguntas: '' });
+  // form state
+  const [form, setForm] = useState({ titulo: '', descripcion: '', preguntasList: [''] });
+
+  const resetForm = () => setForm({ titulo: '', descripcion: '', preguntasList: [''] });
+
+  const addPregunta = () => {
+    setForm((prev) => ({ ...prev, preguntasList: [...prev.preguntasList, ''] }));
+  };
+
+  const removePregunta = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      preguntasList: prev.preguntasList.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updatePregunta = (index: number, value: string) => {
+    setForm((prev) => {
+      const updated = [...prev.preguntasList];
+      updated[index] = value;
+      return { ...prev, preguntasList: updated };
+    });
+  };
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,12 +101,15 @@ export function Encuestas() {
       notify({ type: 'warning', message: 'El título es obligatorio' });
       return;
     }
-    // parse questions as array of strings separated by newlines
-    const preguntas = form.preguntas
-      .split('\n')
-      .map((q) => q.trim())
+    const preguntas = form.preguntasList
+      .map((t) => t.trim())
       .filter(Boolean)
       .map((texto) => ({ texto, tipo: 'texto_libre' }));
+
+    if (preguntas.length === 0) {
+      notify({ type: 'warning', message: 'Agregue al menos una pregunta' });
+      return;
+    }
 
     crearMutation.mutate({
       titulo: form.titulo,
@@ -228,15 +252,32 @@ export function Encuestas() {
                 </Button>
               )}
               {encuesta.estado === 'PUBLICADA' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => cerrarMutation.mutate(encuesta.id)}
-                  isLoading={cerrarMutation.isPending}
-                >
-                  <Lock className="w-3 h-3 mr-1" />
-                  Cerrar
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const url = `${window.location.origin}/encuestas/${encuesta.id}/responder`;
+                      navigator.clipboard.writeText(url).then(() => {
+                        notify({ type: 'success', message: 'Enlace copiado al portapapeles' });
+                      }).catch(() => {
+                        notify({ type: 'warning', message: `Enlace: ${url}` });
+                      });
+                    }}
+                  >
+                    <Share2 className="w-3 h-3 mr-1" />
+                    Compartir
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => cerrarMutation.mutate(encuesta.id)}
+                    isLoading={cerrarMutation.isPending}
+                  >
+                    <Lock className="w-3 h-3 mr-1" />
+                    Cerrar
+                  </Button>
+                </>
               )}
               {encuesta.estado === 'CERRADA' && (
                 <Button variant="outline" size="sm">
@@ -285,13 +326,43 @@ export function Encuestas() {
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-600 mb-1">Preguntas (una por línea)</label>
-            <textarea
-              value={form.preguntas}
-              onChange={(e) => setForm({ ...form, preguntas: e.target.value })}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[120px] resize-none"
-              placeholder={"¿Cómo califica el acompañamiento académico?\n¿Se siente apoyado por la institución?\n¿Qué mejoraría del programa?"}
-            />
+            <label className="block text-xs font-bold text-slate-600 mb-1">Preguntas *</label>
+            <div className="space-y-2">
+              {form.preguntasList.map((pregunta, index) => (
+                <div key={index} className="flex items-start gap-2">
+                  <span className="text-xs text-slate-400 font-mono mt-3 min-w-[20px]">{index + 1}.</span>
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={pregunta}
+                      maxLength={PREGUNTA_MAX_LENGTH}
+                      onChange={(e) => updatePregunta(index, e.target.value)}
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
+                      placeholder={`Escriba la pregunta ${index + 1}`}
+                    />
+                    <div className="flex justify-end mt-0.5">
+                      <span className="text-[10px] text-slate-400">{pregunta.length}/{PREGUNTA_MAX_LENGTH}</span>
+                    </div>
+                  </div>
+                  {form.preguntasList.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removePregunta(index)}
+                      className="mt-2 text-red-400 hover:text-red-600 transition-colors text-xs font-bold"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={addPregunta}
+              className="mt-2 text-xs text-brand-primary hover:text-brand-primary/80 font-semibold transition-colors"
+            >
+              + Añadir pregunta
+            </button>
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => { setShowCreateModal(false); resetForm(); }}>

@@ -7,6 +7,7 @@ import { Rol } from '../shared/types/roles.types';
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('../pages/LoginPage'));
+const ResponderEncuestaPage = lazy(() => import('../pages/ResponderEncuestaPage'));
 const DashboardPage = lazy(() => import('../pages/DashboardPage'));
 const ApoyoPage = lazy(() => import('../pages/ApoyoPage'));
 const EstudiantesPage = lazy(() => import('../pages/EstudiantesPage'));
@@ -28,6 +29,10 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <Suspense fallback={<PageLoader />}><LoginPage /></Suspense>,
+  },
+  {
+    path: '/encuestas/:encuestaId/responder',
+    element: <Suspense fallback={<PageLoader />}><ResponderEncuestaPage /></Suspense>,
   },
   {
     path: '/',
