@@ -82,7 +82,7 @@ export function CasosEspeciales() {
     setShowCreateModal(true);
   };
 
-  const { data: registrosData, isLoading, refetch } = useListarRegistros(filtroEstado);
+  const { data: registrosData, isLoading, refetch } = useListarRegistros(filtroEstado, pagina, filtroTipo);
   const crearRegistro = useCrearRegistro();
   const eliminarRegistro = useEliminarRegistro();
   const notification = useNotificationStore();
@@ -91,10 +91,6 @@ export function CasosEspeciales() {
 
   const groupAndFilter = useMemo(() => {
     let registros = allRegistros;
-
-    if (filtroTipo) {
-      registros = registros.filter(r => r.tipo === filtroTipo);
-    }
 
     if (searchTerm.length >= 2) {
       const q = searchTerm.toLowerCase();
