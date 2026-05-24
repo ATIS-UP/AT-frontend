@@ -49,10 +49,9 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
   const limit = 20;
 
   const { data, isLoading, isError } = useEstudiantes({
-    page,
-    limit,
-    search: search || undefined,
-    semestre: semestre ? Number(semestre) : undefined,
+    pagina: page,
+    por_pagina: limit,
+    buscar: search || undefined,
   });
 
   const crearEstudiante = useCrearEstudiante();

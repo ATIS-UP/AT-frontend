@@ -1,11 +1,10 @@
 import { apiClient } from '@/src/lib/api-client';
 
 export interface EstudianteListParams {
-  page?: number;
-  limit?: number;
-  search?: string;
+  pagina?: number;
+  por_pagina?: number;
+  buscar?: string;
   programa?: string;
-  semestre?: number;
   estado?: string;
 }
 
