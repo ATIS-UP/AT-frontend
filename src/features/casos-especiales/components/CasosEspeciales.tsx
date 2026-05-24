@@ -1,15 +1,17 @@
 import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useListarRegistros, useCrearRegistro, useActualizarRegistro, useAgregarHistorial, useEliminarRegistro } from '../hooks/useCasosEspeciales';
 import { useNovedadesCasos } from '../hooks/useNovedadesCasos';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Card } from '@/src/shared/components/ui/Card';
 import { Badge } from '@/src/shared/components/ui/Badge';
 import { Modal } from '@/src/shared/components/ui/Modal';
-import { Plus, Eye, Trash2 } from 'lucide-react';
+import { Search, Plus, Eye, Trash2 } from 'lucide-react';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
 import type { BusquedaEstudiante, EstudianteInfo, RegistroCaso, TipoRegistro, EstadoRegistro } from '../types/casosEspeciales.types';
 import { TIPOS_REGISTRO, ESTADOS_REGISTRO } from '../types/casosEspeciales.types';
 import { HistorialRegistro } from './HistorialRegistro';
+import { apiClient } from '@/src/lib/api-client';
 
 const getEstadoVariant = (estado: string): 'error' | 'warning' | 'success' | 'default' => {
   switch (estado) {
@@ -31,11 +33,12 @@ export function CasosEspeciales() {
   const [searchTerm, setSearchTerm] = useState('');
   const [pagina, setPagina] = useState(1);
   const [filtroTipo, setFiltroTipo] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState('ACTIVO');
   const ITEMS_PER_PAGE = 20;
 
   React.useEffect(() => {
     setPagina(1);
-  }, [searchTerm, filtroTipo]);
+  }, [searchTerm, filtroTipo, filtroEstado]);
   const [selectedEstudiante, setSelectedEstudiante] = useState<EstudianteInfo | null>(null);
   const [selectedRegistro, setSelectedRegistro] = useState<RegistroCaso | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -43,8 +46,43 @@ export function CasosEspeciales() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [showNuevoCasoModal, setShowNuevoCasoModal] = useState(false);
+  const [buscarNuevoEstudiante, setBuscarNuevoEstudiante] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [studentResults, setStudentResults] = useState<any[]>([]);
 
-  const { data: registrosData, isLoading, refetch } = useListarRegistros();
+  const handleNuevoCasoSearch = async () => {
+    if (buscarNuevoEstudiante.length < 2) return;
+    setSearching(true);
+    try {
+      const res = await apiClient.get<{ estudiantes: any[]; total: number }>('/api/estudiantes', { search: buscarNuevoEstudiante, limit: 10 });
+      setStudentResults(res.estudiantes || []);
+    } catch {
+      setStudentResults([]);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const handleSelectStudentForCaso = (est: any) => {
+    setSelectedEstudiante({
+      id: est.id,
+      codigo: est.codigo,
+      documento: est.documento,
+      nombres: est.nombres,
+      apellidos: est.apellidos,
+      programa: est.programa,
+      semestre: est.semestre,
+      estado: est.estado,
+    });
+    setShowNuevoCasoModal(false);
+    setBuscarNuevoEstudiante('');
+    setStudentResults([]);
+    setForm({ tipo: 'SOCIO_ECONOMICO', novedad_id: '', observaciones: '' });
+    setShowCreateModal(true);
+  };
+
+  const { data: registrosData, isLoading, refetch } = useListarRegistros(filtroEstado);
   const crearRegistro = useCrearRegistro();
   const eliminarRegistro = useEliminarRegistro();
   const notification = useNotificationStore();
@@ -190,6 +228,10 @@ export function CasosEspeciales() {
           <h2 className="text-2xl font-bold font-display text-brand-primary">Casos Especiales</h2>
           <p className="text-slate-500 text-sm">Gestión de registros de casos especiales por estudiante</p>
         </div>
+        <Button onClick={() => setShowNuevoCasoModal(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Nuevo Caso
+        </Button>
       </div>
 
       <Card>
@@ -212,6 +254,16 @@ export function CasosEspeciales() {
             {TIPOS_REGISTRO.map((t) => (
               <option key={t.value} value={t.value}>{t.label}</option>
             ))}
+          </select>
+          <select
+            value={filtroEstado}
+            onChange={(e) => setFiltroEstado(e.target.value)}
+            className="w-full sm:w-40 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none"
+          >
+            <option value="ACTIVO">Activos</option>
+            <option value="CERRADO">Cerrados</option>
+            <option value="PENDIENTE">Pendientes</option>
+            <option value="TODOS">Todos</option>
           </select>
         </div>
       </Card>
@@ -361,6 +413,66 @@ export function CasosEspeciales() {
           )}
         </Card>
       ))}
+
+      <Modal
+        open={showNuevoCasoModal}
+        onOpenChange={(open) => {
+          setShowNuevoCasoModal(open);
+          if (!open) {
+            setBuscarNuevoEstudiante('');
+            setStudentResults([]);
+          }
+        }}
+        title="Nuevo Caso Especial"
+        description="Busque un estudiante para crearle un caso especial"
+      >
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={buscarNuevoEstudiante}
+              onChange={(e) => setBuscarNuevoEstudiante(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleNuevoCasoSearch(); }}
+              className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
+              placeholder="Buscar por código, nombre o apellido..."
+            />
+            <Button onClick={handleNuevoCasoSearch} disabled={buscarNuevoEstudiante.length < 2 || searching}>
+              <Search className="w-4 h-4 mr-2" />
+              Buscar
+            </Button>
+          </div>
+
+          {searching && (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div>
+            </div>
+          )}
+
+          {!searching && studentResults.length === 0 && buscarNuevoEstudiante.length >= 2 && (
+            <p className="text-sm text-slate-500 text-center py-4">No se encontraron estudiantes</p>
+          )}
+
+          {!searching && studentResults.length > 0 && (
+            <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto border border-slate-200 rounded-lg">
+              {studentResults.map((est: any) => (
+                <button
+                  key={est.id}
+                  type="button"
+                  onClick={() => handleSelectStudentForCaso(est)}
+                  className="w-full text-left px-4 py-3 hover:bg-brand-primary/5 transition-colors"
+                >
+                  <p className="font-medium text-slate-800 text-sm">
+                    {est.nombres} {est.apellidos}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Código: {est.codigo} | {est.programa} | {est.semestre}° semestre
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </Modal>
 
       <Modal
         open={showCreateModal}

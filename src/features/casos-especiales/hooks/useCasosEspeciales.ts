@@ -10,10 +10,11 @@ export const useBuscarEstudiante = (q: string, pagina: number = 1, enabled: bool
   });
 };
 
-export const useListarRegistros = () => {
+export const useListarRegistros = (estado?: string) => {
+  const filtro = estado && estado !== 'TODOS' ? estado : undefined;
   return useQuery({
-    queryKey: ['casos-especiales', 'listar', 'ACTIVO'],
-    queryFn: () => casosEspecialesService.listar(1, 500, 'ACTIVO'),
+    queryKey: ['casos-especiales', 'listar', filtro ?? 'todos'],
+    queryFn: () => casosEspecialesService.listar(1, 500, filtro),
     staleTime: 30000,
   });
 };

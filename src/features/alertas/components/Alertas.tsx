@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAlertas, useAlertasStats, useCrearAlerta, useCrearActividad } from '../hooks/useAlertas';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Card } from '@/src/shared/components/ui/Card';
@@ -6,6 +6,8 @@ import { Badge } from '@/src/shared/components/ui/Badge';
 import { Modal } from '@/src/shared/components/ui/Modal';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
 import { Plus } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { parametrizacionService } from '@/src/features/parametrizacion/services/parametrizacionService';
 
 type NivelRiesgo = 'ROJO' | 'AMARILLO' | 'VERDE';
 type EstadoSeguimiento = 'PENDIENTE' | 'EN_PROCESO' | 'RESUELTO';
@@ -29,6 +31,21 @@ export function Alertas() {
     descripcion: '',
     periodo: '',
   });
+
+  const { data: paramsData } = useQuery({
+    queryKey: ['parametrizacion'],
+    queryFn: () => parametrizacionService.listar(),
+    enabled: showCreateModal,
+  });
+
+  useEffect(() => {
+    if (!showCreateModal) return;
+    const grupo = paramsData?.find((g: any) => g.grupo === 'PERIODO');
+    const periodoActual = grupo?.parametros?.find((p: any) => p.clave === 'PERIODO_ACTUAL');
+    if (periodoActual?.valor) {
+      setForm((prev) => ({ ...prev, periodo: periodoActual.valor }));
+    }
+  }, [showCreateModal, paramsData]);
 
   const [actividadForm, setActividadForm] = useState({
     tipo: 'LLAMADA',

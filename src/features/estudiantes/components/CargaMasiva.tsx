@@ -1,8 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { estudiantesService } from '../services/estudiantesService';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { Modal } from '@/src/shared/components/ui/Modal';
+import { Button } from '@/src/shared/components/ui/Button';
 
 interface UploadResult {
   insertadas: number;
@@ -12,11 +14,24 @@ interface UploadResult {
 
 type Step = 'select' | 'preview' | 'uploading' | 'result';
 
+const FORMAT_COLUMNS = [
+  { columna: 'codigo', tipo: 'Texto', requerido: true, descripcion: 'Código único del estudiante', ejemplo: '20201001' },
+  { columna: 'nombres', tipo: 'Texto', requerido: true, descripcion: 'Nombres del estudiante', ejemplo: 'Carlos' },
+  { columna: 'apellidos', tipo: 'Texto', requerido: true, descripcion: 'Apellidos del estudiante', ejemplo: 'Mendoza Torres' },
+  { columna: 'documento', tipo: 'Texto', requerido: false, descripcion: 'Número de documento', ejemplo: '1098765432' },
+  { columna: 'telefono', tipo: 'Texto', requerido: false, descripcion: 'Número de teléfono', ejemplo: '3001234567' },
+  { columna: 'email', tipo: 'Texto', requerido: false, descripcion: 'Correo electrónico', ejemplo: 'carlos@unipamplona.edu.co' },
+  { columna: 'programa', tipo: 'Texto', requerido: true, descripcion: 'Programa académico', ejemplo: 'Ingeniería de Sistemas' },
+  { columna: 'semestre', tipo: 'Número', requerido: true, descripcion: 'Semestre actual (1-15)', ejemplo: '8' },
+  { columna: 'estado', tipo: 'Texto', requerido: false, descripcion: 'Estado (ACTIVO, INACTIVO, GRADUADO, SUSPENDIDO)', ejemplo: 'ACTIVO' },
+];
+
 export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
   const [step, setStep] = useState<Step>('select');
   const [file, setFile] = useState<File | null>(null);
   const [previewRows, setPreviewRows] = useState<string[][]>([]);
   const [result, setResult] = useState<UploadResult | null>(null);
+  const [showFormatModal, setShowFormatModal] = useState(false);
 
   const queryClient = useQueryClient();
   const notify = useNotificationStore.getState().add;
@@ -101,19 +116,32 @@ export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
 
       {/* step: select file */}
       {step === 'select' && (
-        <label className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-slate-300 rounded-card p-10 cursor-pointer hover:border-brand-primary hover:bg-brand-primary/5 transition-all">
-          <Upload className="w-8 h-8 text-slate-400" />
-          <span className="text-sm text-slate-600 font-medium">
-            Seleccionar archivo .csv o .xlsx
-          </span>
-          <span className="text-xs text-slate-400">Máximo 5000 registros por archivo</span>
-          <input
-            type="file"
-            accept=".csv,.xlsx,.xls"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-        </label>
+        <div className="space-y-4">
+          <label className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-slate-300 rounded-card p-10 cursor-pointer hover:border-brand-primary hover:bg-brand-primary/5 transition-all">
+            <Upload className="w-8 h-8 text-slate-400" />
+            <span className="text-sm text-slate-600 font-medium">
+              Seleccionar archivo .csv o .xlsx
+            </span>
+            <span className="text-xs text-slate-400">Máximo 5000 registros por archivo</span>
+            <input
+              type="file"
+              accept=".csv,.xlsx,.xls"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
+          <div className="flex justify-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFormatModal(true)}
+            >
+              <Info className="w-4 h-4 mr-1" />
+              Ver formato esperado
+            </Button>
+          </div>
+        </div>
       )}
 
       {/* step: preview */}
@@ -236,6 +264,51 @@ export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
           </div>
         </div>
       )}
+      <Modal
+        open={showFormatModal}
+        onOpenChange={setShowFormatModal}
+        title="Formato esperado"
+        description="Columnas del archivo CSV/XLSX y tipo de datos esperados"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px]">
+                <th className="pb-2 pr-4 font-bold">Columna</th>
+                <th className="pb-2 pr-4 font-bold">Tipo</th>
+                <th className="pb-2 pr-4 font-bold">Requerido</th>
+                <th className="pb-2 pr-4 font-bold">Descripción</th>
+                <th className="pb-2 font-bold">Ejemplo</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {FORMAT_COLUMNS.map((col) => (
+                <tr key={col.columna} className="text-slate-700">
+                  <td className="py-2 pr-4 font-mono text-xs font-bold">{col.columna}</td>
+                  <td className="py-2 pr-4 text-xs">{col.tipo}</td>
+                  <td className="py-2 pr-4">
+                    {col.requerido ? (
+                      <span className="text-xs font-bold text-red-500">Sí</span>
+                    ) : (
+                      <span className="text-xs text-slate-400">No</span>
+                    )}
+                  </td>
+                  <td className="py-2 pr-4 text-xs">{col.descripcion}</td>
+                  <td className="py-2 text-xs font-mono text-slate-500">{col.ejemplo}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-700">
+          <strong>Nota:</strong> La primera fila del archivo debe contener los nombres de las columnas exactamente como se muestran arriba. Las columnas no requeridas pueden omitirse.
+        </div>
+        <div className="flex justify-end mt-4">
+          <Button variant="outline" onClick={() => setShowFormatModal(false)}>
+            Cerrar
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };
