@@ -251,7 +251,7 @@ export const Dashboard = () => {
                   {alertasRecientes.map((alerta, idx) => (
                     <tr key={alerta.id ?? idx} className="hover:bg-slate-50/50 transition-colors">
                       <td className="py-3 px-6 font-medium text-slate-800">
-                        {`ID: ${alerta.estudiante_id?.slice(0, 8)}...`}
+                        {alerta.estudiante_nombre || `ID: ${alerta.estudiante_id?.slice(0, 8)}...`}
                       </td>
                       <td className="py-3 px-6">
                         <Badge

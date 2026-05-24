@@ -16,6 +16,7 @@ export interface DashboardEstados {
 export interface AlertaReciente {
   id: string;
   estudiante_id: string;
+  estudiante_nombre: string | null;
   nivel_riesgo: string;
   estado_seguimiento: string;
   periodo: string;
