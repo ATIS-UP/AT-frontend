@@ -119,19 +119,19 @@ export function Alertas() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="text-center hover:border-red-300 transition-colors group">
           <div className="text-4xl font-bold text-red-600 mb-1 group-hover:scale-110 transition-transform">
-            {stats?.por_nivel?.ROJO ?? 0}
+            {stats?.critico ?? 0}
           </div>
           <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Riesgo Crítico</div>
         </Card>
         <Card className="text-center hover:border-amber-300 transition-colors group">
           <div className="text-4xl font-bold text-amber-500 mb-1 group-hover:scale-110 transition-transform">
-            {stats?.por_nivel?.AMARILLO ?? 0}
+            {stats?.medio ?? 0}
           </div>
           <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Riesgo Medio</div>
         </Card>
         <Card className="text-center hover:border-emerald-300 transition-colors group">
           <div className="text-4xl font-bold text-emerald-600 mb-1 group-hover:scale-110 transition-transform">
-            {stats?.por_nivel?.VERDE ?? 0}
+            {stats?.bajo ?? 0}
           </div>
           <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Normal</div>
         </Card>

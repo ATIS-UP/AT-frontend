@@ -85,7 +85,7 @@ export function Encuestas() {
       .split('\n')
       .map((q) => q.trim())
       .filter(Boolean)
-      .map((texto) => ({ texto, tipo: 'ABIERTA' }));
+      .map((texto) => ({ texto, tipo: 'texto_libre' }));
 
     crearMutation.mutate({
       titulo: form.titulo,
