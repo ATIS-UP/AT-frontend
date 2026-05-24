@@ -76,6 +76,22 @@ export function useAlertaActividades(alertaId: string) {
   });
 }
 
+export function useEliminarAlerta() {
+  const queryClient = useQueryClient();
+  const notify = useNotificationStore.getState().add;
+
+  return useMutation({
+    mutationFn: (id: string) => alertasService.eliminar(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: KEYS.all });
+      notify({ type: 'success', message: 'Alerta eliminada correctamente' });
+    },
+    onError: () => {
+      notify({ type: 'error', message: 'Error al eliminar la alerta' });
+    },
+  });
+}
+
 export function useCrearActividad() {
   const queryClient = useQueryClient();
   const notify = useNotificationStore.getState().add;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAlertas, useAlertasStats, useCrearAlerta, useCrearActividad, useCambiarEstadoAlerta } from '../hooks/useAlertas';
+import { useAlertas, useAlertasStats, useCrearAlerta, useCrearActividad, useCambiarEstadoAlerta, useEliminarAlerta } from '../hooks/useAlertas';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Card } from '@/src/shared/components/ui/Card';
 import { Badge } from '@/src/shared/components/ui/Badge';
@@ -20,12 +20,25 @@ export function Alertas() {
   const [showEstadoModal, setShowEstadoModal] = useState(false);
   const [selectedEstadoAlerta, setSelectedEstadoAlerta] = useState<any | null>(null);
   const [nuevoEstado, setNuevoEstado] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedDeleteId, setSelectedDeleteId] = useState<string | null>(null);
 
-  const { data, isLoading, isError } = useAlertas();
+  const [filtroNivel, setFiltroNivel] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState('');
+  const [filtroPeriodo, setFiltroPeriodo] = useState('');
+
+  const params: Record<string, any> = {};
+  if (filtroNivel) params.nivel_riesgo = filtroNivel;
+  if (filtroEstado) params.estado_seguimiento = filtroEstado;
+  if (filtroPeriodo) params.periodo = filtroPeriodo;
+
+  const { data, isLoading, isError } = useAlertas(Object.keys(params).length ? params as any : undefined);
+
   const { data: stats, isLoading: isLoadingStats } = useAlertasStats();
   const crearAlerta = useCrearAlerta();
   const crearActividad = useCrearActividad();
   const cambiarEstado = useCambiarEstadoAlerta();
+  const eliminarAlerta = useEliminarAlerta();
 
   const alertas = data?.alertas ?? [];
 
@@ -225,6 +238,46 @@ export function Alertas() {
         </Card>
       </div>
 
+      {/* filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <select
+          value={filtroNivel}
+          onChange={(e) => setFiltroNivel(e.target.value)}
+          className="border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-brand-primary"
+        >
+          <option value="">Todos los niveles</option>
+          <option value="ROJO">Rojo</option>
+          <option value="AMARILLO">Amarillo</option>
+          <option value="VERDE">Verde</option>
+        </select>
+        <select
+          value={filtroEstado}
+          onChange={(e) => setFiltroEstado(e.target.value)}
+          className="border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-brand-primary"
+        >
+          <option value="">Todos los estados</option>
+          <option value="PENDIENTE">Pendiente</option>
+          <option value="EN_PROCESO">En proceso</option>
+          <option value="RESUELTO">Resuelto</option>
+          <option value="DESCARTADO">Descartado</option>
+        </select>
+        <input
+          type="text"
+          value={filtroPeriodo}
+          onChange={(e) => setFiltroPeriodo(e.target.value)}
+          placeholder="Periodo (ej: 2025-1)"
+          className="border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-brand-primary max-w-[160px]"
+        />
+        {(filtroNivel || filtroEstado || filtroPeriodo) && (
+          <button
+            onClick={() => { setFiltroNivel(''); setFiltroEstado(''); setFiltroPeriodo(''); }}
+            className="text-xs text-red-500 hover:text-red-600 font-medium"
+          >
+            Limpiar filtros
+          </button>
+        )}
+      </div>
+
       {/* table */}
       <Card padding="none" className="overflow-hidden">
         <div className="overflow-x-auto">
@@ -292,6 +345,17 @@ export function Alertas() {
                         }}
                       >
                         Estado ▾
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-600 text-xs"
+                        onClick={() => {
+                          setSelectedDeleteId(item.id);
+                          setShowDeleteModal(true);
+                        }}
+                      >
+                        Eliminar
                       </Button>
                     </div>
                   </td>
@@ -517,6 +581,40 @@ export function Alertas() {
               Guardar cambio
             </Button>
           </div>
+        </div>
+      </Modal>
+
+      {/* delete confirmation modal */}
+      <Modal
+        open={showDeleteModal}
+        onOpenChange={(open) => {
+          setShowDeleteModal(open);
+          if (!open) setSelectedDeleteId(null);
+        }}
+        title="Eliminar Alerta"
+        description="¿Está seguro de eliminar esta alerta? Esta acción no se puede deshacer."
+      >
+        <div className="flex justify-end gap-3 pt-2">
+          <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
+            Cancelar
+          </Button>
+          <Button
+            variant="outline"
+            className="text-red-500 border-red-200 hover:bg-red-50"
+            onClick={() => {
+              if (selectedDeleteId) {
+                eliminarAlerta.mutate(selectedDeleteId, {
+                  onSuccess: () => {
+                    setShowDeleteModal(false);
+                    setSelectedDeleteId(null);
+                  },
+                });
+              }
+            }}
+            isLoading={eliminarAlerta.isPending}
+          >
+            Eliminar
+          </Button>
         </div>
       </Modal>
     </div>
