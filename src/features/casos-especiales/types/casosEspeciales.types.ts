@@ -1,4 +1,4 @@
-export type TipoRegistro = 'SOCIO_ECONOMICO' | 'ARTICULADO' | 'RENDIMIENTO_ACADEMICO' | 'CONDUCTUAL' | 'OTRO';
+export type TipoRegistro = 'SOCIO_ECONOMICO' | 'ARTICULADO' | 'RENDIMIENTO_ACADEMICO' | 'CONDUCTUAL' | 'PSICOSOCIAL' | 'INSTITUCIONAL_VOCACIONAL' | 'OTRO';
 
 export type EstadoRegistro = 'ACTIVO' | 'CERRADO' | 'PENDIENTE';
 
@@ -13,12 +13,23 @@ export interface EstudianteInfo {
   estado: string;
 }
 
+export interface NovedadCaso {
+  id: string;
+  tipo_caso: string;
+  nombre: string;
+  activo: boolean;
+  orden: number;
+  created_at?: string;
+}
+
 export interface RegistroCaso {
   id: string;
   estudiante_id: string;
   estudiante: EstudianteInfo;
   tipo: TipoRegistro;
   estado: EstadoRegistro;
+  novedad_id?: string;
+  novedad?: { id: string; nombre: string };
   observaciones?: string;
   responsable_id: string;
   responsable_nombre: string;
@@ -52,12 +63,14 @@ export interface BusquedaEstudianteResponse {
 export interface RegistroCreate {
   estudiante_id: string;
   tipo: TipoRegistro;
+  novedad_id: string;
   observaciones?: string;
 }
 
 export interface RegistroUpdate {
   tipo?: TipoRegistro;
   estado?: EstadoRegistro;
+  novedad_id?: string;
   observaciones?: string;
 }
 
@@ -71,6 +84,8 @@ export const TIPOS_REGISTRO: { value: TipoRegistro; label: string }[] = [
   { value: 'ARTICULADO', label: 'Articulado' },
   { value: 'RENDIMIENTO_ACADEMICO', label: 'Rendimiento Académico' },
   { value: 'CONDUCTUAL', label: 'Conductual' },
+  { value: 'PSICOSOCIAL', label: 'Psicosocial' },
+  { value: 'INSTITUCIONAL_VOCACIONAL', label: 'Institucional Vocacional' },
   { value: 'OTRO', label: 'Otro' },
 ];
 

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { useBuscarEstudiante, useCrearRegistro, useActualizarRegistro, useAgregarHistorial, useEliminarRegistro } from '../hooks/useCasosEspeciales';
+import React, { useState, useMemo } from 'react';
+import { useListarRegistros, useCrearRegistro, useActualizarRegistro, useAgregarHistorial, useEliminarRegistro } from '../hooks/useCasosEspeciales';
+import { useNovedadesCasos } from '../hooks/useNovedadesCasos';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Card } from '@/src/shared/components/ui/Card';
 import { Badge } from '@/src/shared/components/ui/Badge';
 import { Modal } from '@/src/shared/components/ui/Modal';
-import { Search, Plus, Eye, Trash2 } from 'lucide-react';
+import { Plus, Eye, Trash2 } from 'lucide-react';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
 import type { BusquedaEstudiante, EstudianteInfo, RegistroCaso, TipoRegistro, EstadoRegistro } from '../types/casosEspeciales.types';
 import { TIPOS_REGISTRO, ESTADOS_REGISTRO } from '../types/casosEspeciales.types';
@@ -24,13 +25,17 @@ const getTipoLabel = (tipo: string): string => {
   return found ? found.label : tipo;
 };
 
+const OBSERVACIONES_MAX_LENGTH = 500;
+
 export function CasosEspeciales() {
   const [searchTerm, setSearchTerm] = useState('');
   const [pagina, setPagina] = useState(1);
+  const [filtroTipo, setFiltroTipo] = useState('');
+  const ITEMS_PER_PAGE = 20;
 
   React.useEffect(() => {
     setPagina(1);
-  }, [searchTerm]);
+  }, [searchTerm, filtroTipo]);
   const [selectedEstudiante, setSelectedEstudiante] = useState<EstudianteInfo | null>(null);
   const [selectedRegistro, setSelectedRegistro] = useState<RegistroCaso | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -39,29 +44,74 @@ export function CasosEspeciales() {
   const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const { data: busquedaResults, isLoading, refetch } = useBuscarEstudiante(searchTerm, pagina, searchTerm.length >= 2);
+  const { data: registrosData, isLoading, refetch } = useListarRegistros();
   const crearRegistro = useCrearRegistro();
   const eliminarRegistro = useEliminarRegistro();
   const notification = useNotificationStore();
 
-  const results: BusquedaEstudiante[] = busquedaResults?.resultados || [];
-  const totalResultados = busquedaResults?.total || 0;
-  const porPagina = busquedaResults?.por_pagina || 20;
+  const allRegistros: RegistroCaso[] = registrosData?.registros || [];
+
+  const groupAndFilter = useMemo(() => {
+    let registros = allRegistros;
+
+    if (filtroTipo) {
+      registros = registros.filter(r => r.tipo === filtroTipo);
+    }
+
+    if (searchTerm.length >= 2) {
+      const q = searchTerm.toLowerCase();
+      registros = registros.filter(r => {
+        const e = r.estudiante;
+        return (
+          (e.codigo || '').toLowerCase().includes(q) ||
+          (e.nombres || '').toLowerCase().includes(q) ||
+          (e.apellidos || '').toLowerCase().includes(q) ||
+          (e.documento || '').toLowerCase().includes(q)
+        );
+      });
+    }
+
+    const map = new Map<string, BusquedaEstudiante>();
+    for (const reg of registros) {
+      const key = reg.estudiante_id;
+      if (!map.has(key)) {
+        map.set(key, {
+          estudiante: reg.estudiante,
+          registros: [],
+          total_registros: 0,
+        });
+      }
+      map.get(key)!.registros.push(reg);
+      map.get(key)!.total_registros++;
+    }
+
+    const resultados = Array.from(map.values());
+    const total = resultados.length;
+    const start = (pagina - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+
+    return {
+      resultados: resultados.slice(start, end),
+      total,
+    };
+  }, [allRegistros, searchTerm, filtroTipo, pagina]);
+
+  const results: BusquedaEstudiante[] = groupAndFilter.resultados;
+  const totalResultados = groupAndFilter.total;
+  const porPagina = ITEMS_PER_PAGE;
   const totalPaginas = Math.ceil(totalResultados / porPagina);
   const hasMorePages = pagina < totalPaginas;
 
   const [form, setForm] = useState({
     tipo: 'SOCIO_ECONOMICO' as TipoRegistro,
+    novedad_id: '',
     observaciones: '',
   });
   const [observacionesError, setObservacionesError] = useState(false);
+  const [novedadError, setNovedadError] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchTerm.length >= 2) {
-      refetch();
-    }
-  };
+  const { data: novedades } = useNovedadesCasos(form.tipo);
+  const novedadesParaTipo = novedades || [];
 
   const handleCreateRegistro = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,17 +129,26 @@ export function CasosEspeciales() {
     }
     setObservacionesError(false);
 
+    if (!form.novedad_id) {
+      setNovedadError(true);
+      notification.add({ type: 'error', message: 'Debe seleccionar una novedad' });
+      return;
+    }
+    setNovedadError(false);
+
     crearRegistro.mutate(
       {
         estudiante_id: selectedEstudiante.id,
         tipo: form.tipo,
+        novedad_id: form.novedad_id,
         observaciones: form.observaciones || undefined,
       },
       {
         onSuccess: () => {
           setShowCreateModal(false);
-          setForm({ tipo: 'SOCIO_ECONOMICO', observaciones: '' });
+          setForm({ tipo: 'SOCIO_ECONOMICO', novedad_id: '', observaciones: '' });
           setObservacionesError(false);
+          setNovedadError(false);
           notification.add({ type: 'success', message: 'Registro creado exitosamente' });
           refetch();
         },
@@ -134,7 +193,7 @@ export function CasosEspeciales() {
       </div>
 
       <Card>
-        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
             <input
               type="text"
@@ -144,11 +203,17 @@ export function CasosEspeciales() {
               placeholder="Buscar por código, cédula, nombre o apellido..."
             />
           </div>
-          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-            <Search className="w-4 h-4 mr-2" />
-            Buscar
-          </Button>
-        </form>
+          <select
+            value={filtroTipo}
+            onChange={(e) => setFiltroTipo(e.target.value)}
+            className="w-full sm:w-48 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none"
+          >
+            <option value="">Todos los tipos</option>
+            {TIPOS_REGISTRO.map((t) => (
+              <option key={t.value} value={t.value}>{t.label}</option>
+            ))}
+          </select>
+        </div>
       </Card>
 
       {isLoading && (
@@ -157,9 +222,15 @@ export function CasosEspeciales() {
         </div>
       )}
 
-      {!isLoading && searchTerm.length >= 2 && results.length === 0 && (
+      {!isLoading && allRegistros.length === 0 && (
         <Card className="text-center py-8">
-          <p className="text-slate-500">Estudiante no está en la base de datos</p>
+          <p className="text-slate-500">No hay casos especiales activos registrados</p>
+        </Card>
+      )}
+
+      {!isLoading && allRegistros.length > 0 && results.length === 0 && (
+        <Card className="text-center py-8">
+          <p className="text-slate-500">No se encontraron resultados con los filtros aplicados</p>
         </Card>
       )}
 
@@ -206,6 +277,7 @@ export function CasosEspeciales() {
               className="border-2 border-dashed border-slate-200 rounded-lg p-6 text-center hover:border-brand-primary/50 hover:bg-brand-primary/5 cursor-pointer transition-all group"
               onClick={() => {
                 setSelectedEstudiante(result.estudiante);
+                setForm({ tipo: 'SOCIO_ECONOMICO', novedad_id: '', observaciones: '' });
                 setShowCreateModal(true);
               }}
             >
@@ -223,6 +295,7 @@ export function CasosEspeciales() {
                     <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px] bg-slate-50/50">
                       <th className="pb-3 pt-4 px-4 font-semibold">#</th>
                       <th className="pb-3 pt-4 px-4 font-semibold hidden md:table-cell">Tipo</th>
+                      <th className="pb-3 pt-4 px-4 font-semibold">Novedad</th>
                       <th className="pb-3 pt-4 px-4 font-semibold">Estado</th>
                       <th className="pb-3 pt-4 px-4 font-semibold hidden sm:table-cell">Fecha</th>
                       <th className="pb-3 pt-4 px-4 font-semibold text-right">Acción</th>
@@ -234,6 +307,9 @@ export function CasosEspeciales() {
                         <td className="py-4 px-4 text-slate-500">{index + 1}</td>
                         <td className="py-4 px-4 hidden md:table-cell">
                           <Badge variant="outline">{getTipoLabel(registro.tipo)}</Badge>
+                        </td>
+                        <td className="py-4 px-4 text-slate-700 text-xs font-medium">
+                          {registro.novedad?.nombre || '—'}
                         </td>
                         <td className="py-4 px-4">
                           <Badge variant={getEstadoVariant(registro.estado)}>{registro.estado}</Badge>
@@ -273,6 +349,7 @@ export function CasosEspeciales() {
                   size="sm"
                   onClick={() => {
                     setSelectedEstudiante(result.estudiante);
+                    setForm({ tipo: 'SOCIO_ECONOMICO', novedad_id: '', observaciones: '' });
                     setShowCreateModal(true);
                   }}
                 >
@@ -290,8 +367,9 @@ export function CasosEspeciales() {
         onOpenChange={(open) => {
           setShowCreateModal(open);
           if (!open) {
-            setForm({ tipo: 'SOCIO_ECONOMICO', observaciones: '' });
+            setForm({ tipo: 'SOCIO_ECONOMICO', novedad_id: '', observaciones: '' });
             setObservacionesError(false);
+            setNovedadError(false);
           }
         }}
         title="Nuevo Registro de Caso Especial"
@@ -308,11 +386,12 @@ export function CasosEspeciales() {
               <p className="text-sm font-medium">{selectedEstudiante?.programa}</p>
             </div>
           </div>
+
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Tipo de Caso *</label>
             <select
               value={form.tipo}
-              onChange={(e) => setForm({ ...form, tipo: e.target.value as TipoRegistro })}
+              onChange={(e) => setForm({ ...form, tipo: e.target.value as TipoRegistro, novedad_id: '' })}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none"
             >
               {TIPOS_REGISTRO.map((tipo) => (
@@ -320,18 +399,41 @@ export function CasosEspeciales() {
               ))}
             </select>
           </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-600 mb-1">Novedad *</label>
+            <select
+              value={form.novedad_id}
+              onChange={(e) => { setForm({ ...form, novedad_id: e.target.value }); setNovedadError(false); }}
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none ${novedadError ? 'border-red-500 focus:border-red-500' : 'border-slate-200 focus:border-brand-primary'}`}
+            >
+              <option value="">Seleccione una novedad</option>
+              {novedadesParaTipo.map((n) => (
+                <option key={n.id} value={n.id}>{n.nombre}</option>
+              ))}
+            </select>
+            {novedadError && (
+              <p className="text-xs text-red-500 mt-1">Debe seleccionar una novedad</p>
+            )}
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Observaciones *</label>
             <textarea
               value={form.observaciones}
+              maxLength={OBSERVACIONES_MAX_LENGTH}
               onChange={(e) => { setForm({ ...form, observaciones: e.target.value }); setObservacionesError(false); }}
               className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none ${observacionesError ? 'border-red-500 focus:border-red-500' : 'border-slate-200'}`}
               placeholder="Describa la situación del estudiante"
             />
-            {observacionesError && (
-              <p className="text-xs text-red-500 mt-1">Debe ingresar las observaciones del caso</p>
-            )}
+            <div className="flex justify-between items-center mt-1">
+              {observacionesError ? (
+                <p className="text-xs text-red-500">Debe ingresar las observaciones del caso</p>
+              ) : <span />}
+              <span className="text-[10px] text-slate-400">{form.observaciones.length}/{OBSERVACIONES_MAX_LENGTH}</span>
+            </div>
           </div>
+
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
               Cancelar
@@ -513,6 +615,13 @@ function RegistroCasoForm({
         </div>
       </div>
 
+      {registro.novedad && (
+        <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
+          <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">Novedad</p>
+          <p className="text-sm font-medium text-blue-800">{registro.novedad.nombre}</p>
+        </div>
+      )}
+
       <form onSubmit={handleSave} className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -555,9 +664,13 @@ function RegistroCasoForm({
           <label className="block text-xs font-bold text-slate-600 mb-1">Observaciones</label>
           <textarea
             value={form.observaciones}
+            maxLength={OBSERVACIONES_MAX_LENGTH}
             onChange={(e) => setForm({ ...form, observaciones: e.target.value })}
             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none"
           />
+          <div className="flex justify-end mt-1">
+            <span className="text-[10px] text-slate-400">{form.observaciones.length}/{OBSERVACIONES_MAX_LENGTH}</span>
+          </div>
         </div>
 
         <div className="flex justify-end gap-3 pt-2">

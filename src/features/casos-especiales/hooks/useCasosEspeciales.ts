@@ -2,11 +2,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { casosEspecialesService } from '../services/casosEspecialesService';
 import type { RegistroCreate, RegistroUpdate, HistorialCreate } from '../types/casosEspeciales.types';
 
-export const useBuscarEstudiante = (q: string, pagina: number = 1, enabled: boolean = false) => {
+export const useBuscarEstudiante = (q: string, pagina: number = 1, enabled: boolean = false, tipo?: string) => {
   return useQuery({
-    queryKey: ['casos-especiales', 'buscar', q, pagina],
-    queryFn: () => casosEspecialesService.buscarEstudiante(q, pagina),
+    queryKey: ['casos-especiales', 'buscar', q, pagina, tipo ?? ''],
+    queryFn: () => casosEspecialesService.buscarEstudiante(q, pagina, tipo),
     enabled: enabled && q.length >= 1,
+  });
+};
+
+export const useListarRegistros = () => {
+  return useQuery({
+    queryKey: ['casos-especiales', 'listar', 'ACTIVO'],
+    queryFn: () => casosEspecialesService.listar(1, 500, 'ACTIVO'),
+    staleTime: 30000,
   });
 };
 

@@ -1,16 +1,21 @@
 import { apiClient } from '@/src/lib/api-client';
 import type {
-  BusquedaEstudiante,
+  BusquedaEstudianteResponse,
   RegistroCaso,
   HistorialRegistro,
   RegistroCreate,
   RegistroUpdate,
-  HistorialCreate
-} from './casosEspeciales.types';
+  HistorialCreate,
+  NovedadCaso,
+} from '../types/casosEspeciales.types';
 
 export const casosEspecialesService = {
-  buscarEstudiante: (q: string, pagina: number = 1) =>
-    apiClient.get<BusquedaEstudianteResponse>('/api/registros-casos/buscar-estudiante', { q, pagina }),
+  buscarEstudiante: (q: string, pagina: number = 1, tipo?: string) =>
+    apiClient.get<BusquedaEstudianteResponse>('/api/registros-casos/buscar-estudiante', {
+      q,
+      pagina,
+      ...(tipo && { tipo }),
+    }),
 
   crear: (data: RegistroCreate) =>
     apiClient.post<RegistroCaso>('/api/registros-casos', data),
@@ -37,4 +42,19 @@ export const casosEspecialesService = {
 
   eliminar: (id: string) =>
     apiClient.delete<void>(`/api/registros-casos/${id}`),
+
+  listarNovedades: (tipo_caso?: string) =>
+    apiClient.get<NovedadCaso[]>('/api/novedades-casos', {
+      ...(tipo_caso && { tipo_caso }),
+      solo_activos: 'true',
+    }),
+
+  crearNovedad: (data: { tipo_caso: string; nombre: string }) =>
+    apiClient.post<NovedadCaso>('/api/novedades-casos', data),
+
+  actualizarNovedad: (id: string, data: { nombre?: string; activo?: boolean }) =>
+    apiClient.put<NovedadCaso>(`/api/novedades-casos/${id}`, data),
+
+  eliminarNovedad: (id: string) =>
+    apiClient.delete<void>(`/api/novedades-casos/${id}`),
 };
