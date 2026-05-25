@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { parametrizacionService, Parametro, ParametroGroup } from '../features/parametrizacion/services/parametrizacionService';
 import { useNotificationStore } from '../shared/stores/notification.store';
@@ -93,6 +94,11 @@ export default function ParametrizacionPage() {
   }
 
   return (
+    <>
+      <Helmet>
+        <title>SATISUP - Configuración</title>
+        <meta name="description" content="Parámetros del Sistema de Alertas Tempranas - Universidad de Pamplona." />
+      </Helmet>
     <div className="space-y-8 fade-in">
       <div className="flex items-center justify-between">
         <div>
@@ -158,5 +164,6 @@ export default function ParametrizacionPage() {
         </div>
       ))}
     </div>
+    </>
   );
 }

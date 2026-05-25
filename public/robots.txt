@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://satisup.unipamplona.edu.co/sitemap.xml

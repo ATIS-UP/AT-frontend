@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
 import { useAuthStore } from '../store/auth.store';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +10,7 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showCredits, setShowCredits] = useState(false);
   const loginWithCredentials = useAuthStore((state) => state.loginWithCredentials);
   const navigate = useNavigate();
 
@@ -32,7 +34,12 @@ export const Login = () => {
   };
 
   return (
-    <div className="bg-surface text-on-surface antialiased h-screen w-full flex flex-col overflow-hidden">
+    <div className="bg-surface text-on-surface antialiased h-screen w-full flex flex-col overflow-hidden relative">
+      <Helmet>
+        <title>SATISUP - Acceso Institucional</title>
+        <meta name="description" content="Ingrese sus credenciales académicas para acceder al Sistema de Alertas Tempranas de Ingeniería de Sistemas de la Universidad de Pamplona." />
+      </Helmet>
+
       {/* Main Split Layout */}
       <main className="flex-1 flex w-full">
         {/* Left Panel: 60% Brutalist Editorial */}
@@ -99,13 +106,14 @@ export const Login = () => {
             </div>
 
             {/* Error Message */}
-            {error && (
+              {error && (
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 className="mb-8 p-4 bg-error-container text-error text-sm flex items-start gap-3 border-l-4 border-error"
+                role="alert"
               >
-                <span className="material-symbols-outlined text-[20px]">error</span>
+                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">error</span>
                 <p>{error}</p>
               </motion.div>
             )}
@@ -124,7 +132,7 @@ export const Login = () => {
                     name="email" 
                     placeholder="usuario" 
                     required 
-                    type="text"
+                    type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -158,7 +166,7 @@ export const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <button 
-                    aria-label="Toggle password visibility" 
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'} 
                     className="text-primary-container hover:text-secondary transition-colors flex items-center justify-center p-1 bg-transparent border-none cursor-pointer" 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -193,6 +201,56 @@ export const Login = () => {
           </motion.div>
         </section>
       </main>
+
+      {/* credits — discreet trigger at bottom-left */}
+      <div className="absolute bottom-3 left-4 z-20">
+        <button
+          type="button"
+          onClick={() => setShowCredits(true)}
+          className="text-[10px] text-slate-400 hover:text-slate-600 transition-colors bg-transparent border-none p-0 cursor-pointer"
+        >
+          © SATISUP
+        </button>
+      </div>
+
+      {/* credits modal */}
+      {showCredits && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowCredits(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Acerca de SATISUP"
+        >
+          <div
+            className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-slate-900 mb-3">SATISUP</h3>
+            <p className="text-sm text-slate-600 mb-4">
+              Sistema de Alertas Tempranas en Ingeniería de Sistemas
+            </p>
+            <p className="text-sm text-slate-600 mb-4">
+              © Universidad de Pamplona
+            </p>
+            <div className="border-t border-slate-200 pt-3 mt-3">
+              <p className="text-xs text-slate-500 font-semibold mb-1">Desarrollado por:</p>
+              <p className="text-xs text-slate-500">Fabian Gonzalez, David Burbano y Oscar Gaitan</p>
+              <p className="text-xs text-slate-500 mt-2 font-semibold">Tutores:</p>
+              <p className="text-xs text-slate-500">Olga Blanco y Fabio Triana</p>
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                type="button"
+                onClick={() => setShowCredits(false)}
+                className="px-4 py-2 text-sm font-medium text-brand-primary hover:bg-slate-100 rounded transition-colors bg-transparent border-none cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

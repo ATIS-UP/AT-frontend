@@ -87,6 +87,11 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen bg-brand-background flex">
+      {/* skip link — visible only on keyboard focus */}
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-brand-primary focus:shadow-lg focus:rounded focus:text-sm focus:font-bold">
+        Saltar al contenido principal
+      </a>
+
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -97,8 +102,10 @@ export function AppShell() {
       />
       
       <main
+        id="main-content"
         className="flex-1 flex flex-col min-h-screen"
         style={{ marginLeft: undefined }}
+        role="main"
       >
         <style>{`
           @media (min-width: 1024px) {

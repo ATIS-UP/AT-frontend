@@ -17,6 +17,7 @@ export const Badge = ({ className, variant = 'default', children, ...props }: Ba
 
   return (
     <span
+      role="status"
       className={cn(
         'inline-flex items-center px-2 py-0.5 border text-[10px] font-bold tracking-wider uppercase rounded-sm',
         variants[variant],

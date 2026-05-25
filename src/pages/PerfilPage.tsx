@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Mail, Shield, UserCircle, Clock3, Lock } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -46,6 +47,11 @@ export default function PerfilPage() {
   }
 
   return (
+    <>
+      <Helmet>
+        <title>SATISUP - Mi Perfil</title>
+        <meta name="description" content="Datos de cuenta y sesión del Sistema de Alertas Tempranas - Universidad de Pamplona." />
+      </Helmet>
     <div className="space-y-6 fade-in">
       {/* user info */}
       <section className="glass-panel rounded-card p-6 md:p-8">
@@ -165,5 +171,6 @@ export default function PerfilPage() {
         </form>
       </section>
     </div>
+    </>
   );
 }

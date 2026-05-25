@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
 import { router } from './router';
 import { ToastContainer } from '../shared/components/ui/Toast';
 import { useAuthStore } from '../features/auth/store/auth.store';
@@ -33,11 +34,13 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
 
 export function Providers() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AppInitializer>
-        <RouterProvider router={router} />
-        <ToastContainer />
-      </AppInitializer>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <AppInitializer>
+          <RouterProvider router={router} />
+          <ToastContainer />
+        </AppInitializer>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
