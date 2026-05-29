@@ -3,6 +3,7 @@ import { FileText, Calendar, Plus, Eye, Send, Lock, Trash2, Share2 } from 'lucid
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { encuestasService } from '../services/encuestasService';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { createCharFilter, CharType } from '@/src/lib/validation';
 import { Modal } from '@/src/shared/components/ui/Modal';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Badge } from '@/src/shared/components/ui/Badge';
@@ -88,9 +89,10 @@ export function Encuestas() {
   };
 
   const updatePregunta = (index: number, value: string) => {
+    const filtered = createCharFilter(CharType.FULL_TEXT)(value);
     setForm((prev) => {
       const updated = [...prev.preguntasList];
-      updated[index] = value;
+      updated[index] = filtered;
       return { ...prev, preguntasList: updated };
     });
   };
@@ -311,7 +313,7 @@ export function Encuestas() {
             <input
               type="text"
               value={form.titulo}
-              onChange={(e) => setForm({ ...form, titulo: e.target.value })}
+              onChange={(e) => setForm({ ...form, titulo: createCharFilter(CharType.ALPHANUMERIC)(e.target.value) })}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
               placeholder="Título de la encuesta"
             />
@@ -320,7 +322,7 @@ export function Encuestas() {
             <label className="block text-xs font-bold text-slate-600 mb-1">Descripción</label>
             <textarea
               value={form.descripcion}
-              onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+              onChange={(e) => setForm({ ...form, descripcion: createCharFilter(CharType.FULL_TEXT)(e.target.value) })}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[60px] resize-none"
               placeholder="Descripción breve de la encuesta"
             />

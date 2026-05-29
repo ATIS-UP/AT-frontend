@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useController, type Control, type FieldValues, type Path, type RegisterOptions } from 'react-hook-form';
 import { cn } from '@/src/lib/utils';
+import { createCharFilter } from '@/src/lib/validation';
 
 interface InputProps<T extends FieldValues> {
   name: Path<T>;
@@ -12,6 +13,7 @@ interface InputProps<T extends FieldValues> {
   disabled?: boolean;
   className?: string;
   maxLength?: number;
+  charType?: RegExp;
 }
 
 export function Input<T extends FieldValues>({
@@ -24,6 +26,7 @@ export function Input<T extends FieldValues>({
   disabled,
   className,
   maxLength,
+  charType,
 }: InputProps<T>) {
   const {
     field,
@@ -31,6 +34,21 @@ export function Input<T extends FieldValues>({
   } = useController({ name, control, rules });
 
   const errorId = `${name}-error`;
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = e.target.value;
+      if (charType) {
+        const filter = createCharFilter(charType);
+        const filtered = filter(raw);
+        if (filtered !== raw) {
+          e.target.value = filtered;
+        }
+      }
+      field.onChange(e);
+    },
+    [charType, field],
+  );
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
@@ -46,6 +64,7 @@ export function Input<T extends FieldValues>({
         placeholder={placeholder}
         disabled={disabled}
         maxLength={maxLength}
+        onChange={handleChange}
         aria-invalid={!!error}
         aria-describedby={error ? errorId : undefined}
         className={cn(

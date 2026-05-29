@@ -8,6 +8,7 @@ import { Badge } from '@/src/shared/components/ui/Badge';
 import { Modal } from '@/src/shared/components/ui/Modal';
 import { Search, Plus, Eye, Trash2 } from 'lucide-react';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { createCharFilter, CharType } from '@/src/lib/validation';
 import type { BusquedaEstudiante, EstudianteInfo, RegistroCaso, TipoRegistro, EstadoRegistro } from '../types/casosEspeciales.types';
 import { TIPOS_REGISTRO, ESTADOS_REGISTRO } from '../types/casosEspeciales.types';
 import { HistorialRegistro } from './HistorialRegistro';
@@ -530,7 +531,7 @@ export function CasosEspeciales() {
             <textarea
               value={form.observaciones}
               maxLength={OBSERVACIONES_MAX_LENGTH}
-              onChange={(e) => { setForm({ ...form, observaciones: e.target.value }); setObservacionesError(false); }}
+              onChange={(e) => { setForm({ ...form, observaciones: createCharFilter(CharType.FULL_TEXT)(e.target.value) }); setObservacionesError(false); }}
               className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none ${observacionesError ? 'border-red-500 focus:border-red-500' : 'border-slate-200'}`}
               placeholder="Describa la situación del estudiante"
             />
@@ -773,7 +774,7 @@ function RegistroCasoForm({
           <textarea
             value={form.observaciones}
             maxLength={OBSERVACIONES_MAX_LENGTH}
-            onChange={(e) => setForm({ ...form, observaciones: e.target.value })}
+            onChange={(e) => setForm({ ...form, observaciones: createCharFilter(CharType.FULL_TEXT)(e.target.value) })}
             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none"
           />
           <div className="flex justify-end mt-1">

@@ -5,6 +5,7 @@ import { Badge } from '@/src/shared/components/ui/Badge';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
 import { ACCIONES_HISTORIAL } from '../types/casosEspeciales.types';
 import { cn } from '@/src/lib/utils';
+import { createCharFilter, CharType } from '@/src/lib/validation';
 import { Plus } from 'lucide-react';
 
 export function HistorialRegistro({ registroId }: { registroId: string }) {
@@ -107,7 +108,7 @@ export function HistorialRegistro({ registroId }: { registroId: string }) {
             <label className="block text-xs font-bold text-slate-600 mb-1">Observación *</label>
             <textarea
               value={form.observaciones}
-              onChange={(e) => { setForm({ ...form, observaciones: e.target.value }); setObservacionesError(false); }}
+              onChange={(e) => { setForm({ ...form, observaciones: createCharFilter(CharType.FULL_TEXT)(e.target.value) }); setObservacionesError(false); }}
               className={cn(
                 "w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none min-h-[60px] resize-none",
                 observacionesError ? "border-red-500 focus:border-red-500" : "border-slate-200"

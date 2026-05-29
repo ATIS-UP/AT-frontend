@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useController, type Control, type FieldValues, type Path, type RegisterOptions } from 'react-hook-form';
 import { cn } from '@/src/lib/utils';
+import { createCharFilter } from '@/src/lib/validation';
 
 interface TextareaProps<T extends FieldValues> {
   name: Path<T>;
@@ -12,6 +13,7 @@ interface TextareaProps<T extends FieldValues> {
   rules?: RegisterOptions<T, Path<T>>;
   disabled?: boolean;
   className?: string;
+  charType?: RegExp;
 }
 
 export function Textarea<T extends FieldValues>({
@@ -24,6 +26,7 @@ export function Textarea<T extends FieldValues>({
   rules,
   disabled,
   className,
+  charType,
 }: TextareaProps<T>) {
   const {
     field,
@@ -32,6 +35,21 @@ export function Textarea<T extends FieldValues>({
 
   const errorId = `${name}-error`;
   const charCount = typeof field.value === 'string' ? field.value.length : 0;
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const raw = e.target.value;
+      if (charType) {
+        const filter = createCharFilter(charType);
+        const filtered = filter(raw);
+        if (filtered !== raw) {
+          e.target.value = filtered;
+        }
+      }
+      field.onChange(e);
+    },
+    [charType, field],
+  );
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
@@ -47,6 +65,7 @@ export function Textarea<T extends FieldValues>({
         maxLength={maxLength}
         placeholder={placeholder}
         disabled={disabled}
+        onChange={handleChange}
         aria-invalid={!!error}
         aria-describedby={error ? errorId : undefined}
         className={cn(

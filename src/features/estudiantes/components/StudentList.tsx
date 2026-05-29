@@ -12,6 +12,7 @@ import {
   UserX,
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
+import { createCharFilter, CharType } from '@/src/lib/validation';
 import { useEstudiantes, useCrearEstudiante, useActualizarEstudiante, useEliminarEstudiante, useConteoRelaciones, useCambiarEstadoEstudiante } from '../hooks/useEstudiantes';
 import { Modal } from '@/src/shared/components/ui/Modal';
 import { Button } from '@/src/shared/components/ui/Button';
@@ -385,9 +386,9 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 type="text"
                 value={form.nombres}
                 maxLength={100}
-                onChange={(e) => { setForm({ ...form, nombres: e.target.value }); setFormErrors({ ...formErrors, nombres: '' }); }}
+                onChange={(e) => { setForm({ ...form, nombres: createCharFilter(CharType.LETTERS)(e.target.value) }); setFormErrors({ ...formErrors, nombres: '' }); }}
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.nombres ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
-                placeholder="Nombres"
+                placeholder="Nombres completos"
               />
               {formErrors.nombres && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.nombres}</p>}
             </div>
@@ -397,7 +398,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 type="text"
                 value={form.apellidos}
                 maxLength={100}
-                onChange={(e) => { setForm({ ...form, apellidos: e.target.value }); setFormErrors({ ...formErrors, apellidos: '' }); }}
+                onChange={(e) => { setForm({ ...form, apellidos: createCharFilter(CharType.LETTERS)(e.target.value) }); setFormErrors({ ...formErrors, apellidos: '' }); }}
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.apellidos ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Apellidos"
               />
@@ -411,7 +412,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 type="text"
                 value={form.codigo}
                 maxLength={20}
-                onChange={(e) => { setForm({ ...form, codigo: e.target.value }); setFormErrors({ ...formErrors, codigo: '' }); }}
+                onChange={(e) => { setForm({ ...form, codigo: createCharFilter(CharType.DIGITS)(e.target.value) }); setFormErrors({ ...formErrors, codigo: '' }); }}
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.codigo ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Código estudiantil"
                 disabled={isEditing}
@@ -424,7 +425,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 type="email"
                 value={form.email}
                 maxLength={100}
-                onChange={(e) => { setForm({ ...form, email: e.target.value }); setFormErrors({ ...formErrors, email: '' }); }}
+                onChange={(e) => { setForm({ ...form, email: createCharFilter(CharType.EMAIL)(e.target.value) }); setFormErrors({ ...formErrors, email: '' }); }}
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="correo@ejemplo.com"
               />
@@ -438,7 +439,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 type="text"
                 value={form.documento}
                 maxLength={100}
-                onChange={(e) => { setForm({ ...form, documento: e.target.value }); setFormErrors({ ...formErrors, documento: '' }); }}
+                onChange={(e) => { setForm({ ...form, documento: createCharFilter(CharType.DIGITS)(e.target.value) }); setFormErrors({ ...formErrors, documento: '' }); }}
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.documento ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Número de documento"
               />
@@ -450,7 +451,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 type="text"
                 value={form.telefono}
                 maxLength={100}
-                onChange={(e) => { setForm({ ...form, telefono: e.target.value }); setFormErrors({ ...formErrors, telefono: '' }); }}
+                onChange={(e) => { setForm({ ...form, telefono: createCharFilter(CharType.DIGITS)(e.target.value) }); setFormErrors({ ...formErrors, telefono: '' }); }}
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.telefono ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Número de teléfono"
               />
@@ -473,7 +474,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 type="text"
                 value={form.programa}
                 maxLength={100}
-                onChange={(e) => { setForm({ ...form, programa: e.target.value }); setFormErrors({ ...formErrors, programa: '' }); }}
+                onChange={(e) => { setForm({ ...form, programa: createCharFilter(CharType.ALPHANUMERIC)(e.target.value) }); setFormErrors({ ...formErrors, programa: '' }); }}
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.programa ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Programa académico"
               />

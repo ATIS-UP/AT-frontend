@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
+import { createCharFilter, CharType } from '@/src/lib/validation';
 import { useAuthStore } from '../store/auth.store';
 import { useNavigate } from 'react-router-dom';
 
@@ -134,7 +135,7 @@ export const Login = () => {
                     required 
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(createCharFilter(CharType.EMAIL)(e.target.value))}
                   />
                   {!email.includes('@') && (
                     <span className="font-technical-sm text-technical-sm text-on-surface-variant pl-2 select-none">

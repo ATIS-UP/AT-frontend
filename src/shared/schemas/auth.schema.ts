@@ -1,7 +1,13 @@
 import { z } from 'zod';
+import { CharType, ERROR_MSGS } from '@/src/lib/validation';
 
 export const loginSchema = z.object({
-  email: z.string().email('Email inválido').endsWith('@unipamplona.edu.co', 'Debe ser email institucional'),
+  email: z
+    .string()
+    .min(1, 'Requerido')
+    .regex(CharType.EMAIL, ERROR_MSGS.EMAIL)
+    .email('Email inválido')
+    .endsWith('@unipamplona.edu.co', 'Debe ser email institucional'),
   password: z.string().min(6, 'Mínimo 6 caracteres'),
 });
 

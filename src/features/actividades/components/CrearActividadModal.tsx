@@ -10,7 +10,10 @@ import { useSubirAnexo, useEliminarAnexo } from '../hooks/useAnexosActividades';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
 import { useAuthStore } from '@/src/features/auth/store/auth.store';
 import { AnexosUpload } from './AnexosUpload';
-import { sanitizeText, cn } from '@/src/lib/utils';
+import { cn } from '@/src/lib/utils';
+import { CharType } from '@/src/lib/validation';
+import { actividadCreateSchema } from '@/src/shared/schemas/actividad.schema';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   TIPO_OPTIONS,
   ESTADO_OPTIONS,
@@ -35,15 +38,6 @@ interface TimePickerProps {
   value: string;
   onChange: (val: string) => void;
 }
-
-const sanitizeRules = (maxLen: number) => ({
-  maxLength: { value: maxLen, message: `Máximo ${maxLen} caracteres` },
-  validate: (v: string) => {
-    const clean = sanitizeText(v);
-    if (clean.length === 0 && v.length > 0) return 'Caracteres no válidos';
-    return true;
-  },
-});
 
 function parseDateTime(dateStr: string, timeStr?: string): string {
   if (!dateStr) return '';
@@ -142,7 +136,10 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
     reset,
     getValues,
     formState: { isSubmitting, errors },
-  } = useForm<ActividadFormData>({ defaultValues });
+  } = useForm<ActividadFormData>({
+    defaultValues,
+    resolver: zodResolver(actividadCreateSchema) as any,
+  });
 
   React.useEffect(() => {
     if (open) {
@@ -173,11 +170,6 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
 
   const onSubmit = async (data: ActividadFormData) => {
     try {
-      data.descripcion = sanitizeText(data.descripcion);
-      data.encargado = sanitizeText(data.encargado);
-      data.lugar_enlace = sanitizeText(data.lugar_enlace);
-      data.observaciones = sanitizeText(data.observaciones);
-
       const startDateTime = new Date(parseDateTime(data.fecha_inicio, horaInicio));
       const endDateTime = new Date(parseDateTime(data.fecha_fin, horaFin));
 
@@ -254,8 +246,9 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
             label="Lugar / Enlace"
             placeholder="Ej: Auditorio Principal, o enlace virtual..."
             control={control}
-            rules={{ ...sanitizeRules(500), required: 'Indica el lugar o enlace' }}
+            rules={{ required: 'Indica el lugar o enlace' }}
             maxLength={500}
+            charType={CharType.ALPHANUMERIC}
           />
         </div>
 
@@ -307,8 +300,9 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
             label="Responsable"
             placeholder="Nombre de la persona encargada"
             control={control}
-            rules={{ ...sanitizeRules(255), required: 'Indica el encargado' }}
+            rules={{ required: 'Indica el encargado' }}
             maxLength={255}
+            charType={CharType.LETTERS}
           />
           {isEditing && (
             <div className="grid grid-cols-2 gap-5">
@@ -331,8 +325,9 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
             placeholder="Describe el objetivo y contenido de la actividad..."
             rows={3}
             control={control}
-            rules={{ ...sanitizeRules(500), required: 'La descripción es requerida' }}
+            rules={{ required: 'La descripción es requerida' }}
             maxLength={500}
+            charType={CharType.FULL_TEXT}
           />
           <Textarea
             name="observaciones"
@@ -340,8 +335,8 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
             placeholder="Notas adicionales, requerimientos, etc..."
             rows={2}
             control={control}
-            rules={sanitizeRules(1000)}
             maxLength={1000}
+            charType={CharType.FULL_TEXT}
           />
         </div>
 

@@ -5,6 +5,7 @@ import { Card } from '@/src/shared/components/ui/Card';
 import { Badge } from '@/src/shared/components/ui/Badge';
 import { Modal } from '@/src/shared/components/ui/Modal';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { createCharFilter, CharType } from '@/src/lib/validation';
 import { Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { parametrizacionService } from '@/src/features/parametrizacion/services/parametrizacionService';
@@ -448,14 +449,10 @@ export function Alertas() {
             <label className="block text-xs font-bold text-slate-600 mb-1">Descripción *</label>
             <textarea
               value={form.descripcion}
+              onChange={(e) => setForm({ ...form, descripcion: createCharFilter(CharType.FULL_TEXT)(e.target.value) })}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px]"
               maxLength={DESCRIPCION_MAX_LENGTH}
-              onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none"
-              placeholder="Describa la situación del estudiante"
             />
-            <div className="flex justify-end mt-1">
-              <span className="text-[10px] text-slate-400">{form.descripcion.length}/{DESCRIPCION_MAX_LENGTH}</span>
-            </div>
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
@@ -495,7 +492,7 @@ export function Alertas() {
             <textarea
               value={actividadForm.descripcion}
               maxLength={DESCRIPCION_MAX_LENGTH}
-              onChange={(e) => setActividadForm({ ...actividadForm, descripcion: e.target.value })}
+              onChange={(e) => setActividadForm({ ...actividadForm, descripcion: createCharFilter(CharType.FULL_TEXT)(e.target.value) })}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none"
               placeholder="Describa la actividad realizada"
             />
@@ -508,7 +505,7 @@ export function Alertas() {
             <input
               type="text"
               value={actividadForm.resultado}
-              onChange={(e) => setActividadForm({ ...actividadForm, resultado: e.target.value })}
+              onChange={(e) => setActividadForm({ ...actividadForm, resultado: createCharFilter(CharType.FULL_TEXT)(e.target.value) })}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
               placeholder="Resultado o conclusión de la actividad"
             />

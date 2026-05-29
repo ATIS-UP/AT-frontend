@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { encuestasService } from '../services/encuestasService';
+import { createCharFilter, CharType } from '@/src/lib/validation';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Card } from '@/src/shared/components/ui/Card';
 import { FileText, CheckCircle, AlertCircle } from 'lucide-react';
@@ -139,7 +140,7 @@ export function ResponderEncuesta() {
               <input
                 type="text"
                 value={documento}
-                onChange={(e) => setDocumento(e.target.value)}
+                onChange={(e) => setDocumento(createCharFilter(CharType.DIGITS)(e.target.value))}
                 onKeyDown={handleKeyDown}
                 className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
                 placeholder="Número de documento"

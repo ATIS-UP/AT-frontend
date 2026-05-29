@@ -4,6 +4,7 @@ import { adminService, type Usuario } from '../services/adminService';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Card } from '@/src/shared/components/ui/Card';
 import { Badge } from '@/src/shared/components/ui/Badge';
+import { createCharFilter, CharType } from '@/src/lib/validation';
 import { Modal } from '@/src/shared/components/ui/Modal';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
 import { Search, Plus, Pencil, Trash2, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -200,12 +201,12 @@ export function AdminUsers() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Nombre *</label>
-            <input type="text" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} maxLength={100}
+            <input type="text" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: createCharFilter(CharType.LETTERS)(e.target.value) })} maxLength={100}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none" />
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Email *</label>
-            <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={100}
+            <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: createCharFilter(CharType.EMAIL)(e.target.value) })} maxLength={100}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none" />
           </div>
           <div>
