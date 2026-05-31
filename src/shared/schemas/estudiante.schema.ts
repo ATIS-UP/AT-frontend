@@ -43,7 +43,6 @@ export const estudianteCreateSchema = z.object({
     .regex(CharType.DIGITS, ERROR_MSGS.DIGITS)
     .optional()
     .or(z.literal('')),
-  fecha_nacimiento: z.string().min(1, 'Requerida'),
   estado: z.enum(['ACTIVO', 'INACTIVO', 'GRADUADO', 'SUSPENDIDO']).default('ACTIVO'),
 });
 

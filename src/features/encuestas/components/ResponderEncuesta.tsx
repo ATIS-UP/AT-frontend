@@ -13,7 +13,6 @@ export function ResponderEncuesta() {
   const { encuestaId } = useParams<{ encuestaId: string }>();
 
   const [documento, setDocumento] = useState('');
-  const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [step, setStep] = useState<Step>('documento');
   const [verificando, setVerificando] = useState(false);
   const [verificacion, setVerificacion] = useState<{
@@ -36,7 +35,6 @@ export function ResponderEncuesta() {
     mutationFn: () =>
       encuestasService.responderPublico(encuestaId!, {
         documento,
-        fecha_nacimiento: fechaNacimiento,
         respuestas: Object.entries(respuestas).map(([preguntaId, valor]) => ({
           pregunta_id: Number(preguntaId),
           valor,
@@ -52,11 +50,11 @@ export function ResponderEncuesta() {
   });
 
   const handleVerificar = async () => {
-    if (!documento.trim() || !fechaNacimiento) return;
+    if (!documento.trim()) return;
     setVerificando(true);
     setErrorMsg(null);
     try {
-      const res = await encuestasService.verificarEstudiante(encuestaId!, documento.trim(), fechaNacimiento);
+      const res = await encuestasService.verificarEstudiante(encuestaId!, documento.trim());
       setVerificacion(res);
       if (res.puede_responder) {
         setStep('responder');
@@ -70,7 +68,7 @@ export function ResponderEncuesta() {
         setErrorMsg('Ya has respondido esta encuesta anteriormente.');
         setStep('error');
       } else if (!res.existe) {
-        setErrorMsg('El documento o la fecha de nacimiento no coinciden con un estudiante registrado.');
+        setErrorMsg('El documento no coincide con un estudiante registrado.');
         setStep('error');
       } else {
         setErrorMsg('No puedes responder esta encuesta en este momento.');
@@ -134,7 +132,7 @@ export function ResponderEncuesta() {
           <Card className="p-6">
             <h2 className="font-semibold text-slate-700 mb-1">Verifica tu identidad</h2>
             <p className="text-sm text-slate-400 mb-4">
-              Ingresa tu número de documento y fecha de nacimiento para verificar que eres estudiante registrado.
+              Ingresa tu número de documento para verificar que eres un estudiante registrado.
             </p>
             <div className="flex flex-col gap-3">
               <input
@@ -144,12 +142,6 @@ export function ResponderEncuesta() {
                 onKeyDown={handleKeyDown}
                 className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
                 placeholder="Número de documento"
-              />
-              <input
-                type="date"
-                value={fechaNacimiento}
-                onChange={(e) => setFechaNacimiento(e.target.value)}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
               />
               <Button onClick={handleVerificar} isLoading={verificando}>
                 Verificar

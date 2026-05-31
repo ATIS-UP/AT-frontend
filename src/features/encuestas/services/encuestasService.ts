@@ -40,15 +40,15 @@ export const encuestasService = {
   obtenerInfoPublica: (id: string) =>
     apiClient.get<any>(`/api/encuestas/${id}/info-publica`),
 
-  verificarEstudiante: (encuestaId: string, documento: string, fecha_nacimiento: string) =>
+  verificarEstudiante: (encuestaId: string, documento: string) =>
     apiClient.post<{
       existe: boolean;
       ya_respondio: boolean;
       puede_responder: boolean;
       estudiante_nombre: string | null;
       estudiante_id: string | null;
-    }>(`/api/encuestas/${encuestaId}/verificar-estudiante`, { documento, fecha_nacimiento }),
+    }>(`/api/encuestas/${encuestaId}/verificar-estudiante`, { documento }),
 
-  responderPublico: (encuestaId: string, data: { documento: string; fecha_nacimiento: string; respuestas: any[] }) =>
+  responderPublico: (encuestaId: string, data: { documento: string; respuestas: any[] }) =>
     apiClient.post<any>(`/api/encuestas/${encuestaId}/responder-publico`, data),
 };

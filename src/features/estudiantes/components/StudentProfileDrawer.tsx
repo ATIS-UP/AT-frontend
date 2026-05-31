@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, User, FileText, Mail, Hash, BookOpen, TrendingUp, Calendar } from 'lucide-react';
+import { X, User, FileText, Mail, Hash, BookOpen, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/src/lib/utils';
 import { Badge } from '@/src/shared/components/ui/Badge';
@@ -118,10 +118,6 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
                   <div className="flex items-center gap-3">
                     <Mail className="w-4 h-4 text-slate-400" />
                     <span className="text-sm text-slate-700">{student.email || '—'}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-4 h-4 text-slate-400" />
-                    <span className="text-sm text-slate-700">{student.fecha_nacimiento ? new Date(student.fecha_nacimiento).toLocaleDateString('es-CO') : '—'}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Hash className="w-4 h-4 text-slate-400" />

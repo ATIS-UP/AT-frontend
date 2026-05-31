@@ -32,7 +32,6 @@ const EMPTY_FORM = {
   semestre: 1,
   documento: '',
   telefono: '',
-  fecha_nacimiento: '',
 };
 
 export const StudentList = ({ onSelectStudent }: StudentListProps) => {
@@ -128,7 +127,6 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
       semestre: student.semestre || 1,
       documento: student.documento || '',
       telefono: student.telefono || '',
-      fecha_nacimiento: student.fecha_nacimiento ? student.fecha_nacimiento.slice(0, 10) : '',
     });
     setShowCreateModal(true);
   };
@@ -456,15 +454,6 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 placeholder="Número de teléfono"
               />
               {formErrors.telefono && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.telefono}</p>}
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Fecha de Nacimiento</label>
-              <input
-                type="date"
-                value={form.fecha_nacimiento}
-                onChange={(e) => { setForm({ ...form, fecha_nacimiento: e.target.value }); }}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/30 outline-none transition-all"
-              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
