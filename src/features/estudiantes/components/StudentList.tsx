@@ -53,6 +53,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
     pagina: page,
     por_pagina: limit,
     buscar: search || undefined,
+    semestre: semestre ? Number(semestre) : undefined,
   });
 
   const crearEstudiante = useCrearEstudiante();

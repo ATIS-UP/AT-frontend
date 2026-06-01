@@ -6,6 +6,7 @@ export interface EstudianteListParams {
   buscar?: string;
   programa?: string;
   estado?: string;
+  semestre?: number;
 }
 
 export const estudiantesService = {
