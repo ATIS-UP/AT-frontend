@@ -1,19 +1,20 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../../features/auth/store/auth.store';
-import { 
-  LayoutDashboard, 
-  Users, 
-  AlertTriangle, 
-  BarChart3, 
-  FileText, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Users,
+  AlertTriangle,
+  BarChart3,
+  FileText,
+  Settings,
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
   Briefcase,
   Calendar,
-  Shield
+  Shield,
+  PieChart,
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
@@ -24,6 +25,22 @@ interface NavItemProps {
   collapsed?: boolean;
   onClick?: () => void;
 }
+
+interface NavDividerProps {
+  label: string;
+  collapsed?: boolean;
+}
+
+const NavDivider = ({ label, collapsed }: NavDividerProps) => (
+  <li className={cn('px-6 pt-4 pb-1', collapsed && 'px-2')}>
+    {!collapsed && (
+      <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-slate-600/50 select-none">
+        {label}
+      </span>
+    )}
+    {collapsed && <div className="border-t border-white/10 my-1" />}
+  </li>
+);
 
 const NavItem = ({ icon: Icon, label, to, collapsed, onClick }: NavItemProps) => {
   const location = useLocation();
@@ -72,23 +89,32 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
 
   const isAdmin = rol === 'ADMINISTRADOR';
 
-  const menuItems = isApoyo 
+  type NavLink = { kind: 'link'; icon: React.ElementType; label: string; to: string };
+  type NavSection = { kind: 'divider'; label: string };
+  type MenuItem = NavLink | NavSection;
+
+  const lnk = (icon: React.ElementType, label: string, to: string): NavLink => ({ kind: 'link', icon, label, to });
+  const sec = (label: string): NavSection => ({ kind: 'divider', label });
+
+  const menuItems: MenuItem[] = isApoyo
     ? [
-        { icon: LayoutDashboard, label: 'Panel', to: '/apoyo/panel' },
-        { icon: Users, label: 'Estudiantes', to: '/estudiantes' },
-        { icon: AlertTriangle, label: 'Alertas', to: '/alertas' },
-        { icon: Briefcase, label: 'Casos Especiales', to: '/casos-especiales' },
-        { icon: Calendar, label: 'Actividades', to: '/actividades' },
+        lnk(LayoutDashboard, 'Panel', '/apoyo/panel'),
+        lnk(Users, 'Estudiantes', '/estudiantes'),
+        lnk(AlertTriangle, 'Alertas', '/alertas'),
+        lnk(Briefcase, 'Casos Especiales', '/casos-especiales'),
+        lnk(Calendar, 'Actividades', '/actividades'),
       ]
     : [
-        { icon: LayoutDashboard, label: 'Tablero', to: '/dashboard' },
-        { icon: Users, label: 'Estudiantes', to: '/estudiantes' },
-        { icon: AlertTriangle, label: 'Alertas y Pérdidas', to: '/alertas' },
-        { icon: Briefcase, label: 'Casos Especiales', to: '/casos-especiales' },
-        { icon: Calendar, label: 'Actividades', to: '/actividades' },
-        { icon: BarChart3, label: 'Encuestas', to: '/encuestas' },
-        { icon: FileText, label: 'Documentos', to: '/artefactos' },
-        ...(isAdmin ? [{ icon: Shield, label: 'Admin', to: '/admin' }] : []),
+        lnk(LayoutDashboard, 'Tablero', '/dashboard'),
+        lnk(Users, 'Estudiantes', '/estudiantes'),
+        lnk(AlertTriangle, 'Alertas y Pérdidas', '/alertas'),
+        lnk(Briefcase, 'Casos Especiales', '/casos-especiales'),
+        lnk(Calendar, 'Actividades', '/actividades'),
+        lnk(BarChart3, 'Encuestas', '/encuestas'),
+        lnk(FileText, 'Documentos', '/artefactos'),
+        sec('Reportes'),
+        lnk(PieChart, 'Caracterización', '/caracterizacion'),
+        ...(isAdmin ? [lnk(Shield, 'Admin', '/admin')] : []),
       ];
 
   // swipe-to-close gesture for mobile drawer
@@ -151,16 +177,21 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
           </div>
           
           <ul className="flex flex-col w-full flex-1">
-            {menuItems.map((item) => (
-              <NavItem
-                key={item.to}
-                icon={item.icon}
-                label={item.label}
-                to={item.to}
-                collapsed={collapsed}
-                onClick={onClose}
-              />
-            ))}
+            {menuItems.map((item, idx) => {
+              if (item.kind === 'divider') {
+                return <NavDivider key={`divider-${idx}`} label={item.label} collapsed={collapsed} />;
+              }
+              return (
+                <NavItem
+                  key={item.to}
+                  icon={item.icon}
+                  label={item.label}
+                  to={item.to}
+                  collapsed={collapsed}
+                  onClick={onClose}
+                />
+              );
+            })}
           </ul>
         </div>
 

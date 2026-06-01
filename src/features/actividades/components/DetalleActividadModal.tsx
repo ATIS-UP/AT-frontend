@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal } from '@/src/shared/components/ui/Modal';
 import { Button } from '@/src/shared/components/ui/Button';
 import { useAnexosActividad } from '../hooks/useAnexosActividades';
 import { anexosActividadesService } from '../services/anexosActividadesService';
+import { apiClient } from '@/src/lib/api-client';
 import {
   Calendar,
   Clock,
@@ -68,14 +69,38 @@ function fileIcon(name: string) {
   return <File className="w-4 h-4 text-slate-400" />;
 }
 
+function useAuthBlobUrl(url: string) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    apiClient.downloadBlob(url).then(({ blob }) => {
+      if (alive) setBlobUrl(URL.createObjectURL(blob));
+    }).catch(() => {});
+    return () => {
+      alive = false;
+      setBlobUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+    };
+  }, [url]);
+  return blobUrl;
+}
+
+function triggerDownload(url: string, nombre: string) {
+  apiClient.downloadBlob(url).then(({ blob, filename }) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = nombre || filename;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  });
+}
+
 function DocChip({ anexo }: { anexo: AnexoActividad }) {
   const downloadUrl = anexosActividadesService.descargarUrl(anexo.id);
 
   return (
-    <a
-      href={downloadUrl}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
+      onClick={() => triggerDownload(downloadUrl, anexo.nombre)}
       className="inline-flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-4 py-2.5
                  hover:border-brand-primary/30 hover:bg-slate-50 transition-colors group min-w-0"
     >
@@ -87,27 +112,33 @@ function DocChip({ anexo }: { anexo: AnexoActividad }) {
         {docExt(anexo.nombre)}
       </span>
       <Download className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-primary transition-colors shrink-0" />
-    </a>
+    </button>
   );
 }
 
 function ImagePreview({ anexo }: { anexo: AnexoActividad }) {
   const downloadUrl = anexosActividadesService.descargarUrl(anexo.id);
+  const blobUrl = useAuthBlobUrl(downloadUrl);
 
   return (
-    <a
-      href={downloadUrl}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
+      onClick={() => triggerDownload(downloadUrl, anexo.nombre)}
       className="group relative aspect-[4/3] rounded-lg border border-slate-200 overflow-hidden bg-slate-50
-                 hover:border-brand-primary/40 hover:shadow-md transition-all"
+                 hover:border-brand-primary/40 hover:shadow-md transition-all w-full"
     >
-      <img
-        src={downloadUrl}
-        alt={anexo.nombre}
-        className="w-full h-full object-cover"
-        loading="lazy"
-      />
+      {blobUrl ? (
+        <img
+          src={blobUrl}
+          alt={anexo.nombre}
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="w-5 h-5 border-2 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
+        </div>
+      )}
       <div
         className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent
                     opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5"
@@ -117,7 +148,7 @@ function ImagePreview({ anexo }: { anexo: AnexoActividad }) {
           <span className="truncate font-medium">{anexo.nombre}</span>
         </div>
       </div>
-    </a>
+    </button>
   );
 }
 

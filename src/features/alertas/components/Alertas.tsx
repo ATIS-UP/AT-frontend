@@ -483,7 +483,7 @@ export function Alertas() {
               <option value="LLAMADA">Llamada telefónica</option>
               <option value="VISITA">Visita domiciliaria</option>
               <option value="REUNION">Reunión presencial</option>
-              <option value="CORREO">Correo electrónico</option>
+              <option value="EMAIL">Correo electrónico</option>
               <option value="OTRO">Otro</option>
             </select>
           </div>

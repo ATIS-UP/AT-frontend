@@ -205,6 +205,30 @@ class ApiClient {
     return this.request<void>(fullUrl, { method: 'DELETE', headers });
   }
 
+  async downloadBlob(url: string): Promise<{ blob: Blob; filename: string }> {
+    const fullUrl = this.buildUrl(url);
+    const headers = new Headers();
+    const token = this.getAccessToken();
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+
+    let response = await fetch(fullUrl, { method: 'GET', headers });
+
+    if (response.status === 401) {
+      const newToken = await this.refreshTokenWithQueue();
+      const retryHeaders = new Headers();
+      retryHeaders.set('Authorization', `Bearer ${newToken}`);
+      response = await fetch(fullUrl, { method: 'GET', headers: retryHeaders });
+    }
+
+    if (!response.ok) throw new Error(`Download failed: ${response.status}`);
+
+    const blob = await response.blob();
+    const disposition = response.headers.get('Content-Disposition') ?? '';
+    const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+    const filename = match ? match[1].replace(/['"]/g, '') : url.split('/').pop() ?? 'download';
+    return { blob, filename };
+  }
+
   async upload<T>(url: string, file: File, data?: Record<string, string>): Promise<T> {
     const fullUrl = this.buildUrl(url);
     const formData = new FormData();

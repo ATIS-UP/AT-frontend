@@ -19,6 +19,7 @@ const PerfilPage = lazy(() => import('../pages/PerfilPage'));
 const CasosEspecialesPage = lazy(() => import('../pages/CasosEspecialesPage'));
 const ActividadesPage = lazy(() => import('../pages/ActividadesPage'));
 const AdminPage = lazy(() => import('../pages/AdminPage'));
+const CaracterizacionPage = lazy(() => import('../pages/CaracterizacionPage'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[400px]">
@@ -66,6 +67,18 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Suspense fallback={<PageLoader />}><ErrorBoundary><ArtefactosPage /></ErrorBoundary></Suspense> },
         ],
+      },
+      {
+        path: 'caracterizacion',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <ErrorBoundary>
+              <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE]}>
+                <CaracterizacionPage />
+              </RoleGuard>
+            </ErrorBoundary>
+          </Suspense>
+        ),
       },
       {
         path: 'perfil',

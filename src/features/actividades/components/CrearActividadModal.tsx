@@ -184,6 +184,11 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
 
       if (isEditing && actividad) {
         await actualizarActividad.mutateAsync({ id: actividad.id, data });
+        if (anexos.length > 0) {
+          for (const af of anexos) {
+            await subirAnexo.mutateAsync({ actividadId: actividad.id, file: af.file });
+          }
+        }
         notification.add({ type: 'success', message: 'Actividad actualizada correctamente' });
       } else {
         const nuevaActividad = await crearActividad.mutateAsync(data);
@@ -347,7 +352,6 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
             files={anexos}
             onFilesAdd={handleFilesAdd}
             onFileRemove={handleFileRemove}
-            disabled={isEditing}
           />
         </div>
 
