@@ -15,6 +15,7 @@ import {
   Calendar,
   Shield,
   PieChart,
+  HeartPulse,
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
@@ -114,6 +115,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
         lnk(FileText, 'Documentos', '/artefactos'),
         sec('Reportes'),
         lnk(PieChart, 'Caracterización', '/caracterizacion'),
+        lnk(HeartPulse, 'Bienestar TCBU', '/bienestar'),
         ...(isAdmin ? [lnk(Shield, 'Admin', '/admin')] : []),
       ];
 
