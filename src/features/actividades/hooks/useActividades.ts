@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { actividadesService } from '../services/actividadesService';
 import type { ActividadFormData, ActividadListParams } from '../types/actividades.types';
 
@@ -6,6 +6,7 @@ export const useActividadesList = (params?: ActividadListParams) => {
   return useQuery({
     queryKey: ['actividades', params],
     queryFn: () => actividadesService.listar(params),
+    placeholderData: keepPreviousData,
   });
 };
 

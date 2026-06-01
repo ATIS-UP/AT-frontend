@@ -97,14 +97,6 @@ export function Actividades() {
 
   const hayFiltros = filtroTipo || filtroEstado || busqueda;
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-3 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
@@ -177,7 +169,11 @@ export function Actividades() {
       </div>
 
       {/* Grid de tarjetas */}
-      {actividadesFiltradas.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-[300px]">
+          <div className="w-8 h-8 border-3 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
+        </div>
+      ) : actividadesFiltradas.length === 0 ? (
         <Card className="flex flex-col items-center justify-center py-16 text-center">
           <Calendar className="w-12 h-12 text-slate-300 mb-4" />
           <p className="text-slate-500 font-medium">

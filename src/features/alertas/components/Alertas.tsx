@@ -33,7 +33,7 @@ export function Alertas() {
   if (filtroEstado) params.estado_seguimiento = filtroEstado;
   if (filtroPeriodo) params.periodo = filtroPeriodo;
 
-  const { data, isLoading, isError } = useAlertas(Object.keys(params).length ? params as any : undefined);
+  const { data, isLoading, isFetching, isError } = useAlertas(Object.keys(params).length ? params as any : undefined);
 
   const { data: stats, isLoading: isLoadingStats } = useAlertasStats();
   const crearAlerta = useCrearAlerta();
@@ -188,22 +188,6 @@ export function Alertas() {
     );
   };
 
-  if (isLoading || isLoadingStats) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-red-500 text-sm">Error al cargar las alertas. Intente nuevamente.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8 fade-in">
       <div className="flex items-center justify-between">
@@ -279,13 +263,25 @@ export function Alertas() {
         )}
       </div>
 
+      {/* error banner — shown inline so filters stay mounted */}
+      {isError && (
+        <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+          Error al cargar las alertas. Intente nuevamente.
+        </p>
+      )}
+
       {/* table */}
       <Card padding="none" className="overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px] bg-slate-50/50">
-                <th className="pb-3 pt-4 px-6 font-semibold">Estudiante</th>
+                <th className="pb-3 pt-4 px-6 font-semibold flex items-center gap-2">
+                  Estudiante
+                  {isFetching && !isLoading && (
+                    <span className="w-3 h-3 border border-brand-primary/40 border-t-brand-primary rounded-full animate-spin inline-block" />
+                  )}
+                </th>
                 <th className="pb-3 pt-4 px-6 font-semibold">Descripción</th>
                 <th className="pb-3 pt-4 px-6 font-semibold">Nivel</th>
                 <th className="pb-3 pt-4 px-6 font-semibold">Seguimiento</th>
@@ -294,7 +290,14 @@ export function Alertas() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {alertas.length === 0 && (
+              {(isLoading || isLoadingStats) && (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center">
+                    <div className="inline-block w-7 h-7 border-2 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
+                  </td>
+                </tr>
+              )}
+              {!isLoading && alertas.length === 0 && (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-400 text-sm">
                     No hay alertas registradas

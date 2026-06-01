@@ -29,7 +29,7 @@ const SERIES_COLOR: Record<string, string> = {
 
 const DASH_PATTERNS = [undefined, '5 5', '10 3', '5 2 2 2', '3 3', undefined, '5 5', '10 3', '5 2 2 2', '3 3'];
 
-const PERIODOS_ALL = ['2021-1','2021-2','2022-1','2022-2','2023-1','2023-2','2024-1','2024-2','2025-1'];
+// Period options come from the API — no hardcoded list needed.
 
 // ── custom tooltip ────────────────────────────────────────────────────────────
 function CustomTooltip({ active, payload, label }: any) {
@@ -204,11 +204,14 @@ export function BienestarTCBU() {
   const [periodoFin, setPeriodoFin] = useState('');
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set());
 
+  // fetch all data without filters to always have the full period list for selectors
+  const { data: allData } = useTcbu();
   const { data, isLoading, refetch } = useTcbu({
     periodo_inicio: periodoInicio || undefined,
     periodo_fin: periodoFin || undefined,
   });
 
+  const allPeriodos = allData?.periodos ?? [];
   const servicios = data?.servicios ?? [];
   const series = data?.series ?? [];
 
@@ -247,7 +250,7 @@ export function BienestarTCBU() {
             className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-brand-primary bg-white"
           >
             <option value="">Desde</option>
-            {PERIODOS_ALL.map((p) => <option key={p} value={p}>{p}</option>)}
+            {allPeriodos.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
           <span className="text-slate-400 text-xs">—</span>
           <select
@@ -256,7 +259,7 @@ export function BienestarTCBU() {
             className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-brand-primary bg-white"
           >
             <option value="">Hasta</option>
-            {PERIODOS_ALL.map((p) => <option key={p} value={p}>{p}</option>)}
+            {allPeriodos.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
           <button
             onClick={() => refetch()}

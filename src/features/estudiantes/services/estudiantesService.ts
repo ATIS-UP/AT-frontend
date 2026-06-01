@@ -40,4 +40,7 @@ export const estudiantesService = {
 
   cambiarEstado: (id: string, data: { estado: string }) =>
     apiClient.put<any>(`/api/estudiantes/${id}/estado`, data),
+
+  descargarPlantilla: () =>
+    apiClient.downloadBlob('/api/estudiantes/plantilla-csv'),
 };

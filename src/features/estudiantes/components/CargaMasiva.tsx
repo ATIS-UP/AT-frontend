@@ -1,37 +1,75 @@
-import React, { useState, useCallback } from 'react';
-import { Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
+import React, { useState, useCallback, useRef } from 'react';
+import { Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle, Download, X } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { estudiantesService } from '../services/estudiantesService';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
-import { Modal } from '@/src/shared/components/ui/Modal';
 import { Button } from '@/src/shared/components/ui/Button';
+import { cn } from '@/src/lib/utils';
 
 interface UploadResult {
   insertadas: number;
   actualizadas: number;
-  errores: Array<{ fila: number; mensaje: string }>;
+  errores: Array<{ fila: number; campo?: string; error?: string; mensaje?: string }>;
 }
 
 type Step = 'select' | 'preview' | 'uploading' | 'result';
 
-const FORMAT_COLUMNS = [
-  { columna: 'codigo', tipo: 'Texto', requerido: true, descripcion: 'Código único del estudiante', ejemplo: '20201001' },
-  { columna: 'nombres', tipo: 'Texto', requerido: true, descripcion: 'Nombres del estudiante', ejemplo: 'Carlos' },
-  { columna: 'apellidos', tipo: 'Texto', requerido: true, descripcion: 'Apellidos del estudiante', ejemplo: 'Mendoza Torres' },
-  { columna: 'documento', tipo: 'Texto', requerido: false, descripcion: 'Número de documento', ejemplo: '1098765432' },
-  { columna: 'telefono', tipo: 'Texto', requerido: false, descripcion: 'Número de teléfono', ejemplo: '3001234567' },
-  { columna: 'email', tipo: 'Texto', requerido: false, descripcion: 'Correo electrónico', ejemplo: 'carlos@unipamplona.edu.co' },
-  { columna: 'programa', tipo: 'Texto', requerido: true, descripcion: 'Programa académico', ejemplo: 'Ingeniería de Sistemas' },
-  { columna: 'semestre', tipo: 'Número', requerido: true, descripcion: 'Semestre actual (1-15)', ejemplo: '8' },
-  { columna: 'estado', tipo: 'Texto', requerido: false, descripcion: 'Estado (ACTIVO, INACTIVO, GRADUADO, SUSPENDIDO)', ejemplo: 'ACTIVO' },
+// ── column spec used both for the inline table and the doc comment ────────────
+const COLUMNS = [
+  { key: 'codigo',    label: 'codigo',    req: true,  example: '20261001' },
+  { key: 'nombres',   label: 'nombres',   req: true,  example: 'María' },
+  { key: 'apellidos', label: 'apellidos', req: true,  example: 'González' },
+  { key: 'documento', label: 'documento', req: false, example: '1098765432' },
+  { key: 'telefono',  label: 'telefono',  req: false, example: '3001234567' },
+  { key: 'email',     label: 'email',     req: false, example: 'maria@uni.edu.co' },
+  { key: 'programa',  label: 'programa',  req: true,  example: 'Ing. Sistemas' },
+  { key: 'semestre',  label: 'semestre',  req: true,  example: '3' },
+  { key: 'estado',    label: 'estado',    req: false, example: 'ACTIVO' },
 ];
+
+// ── horizontal spreadsheet preview of the template ────────────────────────────
+function FormatoHorizontal() {
+  return (
+    <div className="rounded-lg border border-slate-200 overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs whitespace-nowrap">
+          {/* header = column names */}
+          <thead>
+            <tr className="bg-brand-primary/10 border-b border-brand-primary/20">
+              {COLUMNS.map((c) => (
+                <th key={c.key} className="px-3 py-2 text-left font-bold text-brand-primary font-mono">
+                  {c.label}
+                  {c.req && <span className="text-red-500 ml-0.5">*</span>}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          {/* one example data row */}
+          <tbody>
+            <tr className="bg-slate-50/70">
+              {COLUMNS.map((c) => (
+                <td key={c.key} className="px-3 py-2 text-slate-500 font-mono">
+                  {c.example}
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="text-[10px] text-slate-400 px-3 py-1.5 border-t border-slate-100 bg-white">
+        <span className="text-red-500 font-bold">*</span> campos obligatorios · La primera fila debe ser exactamente el encabezado mostrado · columnas opcionales pueden omitirse
+      </p>
+    </div>
+  );
+}
 
 export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
   const [step, setStep] = useState<Step>('select');
   const [file, setFile] = useState<File | null>(null);
   const [previewRows, setPreviewRows] = useState<string[][]>([]);
   const [result, setResult] = useState<UploadResult | null>(null);
-  const [showFormatModal, setShowFormatModal] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const queryClient = useQueryClient();
   const notify = useNotificationStore.getState().add;
@@ -49,205 +87,201 @@ export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
     },
     onError: () => {
       setStep('select');
-      notify({ type: 'error', message: 'Error al procesar el archivo' });
+      notify({ type: 'error', message: 'Error al procesar el archivo. Verifica el formato.' });
     },
   });
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (!selected) return;
-
-    const validTypes = [
-      'text/csv',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-excel',
-    ];
-    const validExtensions = ['.csv', '.xlsx', '.xls'];
+  const processFile = useCallback((selected: File) => {
     const ext = selected.name.substring(selected.name.lastIndexOf('.')).toLowerCase();
-
-    if (!validTypes.includes(selected.type) && !validExtensions.includes(ext)) {
+    if (!['.csv', '.xlsx', '.xls'].includes(ext)) {
       notify({ type: 'error', message: 'Solo se aceptan archivos .csv o .xlsx' });
       return;
     }
-
     setFile(selected);
-
-    // preview first 10 rows for csv files
     if (ext === '.csv') {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = event.target?.result as string;
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
         const lines = text.split('\n').filter((l) => l.trim());
-        const rows = lines.slice(0, 11).map((line) => line.split(',').map((c) => c.trim()));
-        setPreviewRows(rows);
+        setPreviewRows(lines.slice(0, 6).map((l) => l.split(',').map((c) => c.trim())));
         setStep('preview');
       };
       reader.readAsText(selected);
     } else {
-      // for xlsx we cannot preview client-side without a library; skip to preview step
       setPreviewRows([]);
       setStep('preview');
     }
   }, [notify]);
 
-  const handleUpload = () => {
-    if (!file) return;
-    setStep('uploading');
-    uploadMutation.mutate(file);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) processFile(f);
+    e.target.value = '';
   };
 
-  const handleReset = () => {
-    setFile(null);
-    setPreviewRows([]);
-    setResult(null);
-    setStep('select');
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const f = e.dataTransfer.files[0];
+    if (f) processFile(f);
   };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const { blob, filename } = await estudiantesService.descargarPlantilla();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename || 'plantilla_estudiantes.csv';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    } catch {
+      notify({ type: 'error', message: 'No se pudo descargar la plantilla' });
+    }
+  };
+
+  const handleReset = () => { setFile(null); setPreviewRows([]); setResult(null); setStep('select'); };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-display text-lg font-bold text-slate-800">Carga masiva de estudiantes</h3>
-        {onClose && (
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-sm">
-            Cerrar
-          </button>
-        )}
-      </div>
+    <div className="space-y-5">
 
-      {/* step: select file */}
+      {/* ── step: select ─────────────────────────────────────── */}
       {step === 'select' && (
-        <div className="space-y-4">
-          <label className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-slate-300 rounded-card p-10 cursor-pointer hover:border-brand-primary hover:bg-brand-primary/5 transition-all">
-            <Upload className="w-8 h-8 text-slate-400" />
-            <span className="text-sm text-slate-600 font-medium">
-              Seleccionar archivo .csv o .xlsx
-            </span>
-            <span className="text-xs text-slate-400">Máximo 5000 registros por archivo</span>
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </label>
-          <div className="flex justify-center">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFormatModal(true)}
+        <>
+          {/* download + drop zone row */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* download template button */}
+            <button
+              onClick={handleDownloadTemplate}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-brand-primary/30 bg-brand-primary/5
+                         text-brand-primary text-sm font-semibold hover:bg-brand-primary/10 transition-colors shrink-0"
             >
-              <Info className="w-4 h-4 mr-1" />
-              Ver formato esperado
+              <Download className="w-4 h-4" />
+              Descargar plantilla CSV
+            </button>
+
+            {/* drop zone */}
+            <div
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+              onClick={() => inputRef.current?.click()}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-3 rounded-lg border-2 border-dashed p-5 cursor-pointer transition-colors',
+                isDragging
+                  ? 'border-brand-primary bg-brand-primary/5'
+                  : 'border-slate-300 hover:border-brand-primary/50 hover:bg-slate-50',
+              )}
+            >
+              <input ref={inputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={handleFileChange} />
+              <Upload className="w-5 h-5 text-slate-400 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-slate-700">Arrastra tu archivo aquí o <span className="text-brand-primary underline underline-offset-2">seleccionar</span></p>
+                <p className="text-xs text-slate-400 mt-0.5">.csv o .xlsx · máx. 5 000 registros</p>
+              </div>
+            </div>
+          </div>
+
+          {/* horizontal format preview — always visible */}
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+              Formato del archivo (horizontal)
+            </p>
+            <FormatoHorizontal />
+          </div>
+        </>
+      )}
+
+      {/* ── step: preview ─────────────────────────────────────── */}
+      {step === 'preview' && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+            <FileSpreadsheet className="w-4 h-4 text-brand-primary shrink-0" />
+            <span className="font-medium truncate">{file?.name}</span>
+            <span className="text-slate-400 shrink-0">({((file?.size ?? 0) / 1024).toFixed(1)} KB)</span>
+            <button onClick={handleReset} className="ml-auto text-slate-400 hover:text-slate-600 shrink-0">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {previewRows.length > 0 ? (
+            <div>
+              <p className="text-xs text-slate-500 mb-1.5">Vista previa (primeras {previewRows.length - 1} filas de datos)</p>
+              <div className="overflow-x-auto border border-slate-200 rounded-lg">
+                <table className="w-full text-xs whitespace-nowrap">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      {previewRows[0]?.map((h, i) => (
+                        <th key={i} className="px-3 py-2 text-left font-bold text-slate-500 uppercase tracking-wide font-mono">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {previewRows.slice(1).map((row, ri) => (
+                      <tr key={ri} className={cn('border-t border-slate-100', ri % 2 === 0 ? 'bg-white' : 'bg-slate-50/40')}>
+                        {row.map((cell, ci) => (
+                          <td key={ci} className="px-3 py-1.5 text-slate-600 font-mono">{cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-slate-400 bg-slate-50 rounded-lg p-4 text-center">
+              Vista previa no disponible para .xlsx — el archivo se procesará en el servidor.
+            </p>
+          )}
+
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={handleReset}>Cambiar archivo</Button>
+            <Button onClick={() => { setStep('uploading'); uploadMutation.mutate(file!); }}>
+              <Upload className="w-3.5 h-3.5 mr-1.5" />
+              Confirmar carga
             </Button>
           </div>
         </div>
       )}
 
-      {/* step: preview */}
-      {step === 'preview' && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <FileSpreadsheet className="w-4 h-4 text-brand-primary" />
-            <span className="font-medium">{file?.name}</span>
-            <span className="text-slate-400">({(file!.size / 1024).toFixed(1)} KB)</span>
-          </div>
-
-          {previewRows.length > 0 && (
-            <div className="overflow-x-auto border border-slate-200 rounded-lg">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="bg-slate-50">
-                    {previewRows[0]?.map((header, i) => (
-                      <th key={i} className="px-3 py-2 text-left font-bold text-slate-500 uppercase">
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {previewRows.slice(1, 11).map((row, ri) => (
-                    <tr key={ri} className="border-t border-slate-100">
-                      {row.map((cell, ci) => (
-                        <td key={ci} className="px-3 py-1.5 text-slate-700">
-                          {cell}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {previewRows.length === 0 && (
-            <p className="text-sm text-slate-500">
-              Vista previa no disponible para archivos .xlsx. El archivo se procesará en el servidor.
-            </p>
-          )}
-
-          <div className="flex gap-3 justify-end">
-            <button
-              onClick={handleReset}
-              className="px-4 py-2 border border-slate-300 text-slate-600 rounded-btn text-sm font-medium hover:bg-slate-50 transition-all"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleUpload}
-              className="px-4 py-2 bg-brand-primary text-white rounded-btn text-sm font-bold hover:bg-brand-primary/90 transition-all"
-            >
-              Confirmar carga
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* step: uploading */}
+      {/* ── step: uploading ─────────────────────────────────────── */}
       {step === 'uploading' && (
-        <div className="flex flex-col items-center gap-3 py-10">
+        <div className="flex flex-col items-center gap-3 py-12 text-slate-500">
           <div className="w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm text-slate-500">Procesando archivo...</span>
+          <span className="text-sm">Procesando archivo…</span>
         </div>
       )}
 
-      {/* step: result */}
+      {/* ── step: result ─────────────────────────────────────── */}
       {step === 'result' && result && (
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
-            <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-emerald-600" />
-              <div>
-                <p className="text-lg font-bold text-emerald-700">{result.insertadas}</p>
-                <p className="text-xs text-emerald-600">Insertadas</p>
-              </div>
+            <div className="text-center p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
+              <p className="text-2xl font-black text-emerald-700">{result.insertadas}</p>
+              <p className="text-xs text-emerald-600 font-medium">Insertadas</p>
             </div>
-            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-blue-600" />
-              <div>
-                <p className="text-lg font-bold text-blue-700">{result.actualizadas}</p>
-                <p className="text-xs text-blue-600">Actualizadas</p>
-              </div>
+            <div className="text-center p-4 bg-sky-50 border border-sky-100 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-sky-500 mx-auto mb-1" />
+              <p className="text-2xl font-black text-sky-700">{result.actualizadas}</p>
+              <p className="text-xs text-sky-600 font-medium">Actualizadas</p>
             </div>
-            <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
-              <XCircle className="w-5 h-5 text-red-600" />
-              <div>
-                <p className="text-lg font-bold text-red-700">{result.errores.length}</p>
-                <p className="text-xs text-red-600">Errores</p>
-              </div>
+            <div className={cn('text-center p-4 border rounded-lg', result.errores.length ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100')}>
+              <XCircle className={cn('w-5 h-5 mx-auto mb-1', result.errores.length ? 'text-red-500' : 'text-slate-300')} />
+              <p className={cn('text-2xl font-black', result.errores.length ? 'text-red-700' : 'text-slate-400')}>{result.errores.length}</p>
+              <p className={cn('text-xs font-medium', result.errores.length ? 'text-red-600' : 'text-slate-400')}>Errores</p>
             </div>
           </div>
 
           {result.errores.length > 0 && (
-            <div className="border border-red-200 rounded-lg p-3 max-h-40 overflow-y-auto">
-              <div className="flex items-center gap-1 mb-2 text-xs font-bold text-red-600">
-                <AlertTriangle className="w-3 h-3" />
-                Errores encontrados
+            <div className="border border-red-200 rounded-lg overflow-hidden">
+              <div className="flex items-center gap-1.5 px-3 py-2 bg-red-50 text-xs font-bold text-red-600 border-b border-red-100">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                {result.errores.length} error{result.errores.length !== 1 ? 'es' : ''} encontrado{result.errores.length !== 1 ? 's' : ''}
               </div>
-              <ul className="space-y-1 text-xs text-red-700">
+              <ul className="divide-y divide-red-50 max-h-36 overflow-y-auto">
                 {result.errores.map((err, i) => (
-                  <li key={i}>
-                    Fila {err.fila}: {err.mensaje}
+                  <li key={i} className="px-3 py-1.5 text-xs text-red-700 font-mono">
+                    Fila {err.fila}{err.campo ? ` · ${err.campo}` : ''}: {err.error ?? err.mensaje ?? 'error desconocido'}
                   </li>
                 ))}
               </ul>
@@ -255,60 +289,10 @@ export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
           )}
 
           <div className="flex justify-end">
-            <button
-              onClick={handleReset}
-              className="px-4 py-2 bg-brand-primary text-white rounded-btn text-sm font-bold hover:bg-brand-primary/90 transition-all"
-            >
-              Cargar otro archivo
-            </button>
+            <Button onClick={handleReset}>Cargar otro archivo</Button>
           </div>
         </div>
       )}
-      <Modal
-        open={showFormatModal}
-        onOpenChange={setShowFormatModal}
-        title="Formato esperado"
-        description="Columnas del archivo CSV/XLSX y tipo de datos esperados"
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px]">
-                <th className="pb-2 pr-4 font-bold">Columna</th>
-                <th className="pb-2 pr-4 font-bold">Tipo</th>
-                <th className="pb-2 pr-4 font-bold">Requerido</th>
-                <th className="pb-2 pr-4 font-bold">Descripción</th>
-                <th className="pb-2 font-bold">Ejemplo</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {FORMAT_COLUMNS.map((col) => (
-                <tr key={col.columna} className="text-slate-700">
-                  <td className="py-2 pr-4 font-mono text-xs font-bold">{col.columna}</td>
-                  <td className="py-2 pr-4 text-xs">{col.tipo}</td>
-                  <td className="py-2 pr-4">
-                    {col.requerido ? (
-                      <span className="text-xs font-bold text-red-500">Sí</span>
-                    ) : (
-                      <span className="text-xs text-slate-400">No</span>
-                    )}
-                  </td>
-                  <td className="py-2 pr-4 text-xs">{col.descripcion}</td>
-                  <td className="py-2 text-xs font-mono text-slate-500">{col.ejemplo}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-700">
-          <strong>Nota:</strong> La primera fila del archivo debe contener los nombres de las columnas exactamente como se muestran arriba. Las columnas no requeridas pueden omitirse.
-        </div>
-        <div className="flex justify-end mt-4">
-          <Button variant="outline" onClick={() => setShowFormatModal(false)}>
-            Cerrar
-          </Button>
-        </div>
-      </Modal>
     </div>
   );
 };

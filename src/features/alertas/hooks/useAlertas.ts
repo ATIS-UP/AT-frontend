@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { alertasService, AlertaListParams } from '../services/alertasService';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
 
@@ -16,6 +16,7 @@ export function useAlertas(params?: AlertaListParams) {
   return useQuery({
     queryKey: KEYS.list(params),
     queryFn: () => alertasService.listar(params),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -23,6 +24,7 @@ export function useAlertasStats() {
   return useQuery({
     queryKey: KEYS.stats,
     queryFn: () => alertasService.stats(),
+    placeholderData: keepPreviousData,
   });
 }
 

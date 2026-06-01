@@ -154,8 +154,8 @@ export const Topbar = ({ title, subtitle, onMenuClick, sidebarWidth = 236 }: Top
               onClick={() => setProfileOpen((prev) => !prev)}
               className="flex items-center gap-2 hover:bg-slate-100 p-1 rounded-sm md:pr-3 transition-all"
             >
-              <div className="w-7 h-7 rounded-sm bg-brand-primary flex items-center justify-center text-white text-[10px] font-bold border border-white shadow-sm overflow-hidden shrink-0">
-                 <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Admin" />
+              <div className="w-7 h-7 rounded-sm bg-brand-primary flex items-center justify-center text-white text-[10px] font-bold shadow-sm shrink-0 select-none">
+                {(user?.nombre ?? 'U').split(' ').map((s: string) => s[0]).join('').slice(0, 2).toUpperCase()}
               </div>
               <span className="font-display text-[11px] font-bold uppercase tracking-wider text-slate-700 hidden sm:block truncate max-w-[100px]">
                 {user?.nombre ?? 'Usuario'}
