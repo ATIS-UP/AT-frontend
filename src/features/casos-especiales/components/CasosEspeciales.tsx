@@ -70,16 +70,6 @@ export function CasosEspeciales() {
 
   const handleSelectStudentForCaso = (estudianteConCasos: any) => {
     const est = estudianteConCasos.estudiante || estudianteConCasos;
-    const registrosEst: any[] = estudianteConCasos.registros || [];
-    const tieneCerrado = registrosEst.some((r) => r.estado === 'CERRADO');
-
-    if (tieneCerrado) {
-      notification.add({
-        type: 'error',
-        message: 'Este estudiante ya tiene un caso especial cerrado. No se pueden añadir nuevos registros.',
-      });
-      return;
-    }
 
     setSelectedEstudiante({
       id: est.id,
@@ -96,6 +86,7 @@ export function CasosEspeciales() {
     setStudentResults([]);
     setForm({ tipo: 'RENDIMIENTO_ACADEMICO', novedad_id: '', observaciones: '' });
     previousNovedadIdRef.current = '';
+    setUserTouchedObservaciones(false);
     setShowCreateModal(true);
   };
 
@@ -160,23 +151,32 @@ export function CasosEspeciales() {
   });
   const [observacionesError, setObservacionesError] = useState(false);
   const [novedadError, setNovedadError] = useState(false);
+  const [userTouchedObservaciones, setUserTouchedObservaciones] = useState(false);
   const previousNovedadIdRef = React.useRef<string>('');
 
   const { data: novedades } = useNovedadesCasos(form.tipo);
   const novedadesParaTipo = novedades || [];
 
+  // Autorrellenar observaciones desde novedad.descripcion SOLO si el usuario
+  // no ha editado el textarea manualmente. Se evalúa después de que las
+  // novedades del tipo actual lleguen del backend.
   React.useEffect(() => {
-    if (form.novedad_id === previousNovedadIdRef.current) return;
-    previousNovedadIdRef.current = form.novedad_id;
-
     if (!form.novedad_id) {
+      previousNovedadIdRef.current = '';
       return;
     }
+    if (form.novedad_id === previousNovedadIdRef.current) return;
+    if (userTouchedObservaciones) {
+      previousNovedadIdRef.current = form.novedad_id;
+      return;
+    }
+    if (novedadesParaTipo.length === 0) return;
     const selected = novedadesParaTipo.find((n) => n.id === form.novedad_id);
-    if (selected?.descripcion && form.observaciones.trim() === '') {
+    previousNovedadIdRef.current = form.novedad_id;
+    if (selected?.descripcion) {
       setForm((prev) => ({ ...prev, observaciones: selected.descripcion || '' }));
     }
-  }, [form.novedad_id, form.observaciones, novedadesParaTipo]);
+  }, [form.novedad_id, novedadesParaTipo, userTouchedObservaciones]);
 
   const handleCreateRegistro = (e: React.FormEvent) => {
     e.preventDefault();
@@ -423,31 +423,20 @@ export function CasosEspeciales() {
                 </table>
               </div>
               <div className="flex justify-end pt-2">
-                {result.registros.some((r) => r.estado === 'CERRADO') ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled
-                    title="El estudiante ya tiene un caso cerrado. No se pueden añadir más registros."
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Caso cerrado
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedEstudiante(result.estudiante);
-                      setForm({ tipo: 'RENDIMIENTO_ACADEMICO', novedad_id: '', observaciones: '' });
-                      previousNovedadIdRef.current = '';
-                      setShowCreateModal(true);
-                    }}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Añadir registro
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedEstudiante(result.estudiante);
+                    setForm({ tipo: 'RENDIMIENTO_ACADEMICO', novedad_id: '', observaciones: '' });
+                    previousNovedadIdRef.current = '';
+                    setUserTouchedObservaciones(false);
+                    setShowCreateModal(true);
+                  }}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Añadir registro
+                </Button>
               </div>
             </>
           )}
@@ -496,18 +485,13 @@ export function CasosEspeciales() {
             <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto border border-slate-200 rounded-lg">
               {studentResults.map((item: any) => {
                 const est = item.estudiante || item;
-                const tieneCerrado = (item.registros || []).some((r: any) => r.estado === 'CERRADO');
+                const totalRegistros = (item.registros || []).length;
                 return (
                   <button
                     key={est.id}
                     type="button"
                     onClick={() => handleSelectStudentForCaso(item)}
-                    disabled={tieneCerrado}
-                    className={`w-full text-left px-4 py-3 transition-colors ${
-                      tieneCerrado
-                        ? 'bg-slate-50 opacity-60 cursor-not-allowed'
-                        : 'hover:bg-brand-primary/5'
-                    }`}
+                    className="w-full text-left px-4 py-3 transition-colors hover:bg-brand-primary/5"
                   >
                     <p className="font-medium text-slate-800 text-sm">
                       {est.nombres} {est.apellidos}
@@ -515,8 +499,10 @@ export function CasosEspeciales() {
                     <p className="text-xs text-slate-500">
                       Código: {est.codigo} | {est.programa} | {est.semestre}° semestre
                     </p>
-                    {tieneCerrado && (
-                      <p className="text-xs text-red-500 mt-1">⚠ Tiene un caso cerrado</p>
+                    {totalRegistros > 0 && (
+                      <p className="text-xs text-slate-500 mt-1">
+                        {totalRegistros} {totalRegistros === 1 ? 'caso registrado' : 'casos registrados'}
+                      </p>
                     )}
                   </button>
                 );
@@ -534,6 +520,8 @@ export function CasosEspeciales() {
             setForm({ tipo: 'RENDIMIENTO_ACADEMICO', novedad_id: '', observaciones: '' });
             setObservacionesError(false);
             setNovedadError(false);
+            previousNovedadIdRef.current = '';
+            setUserTouchedObservaciones(false);
           }
         }}
         title="Nuevo Registro de Caso Especial"
@@ -555,7 +543,11 @@ export function CasosEspeciales() {
             <label className="block text-xs font-bold text-slate-600 mb-1">Tipo de Caso *</label>
             <select
               value={form.tipo}
-              onChange={(e) => setForm({ ...form, tipo: e.target.value as TipoRegistro, novedad_id: '' })}
+              onChange={(e) => {
+                setForm({ ...form, tipo: e.target.value as TipoRegistro, novedad_id: '', observaciones: '' });
+                previousNovedadIdRef.current = '';
+                setUserTouchedObservaciones(false);
+              }}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none"
             >
               {TIPOS_REGISTRO.map((tipo) => (
@@ -586,7 +578,11 @@ export function CasosEspeciales() {
             <textarea
               value={form.observaciones}
               maxLength={OBSERVACIONES_MAX_LENGTH}
-              onChange={(e) => { setForm({ ...form, observaciones: createCharFilter(CharType.FULL_TEXT)(e.target.value) }); setObservacionesError(false); }}
+              onChange={(e) => {
+                setForm({ ...form, observaciones: createCharFilter(CharType.FULL_TEXT)(e.target.value) });
+                setObservacionesError(false);
+                setUserTouchedObservaciones(true);
+              }}
               className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none ${observacionesError ? 'border-red-500 focus:border-red-500' : 'border-slate-200'}`}
               placeholder="Describa la situación del estudiante"
             />
@@ -635,7 +631,6 @@ export function CasosEspeciales() {
             onHasChangesChange={setHasUnsavedChanges}
             showUnsavedAlert={showUnsavedAlert}
             onDismissAlert={() => setShowUnsavedAlert(false)}
-            isReadOnly={selectedRegistro.estado === 'CERRADO'}
           />
         )}
       </Modal>
@@ -683,14 +678,12 @@ function RegistroCasoForm({
   onHasChangesChange,
   showUnsavedAlert,
   onDismissAlert,
-  isReadOnly = false,
 }: {
   registro: RegistroCaso;
   onClose: () => void;
   onHasChangesChange?: (hasChanges: boolean) => void;
   showUnsavedAlert?: boolean;
   onDismissAlert?: () => void;
-  isReadOnly?: boolean;
 }) {
   const prevRegistroIdRef = React.useRef(registro.id);
 
@@ -721,13 +714,12 @@ function RegistroCasoForm({
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isReadOnly) return;
     actualizarRegistro.mutate(
       { id: registro.id, data: form },
       {
         onSuccess: () => {
-          setOriginalForm(form);
           notification.add({ type: 'success', message: 'Registro actualizado' });
+          onClose();
         },
         onError: () => {
           notification.add({ type: 'error', message: 'Error al actualizar' });
@@ -751,18 +743,6 @@ function RegistroCasoForm({
           ← Volver
         </Button>
       </div>
-
-      {isReadOnly && (
-        <div className="bg-slate-100 border border-slate-300 rounded-lg p-3 text-sm text-slate-700 flex items-start gap-2">
-          <span className="text-base">🔒</span>
-          <div>
-            <p className="font-semibold">Caso cerrado</p>
-            <p className="text-xs text-slate-600">
-              Este registro se encuentra en estado <strong>CERRADO</strong>. No se permite modificar el tipo, el estado ni las observaciones, ni añadir nuevos seguimientos.
-            </p>
-          </div>
-        </div>
-      )}
 
       {showUnsavedAlert && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
@@ -814,8 +794,7 @@ function RegistroCasoForm({
             <select
               value={form.tipo}
               onChange={(e) => setForm({ ...form, tipo: e.target.value as TipoRegistro })}
-              disabled={isReadOnly}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none disabled:bg-slate-100 disabled:cursor-not-allowed"
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none"
             >
               {TIPOS_REGISTRO.map((t) => (
                 <option key={t.value} value={t.value}>{t.label}</option>
@@ -827,13 +806,17 @@ function RegistroCasoForm({
             <select
               value={form.estado}
               onChange={(e) => setForm({ ...form, estado: e.target.value as EstadoRegistro })}
-              disabled={isReadOnly}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none disabled:bg-slate-100 disabled:cursor-not-allowed"
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none"
             >
               {ESTADOS_REGISTRO.map((e) => (
                 <option key={e.value} value={e.value}>{e.label}</option>
               ))}
             </select>
+            {form.estado === 'CERRADO' && (
+              <p className="text-[11px] text-slate-500 mt-1">
+                Para reabrir el caso, cambia el estado a <strong>Activo</strong> y guarda.
+              </p>
+            )}
           </div>
         </div>
 
@@ -853,24 +836,21 @@ function RegistroCasoForm({
             value={form.observaciones}
             maxLength={OBSERVACIONES_MAX_LENGTH}
             onChange={(e) => setForm({ ...form, observaciones: createCharFilter(CharType.FULL_TEXT)(e.target.value) })}
-            disabled={isReadOnly}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none disabled:bg-slate-100 disabled:cursor-not-allowed"
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none"
           />
           <div className="flex justify-end mt-1">
             <span className="text-[10px] text-slate-400">{form.observaciones.length}/{OBSERVACIONES_MAX_LENGTH}</span>
           </div>
         </div>
 
-        {!isReadOnly && (
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="submit" isLoading={actualizarRegistro.isPending}>
-              Guardar Cambios
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-end gap-3 pt-2">
+          <Button type="submit" isLoading={actualizarRegistro.isPending}>
+            Guardar Cambios
+          </Button>
+        </div>
       </form>
 
-      <HistorialRegistro registroId={registro.id} isReadOnly={isReadOnly} />
+      <HistorialRegistro registroId={registro.id} />
     </div>
   );
 }

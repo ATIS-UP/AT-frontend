@@ -8,7 +8,7 @@ import { cn } from '@/src/lib/utils';
 import { createCharFilter, CharType } from '@/src/lib/validation';
 import { Plus } from 'lucide-react';
 
-export function HistorialRegistro({ registroId, isReadOnly = false }: { registroId: string; isReadOnly?: boolean }) {
+export function HistorialRegistro({ registroId }: { registroId: string }) {
   const { data, isLoading } = useObtenerHistorial(registroId, true);
   const agregarHistorial = useAgregarHistorial();
   const notification = useNotificationStore();
@@ -22,7 +22,6 @@ export function HistorialRegistro({ registroId, isReadOnly = false }: { registro
 
   const handleAddHistorial = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isReadOnly) return;
 
     if (!form.observaciones.trim()) {
       setObservacionesError(true);
@@ -135,8 +134,6 @@ export function HistorialRegistro({ registroId, isReadOnly = false }: { registro
           size="sm"
           className="mt-4"
           onClick={() => setShowAddForm(true)}
-          disabled={isReadOnly}
-          title={isReadOnly ? 'No se pueden añadir seguimientos a un caso cerrado' : undefined}
         >
           <Plus className="w-4 h-4 mr-2" />
           Añadir seguimiento
