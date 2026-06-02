@@ -18,9 +18,28 @@ export const Artifacts = () => {
   const [filtroTipo, setFiltroTipo] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
   const notify = useNotificationStore.getState().add;
+
+  const handleDownload = async (id: string, nombre?: string) => {
+    setDownloadingId(id);
+    try {
+      const { blob, filename } = await artefactosService.descargar(id);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = nombre || filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    } catch {
+      notify({ type: 'error', message: 'Error al descargar el archivo' });
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const params: ArtefactoListParams = filtroTipo ? { tipo: filtroTipo } : {};
 
@@ -204,15 +223,14 @@ export const Artifacts = () => {
                     </td>
                     <td className="py-4 px-6 text-right">
                       <div className="flex justify-end gap-2">
-                        <a
-                          href={artefactosService.descargar(item.id)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-slate-100 rounded transition-all"
+                        <button
+                          onClick={() => handleDownload(item.id, item.nombre)}
+                          disabled={downloadingId === item.id}
+                          className="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-slate-100 rounded transition-all disabled:opacity-50 disabled:cursor-wait"
                           title="Descargar"
                         >
-                          <Download className="w-4 h-4" />
-                        </a>
+                          <Download className={`w-4 h-4 ${downloadingId === item.id ? 'animate-pulse' : ''}`} />
+                        </button>
                         <button
                           onClick={() => setShowDeleteConfirm(item.id)}
                           className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
