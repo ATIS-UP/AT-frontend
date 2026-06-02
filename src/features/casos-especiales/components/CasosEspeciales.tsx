@@ -157,6 +157,14 @@ export function CasosEspeciales() {
   const { data: novedades } = useNovedadesCasos(form.tipo);
   const novedadesParaTipo = novedades || [];
 
+  const applyNovedadDescripcion = React.useCallback((novedadId: string) => {
+    const selected = novedadesParaTipo.find((n) => n.id === novedadId);
+    if (selected?.descripcion) {
+      setForm((prev) => ({ ...prev, observaciones: selected.descripcion || '' }));
+      setUserTouchedObservaciones(false);
+    }
+  }, [novedadesParaTipo]);
+
   // Autorrellenar observaciones desde novedad.descripcion SOLO si el usuario
   // no ha editado el textarea manualmente. Se evalúa después de que las
   // novedades del tipo actual lleguen del backend.
@@ -166,17 +174,20 @@ export function CasosEspeciales() {
       return;
     }
     if (form.novedad_id === previousNovedadIdRef.current) return;
-    if (userTouchedObservaciones) {
-      previousNovedadIdRef.current = form.novedad_id;
-      return;
-    }
+    previousNovedadIdRef.current = form.novedad_id;
+    if (userTouchedObservaciones) return;
     if (novedadesParaTipo.length === 0) return;
     const selected = novedadesParaTipo.find((n) => n.id === form.novedad_id);
-    previousNovedadIdRef.current = form.novedad_id;
     if (selected?.descripcion) {
       setForm((prev) => ({ ...prev, observaciones: selected.descripcion || '' }));
     }
   }, [form.novedad_id, novedadesParaTipo, userTouchedObservaciones]);
+
+  const selectedNovedad = React.useMemo(
+    () => novedadesParaTipo.find((n) => n.id === form.novedad_id) || null,
+    [novedadesParaTipo, form.novedad_id]
+  );
+  const hasNovedadDescripcion = !!selectedNovedad?.descripcion;
 
   const handleCreateRegistro = (e: React.FormEvent) => {
     e.preventDefault();
@@ -574,7 +585,19 @@ export function CasosEspeciales() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 mb-1">Observaciones *</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-bold text-slate-600">Observaciones *</label>
+              {hasNovedadDescripcion && (
+                <button
+                  type="button"
+                  onClick={() => applyNovedadDescripcion(form.novedad_id)}
+                  className="text-[11px] text-brand-primary hover:underline flex items-center gap-1"
+                  title="Reemplazar el contenido del textarea con la descripción oficial de la novedad"
+                >
+                  ↻ Usar descripción oficial
+                </button>
+              )}
+            </div>
             <textarea
               value={form.observaciones}
               maxLength={OBSERVACIONES_MAX_LENGTH}
