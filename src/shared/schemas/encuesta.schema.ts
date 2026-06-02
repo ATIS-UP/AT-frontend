@@ -1,15 +1,29 @@
 import { z } from 'zod';
 import { CharType, ERROR_MSGS } from '@/src/lib/validation';
 
-export const preguntaSchema = z.object({
-  id: z.number(),
+export const PREGUNTA_TIPOS = ['texto_libre', 'opcion_multiple', 'escala_likert'] as const;
+export type PreguntaTipo = (typeof PREGUNTA_TIPOS)[number];
+
+export const preguntaBackendSchema = z.object({
+  id: z.number().optional(),
   texto: z
     .string()
     .min(1, 'Requerido')
     .max(500, 'Máximo 500 caracteres')
     .regex(CharType.FULL_TEXT, ERROR_MSGS.FULL_TEXT),
-  tipo: z.enum(['opcion_multiple', 'texto_libre', 'escala_likert']),
-  opciones: z.array(z.string()).min(2).optional(),
+  tipo: z.enum(PREGUNTA_TIPOS),
+  opciones: z.array(z.string().min(1)).min(2).optional(),
+  requerida: z.boolean().default(true),
+});
+
+export const preguntaFormSchema = z.object({
+  id: z.string(),
+  texto: z
+    .string()
+    .min(1, 'La pregunta no puede estar vacía')
+    .max(500, 'Máximo 500 caracteres'),
+  tipo: z.enum(PREGUNTA_TIPOS),
+  opciones: z.array(z.string().min(1)).optional(),
   requerida: z.boolean().default(true),
 });
 
@@ -25,9 +39,51 @@ export const encuestaCreateSchema = z.object({
     .regex(CharType.FULL_TEXT, ERROR_MSGS.FULL_TEXT)
     .optional()
     .or(z.literal('')),
-  preguntas: z.array(preguntaSchema).min(1, 'Agrega al menos una pregunta'),
+  preguntas: z.array(preguntaBackendSchema).min(1, 'Agrega al menos una pregunta'),
   periodo: z.string().optional(),
 });
 
-export type Pregunta = z.infer<typeof preguntaSchema>;
+export const encuestaUpdateSchema = z.object({
+  titulo: z
+    .string()
+    .min(5, 'Mínimo 5 caracteres')
+    .max(255, 'Máximo 255 caracteres')
+    .regex(CharType.ALPHANUMERIC, ERROR_MSGS.ALPHANUMERIC)
+    .optional(),
+  descripcion: z
+    .string()
+    .max(500, 'Máximo 500 caracteres')
+    .regex(CharType.FULL_TEXT, ERROR_MSGS.FULL_TEXT)
+    .optional()
+    .or(z.literal('')),
+  preguntas: z.array(preguntaBackendSchema).min(1, 'Agrega al menos una pregunta').optional(),
+  periodo: z.string().optional(),
+  fecha_fin: z.string().nullable().optional(),
+});
+
+export const encuestaBackendSchema = z.object({
+  id: z.string(),
+  titulo: z.string(),
+  descripcion: z.string().nullable().optional(),
+  preguntas: z.array(z.any()).default([]),
+  estado: z.string(),
+  periodo: z.string().nullable().optional(),
+  fecha_inicio: z.string().nullable().optional(),
+  fecha_fin: z.string().nullable().optional(),
+  es_publica: z.boolean().optional(),
+  total_respuestas: z.number().optional(),
+  created_at: z.string().nullable().optional(),
+  updated_at: z.string().nullable().optional(),
+});
+
+export type Pregunta = z.infer<typeof preguntaBackendSchema>;
 export type EncuestaCreate = z.infer<typeof encuestaCreateSchema>;
+export type EncuestaUpdate = z.infer<typeof encuestaUpdateSchema>;
+export type Encuesta = z.infer<typeof encuestaBackendSchema>;
+export type PreguntaForm = z.infer<typeof preguntaFormSchema>;
+
+export const PREGUNTA_TIPO_LABELS: Record<PreguntaTipo, string> = {
+  texto_libre: 'Texto libre',
+  opcion_multiple: 'Opción múltiple',
+  escala_likert: 'Escala 1-5',
+};

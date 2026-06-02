@@ -25,11 +25,12 @@ export function ResponderEncuesta() {
   const [respuestas, setRespuestas] = useState<Record<string, string>>({});
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const { data: encuesta, isLoading: loadingEncuesta } = useQuery({
+  const { data: encuestaData, isLoading: loadingEncuesta } = useQuery({
     queryKey: ['encuesta-publica', encuestaId],
     queryFn: () => encuestasService.obtenerInfoPublica(encuestaId!),
     enabled: !!encuestaId,
   });
+  const encuesta = encuestaData as any;
 
   const responderMutation = useMutation({
     mutationFn: () =>
