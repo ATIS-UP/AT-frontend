@@ -8,7 +8,7 @@ import { cn } from '@/src/lib/utils';
 import { createCharFilter, CharType } from '@/src/lib/validation';
 import { Plus } from 'lucide-react';
 
-export function HistorialRegistro({ registroId }: { registroId: string }) {
+export function HistorialRegistro({ registroId, isReadOnly = false }: { registroId: string; isReadOnly?: boolean }) {
   const { data, isLoading } = useObtenerHistorial(registroId, true);
   const agregarHistorial = useAgregarHistorial();
   const notification = useNotificationStore();
@@ -22,14 +22,15 @@ export function HistorialRegistro({ registroId }: { registroId: string }) {
 
   const handleAddHistorial = (e: React.FormEvent) => {
     e.preventDefault();
-    
+    if (isReadOnly) return;
+
     if (!form.observaciones.trim()) {
       setObservacionesError(true);
       notification.add({ type: 'error', message: 'Debe ingresar una observación' });
       return;
     }
     setObservacionesError(false);
-    
+
     agregarHistorial.mutate(
       { id: registroId, data: form },
       {
@@ -129,7 +130,14 @@ export function HistorialRegistro({ registroId }: { registroId: string }) {
           </div>
         </form>
       ) : (
-        <Button variant="outline" size="sm" className="mt-4" onClick={() => setShowAddForm(true)}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-4"
+          onClick={() => setShowAddForm(true)}
+          disabled={isReadOnly}
+          title={isReadOnly ? 'No se pueden añadir seguimientos a un caso cerrado' : undefined}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Añadir seguimiento
         </Button>

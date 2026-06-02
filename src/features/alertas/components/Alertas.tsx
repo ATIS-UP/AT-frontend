@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAlertas, useAlertasStats, useCrearAlerta, useCrearActividad, useCambiarEstadoAlerta, useEliminarAlerta } from '../hooks/useAlertas';
+import { useAlertas, useAlertasStats, useCrearAlerta, useCrearActividad, useCambiarEstadoAlerta, useEliminarAlerta, useAlertaActividades } from '../hooks/useAlertas';
 import { Button } from '@/src/shared/components/ui/Button';
 import { Card } from '@/src/shared/components/ui/Card';
 import { Badge } from '@/src/shared/components/ui/Badge';
 import { Modal } from '@/src/shared/components/ui/Modal';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
 import { createCharFilter, CharType } from '@/src/lib/validation';
-import { Plus } from 'lucide-react';
+import { Plus, Maximize2, Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { parametrizacionService } from '@/src/features/parametrizacion/services/parametrizacionService';
 import { apiClient } from '@/src/lib/api-client';
+import * as Tabs from '@radix-ui/react-tabs';
 
 type NivelRiesgo = 'ROJO' | 'AMARILLO' | 'VERDE';
 type EstadoSeguimiento = 'PENDIENTE' | 'EN_PROCESO' | 'RESUELTO';
@@ -23,6 +24,11 @@ export function Alertas() {
   const [nuevoEstado, setNuevoEstado] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedDeleteId, setSelectedDeleteId] = useState<string | null>(null);
+  const [showDescripcionModal, setShowDescripcionModal] = useState(false);
+  const [descripcionAmpliada, setDescripcionAmpliada] = useState<{ titulo: string; descripcion: string } | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedDetailAlerta, setSelectedDetailAlerta] = useState<any | null>(null);
+  const [detailTab, setDetailTab] = useState('datos');
 
   const [filtroNivel, setFiltroNivel] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
@@ -310,7 +316,28 @@ export function Alertas() {
                     <p className="font-medium text-slate-800">{item.estudiante_nombre || `ID: ${item.estudiante_id}`}</p>
                   </td>
                   <td className="py-4 px-6">
-                    <p className="text-slate-600 text-xs line-clamp-2 max-w-[200px]">{item.descripcion}</p>
+                    {item.descripcion ? (
+                      <div className="flex items-center gap-2 max-w-[260px]">
+                        <p className="text-slate-600 text-xs line-clamp-2 flex-1">{item.descripcion}</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDescripcionAmpliada({
+                              titulo: `Alerta #${item.id.slice(0, 8)} - ${item.estudiante_nombre || item.estudiante_id}`,
+                              descripcion: item.descripcion,
+                            });
+                            setShowDescripcionModal(true);
+                          }}
+                          className="p-1 text-slate-400 hover:text-brand-primary hover:bg-slate-100 rounded transition-colors flex-shrink-0"
+                          title="Ver descripción completa"
+                          aria-label="Ampliar descripción"
+                        >
+                          <Maximize2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-400">—</span>
+                    )}
                   </td>
                   <td className="py-4 px-6">
                     <Badge variant={getStatusVariant(item.nivel_riesgo)}>
@@ -349,6 +376,20 @@ export function Alertas() {
                         }}
                       >
                         Estado ▾
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-slate-600 hover:text-brand-primary text-xs gap-1"
+                        onClick={() => {
+                          setSelectedDetailAlerta(item);
+                          setDetailTab('datos');
+                          setShowDetailModal(true);
+                        }}
+                        title="Ver detalle e historial"
+                      >
+                        <Clock className="w-3.5 h-3.5" />
+                        Detalle
                       </Button>
                       <Button
                         variant="ghost"
@@ -617,6 +658,171 @@ export function Alertas() {
           </Button>
         </div>
       </Modal>
+
+      <Modal
+        open={showDescripcionModal}
+        onOpenChange={(open) => {
+          setShowDescripcionModal(open);
+          if (!open) setDescripcionAmpliada(null);
+        }}
+        title={descripcionAmpliada?.titulo || 'Descripción de la alerta'}
+        description="Descripción completa"
+        className="max-w-2xl"
+      >
+        <div className="prose prose-sm max-w-none">
+          <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+            {descripcionAmpliada?.descripcion || 'Sin descripción disponible.'}
+          </p>
+        </div>
+      </Modal>
+
+      {selectedDetailAlerta && (
+        <DetalleAlertaModal
+          alerta={selectedDetailAlerta}
+          open={showDetailModal}
+          onOpenChange={(open) => {
+            setShowDetailModal(open);
+            if (!open) {
+              setSelectedDetailAlerta(null);
+              setDetailTab('datos');
+            }
+          }}
+          tab={detailTab}
+          onTabChange={setDetailTab}
+        />
+      )}
     </div>
+  );
+}
+
+function DetalleAlertaModal({
+  alerta,
+  open,
+  onOpenChange,
+  tab,
+  onTabChange,
+}: {
+  alerta: any;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  tab: string;
+  onTabChange: (tab: string) => void;
+}) {
+  const { data: actividades, isLoading } = useAlertaActividades(open ? alerta.id : '');
+
+  return (
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={`Detalle de Alerta`}
+      description={`Alerta #${alerta.id?.slice(0, 8)} - ${alerta.estudiante_nombre || alerta.estudiante_id}`}
+      className="max-w-3xl"
+      bodyClassName="max-h-[80vh]"
+    >
+      <Tabs.Root value={tab} onValueChange={onTabChange}>
+        <Tabs.List className="flex border-b border-slate-200 mb-4">
+          <Tabs.Trigger
+            value="datos"
+            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-brand-primary data-[state=active]:text-brand-primary data-[state=active]:border-b-2 data-[state=active]:border-brand-primary outline-none"
+          >
+            Datos
+          </Tabs.Trigger>
+          <Tabs.Trigger
+            value="historial"
+            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-brand-primary data-[state=active]:text-brand-primary data-[state=active]:border-b-2 data-[state=active]:border-brand-primary outline-none"
+          >
+            Historial
+          </Tabs.Trigger>
+        </Tabs.List>
+
+        <Tabs.Content value="datos" className="space-y-4 outline-none">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-slate-50 p-3 rounded-lg">
+              <p className="text-xs text-slate-500">Estudiante</p>
+              <p className="text-sm font-medium text-slate-800">{alerta.estudiante_nombre || `ID: ${alerta.estudiante_id}`}</p>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-lg">
+              <p className="text-xs text-slate-500">Periodo</p>
+              <p className="text-sm font-medium text-slate-800">{alerta.periodo || '—'}</p>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-lg">
+              <p className="text-xs text-slate-500">Nivel de riesgo</p>
+              <Badge variant={
+                alerta.nivel_riesgo === 'ROJO' ? 'error' :
+                alerta.nivel_riesgo === 'AMARILLO' ? 'warning' : 'success'
+              }>
+                {alerta.nivel_riesgo}
+              </Badge>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-lg">
+              <p className="text-xs text-slate-500">Estado de seguimiento</p>
+              <Badge variant={
+                alerta.estado_seguimiento === 'PENDIENTE' ? 'outline' :
+                alerta.estado_seguimiento === 'EN_PROCESO' ? 'info' :
+                alerta.estado_seguimiento === 'RESUELTO' ? 'success' : 'default'
+              }>
+                {alerta.estado_seguimiento?.replace('_', ' ')}
+              </Badge>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-slate-600 mb-1">Descripción</p>
+            <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg whitespace-pre-wrap">
+              {alerta.descripcion || 'Sin descripción.'}
+            </p>
+          </div>
+        </Tabs.Content>
+
+        <Tabs.Content value="historial" className="outline-none">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div>
+            </div>
+          ) : !actividades || actividades.length === 0 ? (
+            <div className="text-center py-8 text-slate-400 text-sm">
+              <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p>No hay actividades registradas para esta alerta</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="sticky top-0 bg-white">
+                  <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px]">
+                    <th className="pb-2 pt-2 px-3 font-semibold">Fecha</th>
+                    <th className="pb-2 pt-2 px-3 font-semibold">Tipo</th>
+                    <th className="pb-2 pt-2 px-3 font-semibold">Descripción</th>
+                    <th className="pb-2 pt-2 px-3 font-semibold">Resultado</th>
+                    <th className="pb-2 pt-2 px-3 font-semibold">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {actividades.map((act: any) => (
+                    <tr key={act.id} className="hover:bg-slate-50/50">
+                      <td className="py-2 px-3 text-slate-500 text-xs">
+                        {new Date(act.fecha_actividad || act.created_at).toLocaleString('es-CO')}
+                      </td>
+                      <td className="py-2 px-3">
+                        <Badge variant="outline">{act.tipo}</Badge>
+                      </td>
+                      <td className="py-2 px-3 text-slate-600 text-xs max-w-[250px]">
+                        <p className="whitespace-pre-wrap">{act.descripcion}</p>
+                      </td>
+                      <td className="py-2 px-3 text-slate-600 text-xs">
+                        {act.resultado || '—'}
+                      </td>
+                      <td className="py-2 px-3">
+                        <Badge variant={act.completada ? 'success' : 'warning'}>
+                          {act.completada ? 'Completada' : 'Pendiente'}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Tabs.Content>
+      </Tabs.Root>
+    </Modal>
   );
 }
