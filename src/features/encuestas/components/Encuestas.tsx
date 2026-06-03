@@ -13,6 +13,8 @@ import {
   Pencil,
   RefreshCw,
   X,
+  Copy,
+  Download,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { encuestasService } from '../services/encuestasService';
@@ -30,6 +32,8 @@ import {
   type PreguntaForm,
   type PreguntaTipo,
 } from '@/src/shared/schemas/encuesta.schema';
+import { downloadCsv, slugify } from '../utils/csv';
+import { resultadosToCsv } from '../utils/resultadosToCsv';
 
 type TabKey = 'activas' | 'resultados';
 type Mode = 'create' | 'edit' | null;
@@ -321,6 +325,27 @@ export function Encuestas() {
     },
   });
 
+  const duplicarMutation = useMutation({
+    mutationFn: (id: string) => encuestasService.duplicar(id),
+    onSuccess: (nueva) => {
+      queryClient.invalidateQueries({ queryKey: ['encuestas'] });
+      notify({ type: 'success', message: 'Encuesta duplicada como borrador' });
+      openEdit(nueva);
+    },
+    onError: (error: any) => {
+      notify({ type: 'error', message: error?.message ?? 'Error al duplicar la encuesta' });
+    },
+  });
+
+  const handleExportarCsv = () => {
+    if (!resultadosData) return;
+    const csv = resultadosToCsv(resultadosData as any);
+    const fecha = new Date().toISOString().slice(0, 10);
+    const slug = slugify((resultadosData as any).titulo || 'encuesta');
+    downloadCsv(`resultados-${slug}-${fecha}.csv`, csv);
+    notify({ type: 'success', message: 'CSV exportado' });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.titulo.trim()) {
@@ -539,6 +564,18 @@ export function Encuestas() {
                 >
                   <BarChart2 className="w-3 h-3 mr-1" />
                   Ver resultados
+                </Button>
+              )}
+              {(encuesta.estado === 'CERRADA' || encuesta.estado === 'PUBLICADA') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => duplicarMutation.mutate(encuesta.id)}
+                  isLoading={duplicarMutation.isPending}
+                  title="Duplicar como nuevo borrador"
+                >
+                  <Copy className="w-3 h-3 mr-1" />
+                  Duplicar
                 </Button>
               )}
               <Button
@@ -805,7 +842,20 @@ export function Encuestas() {
             ))}
           </div>
         ) : null}
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end gap-2 pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportarCsv}
+            disabled={
+              !resultadosData ||
+              ((resultadosData as any).resultados_por_pregunta?.length ?? 0) === 0
+            }
+            title="Exportar resultados a CSV"
+          >
+            <Download className="w-3.5 h-3.5 mr-1.5" />
+            Exportar CSV
+          </Button>
           <Button variant="outline" onClick={() => setResultadosEncuestaId(null)}>Cerrar</Button>
         </div>
       </Modal>

@@ -90,6 +90,8 @@ export const encuestasService = {
 
   cerrar: (id: string) => apiClient.post<Encuesta>(`/api/encuestas/${id}/cerrar`),
 
+  duplicar: (id: string) => apiClient.post<Encuesta>(`/api/encuestas/${id}/duplicar`, {}),
+
   responder: (id: string, respuestas: Array<{ pregunta_id: number; valor: unknown }>) =>
     apiClient.post<unknown>(`/api/encuestas/${id}/respuestas`, { respuestas }),
 
