@@ -15,6 +15,7 @@ import {
   X,
   Copy,
   Download,
+  Database,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { encuestasService } from '../services/encuestasService';
@@ -337,6 +338,18 @@ export function Encuestas() {
     },
   });
 
+  const plantillaDatosMutation = useMutation({
+    mutationFn: () => encuestasService.plantillaDatos(),
+    onSuccess: (nueva) => {
+      queryClient.invalidateQueries({ queryKey: ['encuestas'] });
+      notify({ type: 'success', message: 'Plantilla de datos creada. Revísala y publícala.' });
+      openEdit(nueva);
+    },
+    onError: (error: any) => {
+      notify({ type: 'error', message: error?.message ?? 'Error al crear la plantilla' });
+    },
+  });
+
   const handleExportarCsv = () => {
     if (!resultadosData) return;
     const csv = resultadosToCsv(resultadosData as any);
@@ -445,6 +458,16 @@ export function Encuestas() {
           >
             <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
             Verificar estados
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => plantillaDatosMutation.mutate()}
+            isLoading={plantillaDatosMutation.isPending}
+            title="Crear encuesta de actualización de datos estudiantiles"
+          >
+            <Database className="w-3.5 h-3.5 mr-1.5" />
+            Plantilla datos
           </Button>
           <Button onClick={openCreate} size="sm">
             <Plus className="w-4 h-4 mr-2" />

@@ -9,6 +9,21 @@ import { FileText, CheckCircle, AlertCircle } from 'lucide-react';
 
 type Step = 'documento' | 'responder' | 'confirmacion' | 'error';
 
+const CAMPO_INPUT_FILTERS: Record<string, (val: string) => string> = {
+  ingreso_familiar: (v) => v.replace(/\D/g, ''),
+};
+
+const CAMPO_ERROR_KEYWORDS: Record<string, string[]> = {
+  estrato: ['estrato'],
+  genero: ['género', 'genero'],
+  procedencia: ['procedencia'],
+  semestre: ['semestre'],
+  email: ['correo', 'email'],
+  telefono: ['teléfono', 'telefono'],
+  ingreso_familiar: ['ingreso familiar', 'ingreso_familiar'],
+  programa: ['programa'],
+};
+
 export function ResponderEncuesta() {
   const { encuestaId } = useParams<{ encuestaId: string }>();
 
@@ -23,7 +38,9 @@ export function ResponderEncuesta() {
     estudiante_id: string | null;
   } | null>(null);
   const [respuestas, setRespuestas] = useState<Record<string, string>>({});
+  const [preguntasConDatos, setPreguntasConDatos] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [campoErrors, setCampoErrors] = useState<Record<string, string>>({});
 
   const { data: encuestaData, isLoading: loadingEncuesta } = useQuery({
     queryKey: ['encuesta-publica', encuestaId],
@@ -45,10 +62,27 @@ export function ResponderEncuesta() {
       setStep('confirmacion');
     },
     onError: (err: any) => {
-      setErrorMsg(err?.message || 'Error al enviar la respuesta');
-      setStep('error');
+      const statusCode = err?.status_code ?? 0;
+      const message = err?.message || 'Error al enviar la respuesta';
+      if (statusCode === 400 || statusCode === 422) {
+        setCampoErrors(matchCampoErrors(message));
+        setErrorMsg(message);
+      } else {
+        setErrorMsg(message);
+        setStep('error');
+      }
     },
   });
+
+  function matchCampoErrors(msg: string): Record<string, string> {
+    for (const [campo, keywords] of Object.entries(CAMPO_ERROR_KEYWORDS)) {
+      const lower = msg.toLowerCase();
+      if (keywords.some((kw) => lower.includes(kw))) {
+        return { [campo]: msg };
+      }
+    }
+    return {};
+  }
 
   const handleVerificar = async () => {
     if (!documento.trim()) return;
@@ -59,10 +93,18 @@ export function ResponderEncuesta() {
       setVerificacion(res);
       if (res.puede_responder) {
         setStep('responder');
-        // init respuestas with empty values
+        const preguntas = res.preguntas || encuesta?.preguntas || [];
+        setPreguntasConDatos(preguntas);
         const init: Record<string, string> = {};
-        (encuesta?.preguntas || []).forEach((p: any) => {
-          init[String(p.id)] = '';
+        preguntas.forEach((p: any) => {
+          if (p.editable === false) {
+            init[String(p.id)] = p.valor_actual ?? '';
+          } else if (p.valor_actual != null && p.valor_actual !== undefined) {
+            const masked = String(p.valor_actual);
+            init[String(p.id)] = masked.includes('****') ? '' : masked;
+          } else {
+            init[String(p.id)] = '';
+          }
         });
         setRespuestas(init);
       } else if (res.ya_respondio) {
@@ -84,9 +126,15 @@ export function ResponderEncuesta() {
   };
 
   const handleResponder = () => {
-    // validate all questions answered
-    const allAnswered = Object.values(respuestas).every((v) => v.trim());
-    if (!allAnswered) {
+    setCampoErrors({});
+    setErrorMsg(null);
+    const editableQuestions = preguntasConDatos.filter(
+      (p: any) => p.editable !== false && p.requerida !== false
+    );
+    const allAnswered = editableQuestions
+      .map((p: any) => respuestas[String(p.id)])
+      .every((v: string) => v && v.trim());
+    if (editableQuestions.length > 0 && !allAnswered) {
       setErrorMsg('Por favor responda todas las preguntas antes de enviar.');
       return;
     }
@@ -165,26 +213,61 @@ export function ResponderEncuesta() {
             <Card className="p-6">
               <h2 className="font-semibold text-slate-700 mb-4">Preguntas</h2>
               <div className="space-y-4">
-                {(encuesta.preguntas || []).map((pregunta: any, idx: number) => (
+                {preguntasConDatos.map((pregunta: any, idx: number) => (
                   <div key={pregunta.id}>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       {idx + 1}. {pregunta.texto}
+                      {pregunta.campo && pregunta.editable === false && (
+                        <span className="ml-1.5 text-[10px] text-slate-400 font-normal">(informativo)</span>
+                      )}
                     </label>
-                    {pregunta.tipo === 'texto_libre' && (
+
+                    {pregunta.editable === false && (
+                      <div className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                        {pregunta.valor_actual ?? 'Sin información'}
+                      </div>
+                    )}
+
+                    {pregunta.editable !== false && pregunta.valor_actual != null && pregunta.valor_actual.includes('****') && (
+                      <div className="text-xs text-slate-400 mb-1">
+                        Valor actual: {pregunta.valor_actual}
+                      </div>
+                    )}
+
+                    {pregunta.editable !== false && pregunta.tipo === 'texto_libre' && (
                       <textarea
                         value={respuestas[String(pregunta.id)] || ''}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          const filter = CAMPO_INPUT_FILTERS[pregunta.campo];
+                          const val = filter ? filter(raw) : raw;
                           setRespuestas((prev) => ({
                             ...prev,
-                            [String(pregunta.id)]: e.target.value,
-                          }))
+                            [String(pregunta.id)]: val,
+                          }));
+                          if (campoErrors[pregunta.campo]) {
+                            setCampoErrors((prev) => {
+                              const next = { ...prev };
+                              delete next[pregunta.campo];
+                              return next;
+                            });
+                            setErrorMsg(null);
+                          }
+                        }}
+                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none min-h-[60px] resize-none ${
+                          campoErrors[pregunta.campo]
+                            ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
+                            : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary'
+                        }`}
+                        placeholder={
+                          pregunta.valor_actual && pregunta.valor_actual.includes('****')
+                            ? 'Ingresa el valor completo para actualizar'
+                            : 'Escribe tu respuesta...'
                         }
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[60px] resize-none"
-                        placeholder="Escribe tu respuesta..."
                         maxLength={500}
                       />
                     )}
-                    {pregunta.tipo === 'opcion_multiple' && (
+                    {pregunta.editable !== false && pregunta.tipo === 'opcion_multiple' && (
                       <div className="space-y-1">
                         {(pregunta.opciones || []).map((opt: string) => (
                           <label key={opt} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
@@ -193,20 +276,27 @@ export function ResponderEncuesta() {
                               name={`pregunta_${pregunta.id}`}
                               value={opt}
                               checked={respuestas[String(pregunta.id)] === opt}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 setRespuestas((prev) => ({
                                   ...prev,
                                   [String(pregunta.id)]: e.target.value,
-                                }))
-                              }
+                                }));
+                                if (campoErrors[pregunta.campo]) {
+                                  setCampoErrors((prev) => {
+                                    const next = { ...prev };
+                                    delete next[pregunta.campo];
+                                    return next;
+                                  });
+                                  setErrorMsg(null);
+                                }
+                              }}
                               className="accent-brand-primary"
                             />
                             {opt}
                           </label>
                         ))}
-                      </div>
-                    )}
-                    {pregunta.tipo === 'escala_likert' && (
+                      </div>)}
+                    {pregunta.editable !== false && pregunta.tipo === 'escala_likert' && (
                       <div className="flex gap-2">
                         {[1, 2, 3, 4, 5].map((val) => (
                           <button
@@ -228,6 +318,9 @@ export function ResponderEncuesta() {
                           </button>
                         ))}
                       </div>
+                    )}
+                    {campoErrors[pregunta.campo] && (
+                      <p className="text-xs text-red-500 mt-1">{campoErrors[pregunta.campo]}</p>
                     )}
                   </div>
                 ))}

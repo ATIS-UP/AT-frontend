@@ -14,6 +14,8 @@ export const preguntaBackendSchema = z.object({
   tipo: z.enum(PREGUNTA_TIPOS),
   opciones: z.array(z.string().min(1)).min(2).optional(),
   requerida: z.boolean().default(true),
+  campo: z.string().optional(),
+  editable: z.boolean().default(true),
 });
 
 export const preguntaFormSchema = z.object({
@@ -87,3 +89,18 @@ export const PREGUNTA_TIPO_LABELS: Record<PreguntaTipo, string> = {
   opcion_multiple: 'Opción múltiple',
   escala_likert: 'Escala 1-5',
 };
+
+export const CAMPO_ESTUDIANTE = {
+  email:             { label: 'Email',              tipoUI: 'texto_libre' },
+  telefono:          { label: 'Teléfono',           tipoUI: 'texto_libre' },
+  programa:          { label: 'Programa académico', tipoUI: 'texto_libre' },
+  semestre:          { label: 'Semestre',           tipoUI: 'opcion_multiple' },
+  estrato:           { label: 'Estrato socioeconómico', tipoUI: 'opcion_multiple' },
+  procedencia:       { label: 'Procedencia',        tipoUI: 'opcion_multiple' },
+  genero:            { label: 'Género',             tipoUI: 'opcion_multiple' },
+  ingreso_familiar:  { label: 'Ingreso familiar ($)', tipoUI: 'texto_libre' },
+} as const;
+
+export const READONLY_CAMPOS = ['programa', 'semestre'] as const;
+
+export type CampoEstudiante = keyof typeof CAMPO_ESTUDIANTE;

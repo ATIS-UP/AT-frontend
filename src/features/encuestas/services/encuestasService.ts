@@ -46,6 +46,16 @@ export interface VerificarEstudianteResponse {
   puede_responder: boolean;
   estudiante_nombre: string | null;
   estudiante_id: string | null;
+  preguntas?: Array<{
+    id: number;
+    texto: string;
+    tipo: string;
+    opciones?: string[];
+    campo?: string;
+    editable?: boolean;
+    valor_actual?: string | null;
+    requerida?: boolean;
+  }> | null;
 }
 
 export interface ResponderPublicoPayload {
@@ -112,4 +122,7 @@ export const encuestasService = {
 
   procesarVencimientos: () =>
     apiClient.post<ProcesarVencimientosResponse>('/api/encuestas/procesar-vencimientos', {}),
+
+  plantillaDatos: () =>
+    apiClient.post<Encuesta>('/api/encuestas/plantilla-datos', {}),
 };
