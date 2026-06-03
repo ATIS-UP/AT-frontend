@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { alertasService, AlertaListParams } from '../services/alertasService';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { useNotificationStore } from '@/shared/stores/notification.store';
 
 const ALL_KEY = ['alertas'] as const;
 

@@ -1,5 +1,5 @@
-import { SortableList } from '@/src/shared/components/ui/SortableList';
-import { SortableRow, DragHandle } from '@/src/shared/components/ui/SortableItem';
+import { SortableList } from '@/shared/components/ui/SortableList';
+import { SortableRow, DragHandle } from '@/shared/components/ui/SortableItem';
 import { OPCION_MAX_LENGTH } from './encuestaUtils';
 
 interface OpcionesEditorProps {

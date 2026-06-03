@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { parametrizacionService, Parametro, ParametroGroup } from '../features/parametrizacion/services/parametrizacionService';
-import { useNotificationStore } from '../shared/stores/notification.store';
+import { parametrizacionService, Parametro, ParametroGroup } from '../services/parametrizacionService';
+import { useNotificationStore } from '@/shared/stores/notification.store';
 import { Settings, Save, Loader2, Database } from 'lucide-react';
 
 export default function ParametrizacionPage() {

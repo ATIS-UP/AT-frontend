@@ -1,6 +1,6 @@
 import { Download, Users } from 'lucide-react';
-import { Modal } from '@/src/shared/components/ui/Modal';
-import { Button } from '@/src/shared/components/ui/Button';
+import { Modal } from '@/shared/components/ui/Modal';
+import { Button } from '@/shared/components/ui/Button';
 
 interface ResultadosModalProps {
   open: boolean;

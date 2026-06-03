@@ -1,10 +1,10 @@
-import { apiClient } from '@/src/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 import type {
   Encuesta,
   EncuestaCreate,
   EncuestaUpdate,
   Pregunta,
-} from '@/src/shared/schemas/encuesta.schema';
+} from '@/shared/schemas/encuesta.schema';
 
 export interface EncuestaListParams {
   page?: number;

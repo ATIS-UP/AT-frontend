@@ -4,7 +4,7 @@ import {
 } from 'recharts';
 import { BookOpen, Users, TrendingUp, DollarSign, RefreshCw } from 'lucide-react';
 import { useMateriasDificultad } from '../hooks/useMonitoreo';
-import { cn } from '@/src/lib/utils';
+import { cn } from '@/lib/utils';
 
 function StatCard({ icon: Icon, label, value, sub, color = 'brand' }: {
   icon: React.ElementType;

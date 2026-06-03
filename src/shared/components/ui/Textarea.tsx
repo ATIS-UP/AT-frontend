@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useController, type Control, type FieldValues, type Path, type RegisterOptions } from 'react-hook-form';
-import { cn } from '@/src/lib/utils';
-import { createCharFilter } from '@/src/lib/validation';
+import { cn } from '@/lib/utils';
+import { createCharFilter } from '@/lib/validation';
 
 interface TextareaProps<T extends FieldValues> {
   name: Path<T>;

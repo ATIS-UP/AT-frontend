@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CharType, ERROR_MSGS } from '@/src/lib/validation';
+import { CharType, ERROR_MSGS } from '@/lib/validation';
 
 export const usuarioCreateSchema = z.object({
   nombre: z

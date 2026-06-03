@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserPlus, AlertTriangle } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/src/shared/components/ui/Card';
-import { Button } from '@/src/shared/components/ui/Button';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/Card';
+import { Button } from '@/shared/components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 
 export const ApoyoDashboard = () => {

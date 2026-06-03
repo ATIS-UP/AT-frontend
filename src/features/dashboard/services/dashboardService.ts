@@ -1,4 +1,4 @@
-import { apiClient } from '@/src/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 
 export interface DashboardResumen {
   estudiantes: { total: number; activos: number };

@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useActividadesList, useEliminarActividad } from '../hooks/useActividades';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Card } from '@/src/shared/components/ui/Card';
-import { Modal } from '@/src/shared/components/ui/Modal';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
+import { Modal } from '@/shared/components/ui/Modal';
 import { CrearActividadModal } from './CrearActividadModal';
 import { DetalleActividadModal } from './DetalleActividadModal';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { useNotificationStore } from '@/shared/stores/notification.store';
 import {
   Calendar,
   MapPin,

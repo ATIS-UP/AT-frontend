@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CharType, ERROR_MSGS } from '@/src/lib/validation';
+import { CharType, ERROR_MSGS } from '@/lib/validation';
 
 export const actividadCreateSchema = z.object({
   tipo: z.string().min(1, 'Selecciona un tipo'),

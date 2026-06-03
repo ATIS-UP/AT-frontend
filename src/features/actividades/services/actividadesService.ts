@@ -1,4 +1,4 @@
-import { apiClient } from '@/src/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 import type { ActividadInstitucional, ActividadFormData, ActividadListResponse, ActividadListParams } from '../types/actividades.types';
 
 export const actividadesService = {

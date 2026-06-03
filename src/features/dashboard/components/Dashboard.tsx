@@ -9,7 +9,7 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import { dashboardService } from '../services/dashboardService';
-import { Badge } from '@/src/shared/components/ui/Badge';
+import { Badge } from '@/shared/components/ui/Badge';
 
 export const Dashboard = () => {
   const { data: resumen, isLoading: loadingResumen } = useQuery({

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { cn } from '@/src/lib/utils';
+import { cn } from '@/lib/utils';
 import type { UniqueIdentifier } from '@dnd-kit/core';
 import type { DraggableAttributes } from '@dnd-kit/core';
 import type { DraggableSyntheticListeners } from '@dnd-kit/core';

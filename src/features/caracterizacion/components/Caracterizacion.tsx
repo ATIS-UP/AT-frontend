@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import { Users, MapPin, UserCheck, RefreshCw } from 'lucide-react';
 import { useSocioeconomica, useProcedencia, useGenero } from '../hooks/useCaracterizacion';
-import { cn } from '@/src/lib/utils';
+import { cn } from '@/lib/utils';
 
 const COLORS_ESTRATO = ['#022448', '#1a4a7a', '#2d6abf', '#5a95d5', '#88b8e8', '#b8d4f0'];
 const COLOR_PROCEDENCIA = ['#022448', '#e2a83a'];

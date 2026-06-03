@@ -9,9 +9,9 @@ import {
 } from 'lucide-react';
 import { useTcbu, useCargaTcbu } from '../hooks/useBienestar';
 import { bienestarService, type CargaResult } from '../services/bienestarService';
-import { apiClient } from '@/src/lib/api-client';
-import { Button } from '@/src/shared/components/ui/Button';
-import { cn } from '@/src/lib/utils';
+import { apiClient } from '@/lib/api-client';
+import { Button } from '@/shared/components/ui/Button';
+import { cn } from '@/lib/utils';
 
 // ── colour palette: 10 distinct, accessible colours ──────────────────────────
 const SERIES_COLOR: Record<string, string> = {

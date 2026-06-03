@@ -1,18 +1,18 @@
 import React, { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { Modal } from '@/src/shared/components/ui/Modal';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Input } from '@/src/shared/components/ui/Input';
-import { Select } from '@/src/shared/components/ui/Select';
-import { Textarea } from '@/src/shared/components/ui/Textarea';
+import { Modal } from '@/shared/components/ui/Modal';
+import { Button } from '@/shared/components/ui/Button';
+import { Input } from '@/shared/components/ui/Input';
+import { Select } from '@/shared/components/ui/Select';
+import { Textarea } from '@/shared/components/ui/Textarea';
 import { useCrearActividad, useActualizarActividad } from '../hooks/useActividades';
 import { useSubirAnexo, useEliminarAnexo } from '../hooks/useAnexosActividades';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
-import { useAuthStore } from '@/src/features/auth/store/auth.store';
+import { useNotificationStore } from '@/shared/stores/notification.store';
+import { useAuthStore } from '@/features/auth/store/auth.store';
 import { AnexosUpload } from './AnexosUpload';
-import { cn } from '@/src/lib/utils';
-import { CharType } from '@/src/lib/validation';
-import { actividadCreateSchema } from '@/src/shared/schemas/actividad.schema';
+import { cn } from '@/lib/utils';
+import { CharType } from '@/lib/validation';
+import { actividadCreateSchema } from '@/shared/schemas/actividad.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   TIPO_OPTIONS,

@@ -2,10 +2,10 @@ import React, { useState, useCallback } from 'react';
 import { Upload, FileText, Download, Trash2, File, Image, FileSpreadsheet } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { artefactosService, ArtefactoListParams } from '../services/artefactosService';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
-import { Modal } from '@/src/shared/components/ui/Modal';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Badge } from '@/src/shared/components/ui/Badge';
+import { useNotificationStore } from '@/shared/stores/notification.store';
+import { Modal } from '@/shared/components/ui/Modal';
+import { Button } from '@/shared/components/ui/Button';
+import { Badge } from '@/shared/components/ui/Badge';
 
 const TIPO_OPTIONS = [
   { value: '', label: 'Todos' },

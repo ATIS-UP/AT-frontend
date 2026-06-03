@@ -1,8 +1,8 @@
 import React from 'react';
 import { X, User, FileText, Mail, Hash, BookOpen, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { cn } from '@/src/lib/utils';
-import { Badge } from '@/src/shared/components/ui/Badge';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/shared/components/ui/Badge';
 
 export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: any; isOpen: boolean; onClose: () => void }) => {
   if (!student) return null;

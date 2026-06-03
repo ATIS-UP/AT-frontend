@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bienestarService } from '../services/bienestarService';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { useNotificationStore } from '@/shared/stores/notification.store';
 
 export function useTcbu(params?: { periodo_inicio?: string; periodo_fin?: string }) {
   return useQuery({

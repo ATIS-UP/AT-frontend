@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAlertas, useAlertasStats, useCrearAlerta, useCrearActividad, useCambiarEstadoAlerta, useEliminarAlerta, useAlertaActividades } from '../hooks/useAlertas';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Card } from '@/src/shared/components/ui/Card';
-import { Badge } from '@/src/shared/components/ui/Badge';
-import { Modal } from '@/src/shared/components/ui/Modal';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
+import { Badge } from '@/shared/components/ui/Badge';
+import { Modal } from '@/shared/components/ui/Modal';
 import { AlertasStatsCards } from './alertas/AlertasStatsCards';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
-import { createCharFilter, CharType } from '@/src/lib/validation';
+import { useNotificationStore } from '@/shared/stores/notification.store';
+import { createCharFilter, CharType } from '@/lib/validation';
 import { Plus, Maximize2, Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { parametrizacionService } from '@/src/features/parametrizacion/services/parametrizacionService';
-import { apiClient } from '@/src/lib/api-client';
+import { parametrizacionService } from '@/features/parametrizacion/services/parametrizacionService';
+import { apiClient } from '@/lib/api-client';
 import * as Tabs from '@radix-ui/react-tabs';
 
 type NivelRiesgo = 'ROJO' | 'AMARILLO' | 'VERDE';

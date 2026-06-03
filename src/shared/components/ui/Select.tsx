@@ -1,6 +1,6 @@
 import React from 'react';
 import { useController, type Control, type FieldValues, type Path, type RegisterOptions } from 'react-hook-form';
-import { cn } from '@/src/lib/utils';
+import { cn } from '@/lib/utils';
 
 interface SelectOption {
   value: string;

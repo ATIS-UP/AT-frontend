@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { encuestasService } from '../services/encuestasService';
-import { createCharFilter, CharType } from '@/src/lib/validation';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Card } from '@/src/shared/components/ui/Card';
+import { createCharFilter, CharType } from '@/lib/validation';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
 import { FileText, CheckCircle, AlertCircle } from 'lucide-react';
 
 type Step = 'documento' | 'responder' | 'confirmacion' | 'error';

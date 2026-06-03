@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
-import { createCharFilter, CharType } from '@/src/lib/validation';
+import { createCharFilter, CharType } from '@/lib/validation';
 import { useAuthStore } from '../store/auth.store';
 import { useNavigate } from 'react-router-dom';
 

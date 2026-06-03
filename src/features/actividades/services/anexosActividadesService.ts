@@ -1,4 +1,4 @@
-import { apiClient } from '@/src/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 import type { AnexoActividad, AnexoActividadListResponse } from '../types/anexosActividades.types';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';

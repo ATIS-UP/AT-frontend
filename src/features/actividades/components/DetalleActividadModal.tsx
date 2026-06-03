@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Modal } from '@/src/shared/components/ui/Modal';
-import { Button } from '@/src/shared/components/ui/Button';
+import { Modal } from '@/shared/components/ui/Modal';
+import { Button } from '@/shared/components/ui/Button';
 import { useAnexosActividad } from '../hooks/useAnexosActividades';
 import { anexosActividadesService } from '../services/anexosActividadesService';
-import { apiClient } from '@/src/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 import {
   Calendar,
   Clock,

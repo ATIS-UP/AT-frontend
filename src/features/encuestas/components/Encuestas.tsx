@@ -5,17 +5,17 @@ import {
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { encuestasService } from '../services/encuestasService';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
-import { createCharFilter, CharType } from '@/src/lib/validation';
-import { Modal } from '@/src/shared/components/ui/Modal';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Badge } from '@/src/shared/components/ui/Badge';
-import { SortableList } from '@/src/shared/components/ui/SortableList';
-import { SortableRow, DragHandle } from '@/src/shared/components/ui/SortableItem';
+import { useNotificationStore } from '@/shared/stores/notification.store';
+import { createCharFilter, CharType } from '@/lib/validation';
+import { Modal } from '@/shared/components/ui/Modal';
+import { Button } from '@/shared/components/ui/Button';
+import { Badge } from '@/shared/components/ui/Badge';
+import { SortableList } from '@/shared/components/ui/SortableList';
+import { SortableRow, DragHandle } from '@/shared/components/ui/SortableItem';
 import {
   PREGUNTA_TIPOS, PREGUNTA_TIPO_LABELS,
   type Encuesta, type PreguntaForm, type PreguntaTipo,
-} from '@/src/shared/schemas/encuesta.schema';
+} from '@/shared/schemas/encuesta.schema';
 import { downloadCsv, slugify } from '../utils/csv';
 import { resultadosToCsv } from '../utils/resultadosToCsv';
 import { EncuestaCard } from './encuesta/EncuestaCard';

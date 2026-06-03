@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Rol } from '../../../shared/types/roles.types';
-import { apiClient } from '@/src/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 
 const TOKEN_KEY = 'sat_access_token';
 const REFRESH_TOKEN_KEY = 'sat_refresh_token';

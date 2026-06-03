@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { estudiantesService, EstudianteListParams } from '../services/estudiantesService';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { useNotificationStore } from '@/shared/stores/notification.store';
 
 const KEYS = {
   all: ['estudiantes'] as const,

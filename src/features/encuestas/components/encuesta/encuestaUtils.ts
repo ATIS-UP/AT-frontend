@@ -1,5 +1,5 @@
-import type { PreguntaForm } from '@/src/shared/schemas/encuesta.schema';
-import { PREGUNTA_TIPOS } from '@/src/shared/schemas/encuesta.schema';
+import type { PreguntaForm } from '@/shared/schemas/encuesta.schema';
+import { PREGUNTA_TIPOS } from '@/shared/schemas/encuesta.schema';
 
 export const PREGUNTA_MAX_LENGTH = 500;
 export const OPCION_MAX_LENGTH = 200;

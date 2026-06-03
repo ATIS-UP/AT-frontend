@@ -7,7 +7,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import { ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
+import { cn } from '@/lib/utils';
 import { EmptyState } from './EmptyState';
 
 interface DataTableProps<T> {

@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { useNotificationStore } from '@/shared/stores/notification.store';
 import { FileText, Image, File, X, Upload, FileUp } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
+import { cn } from '@/lib/utils';
 
 const MAX_FILES = 5;
 const MAX_SIZE_MB = 10;

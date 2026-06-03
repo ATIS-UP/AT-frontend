@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNovedadesCasos } from '../../hooks/useNovedadesCasos';
 import { useActualizarRegistro } from '../../hooks/useCasosEspeciales';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
-import { createCharFilter, CharType } from '@/src/lib/validation';
-import { Button } from '@/src/shared/components/ui/Button';
+import { useNotificationStore } from '@/shared/stores/notification.store';
+import { createCharFilter, CharType } from '@/lib/validation';
+import { Button } from '@/shared/components/ui/Button';
 import { TIPOS_REGISTRO, ESTADOS_REGISTRO, type RegistroCaso, type TipoRegistro, type EstadoRegistro } from '../../types/casosEspeciales.types';
 import { HistorialRegistro } from '../HistorialRegistro';
 import { OBSERVACIONES_MAX_LENGTH } from './casosUtils';

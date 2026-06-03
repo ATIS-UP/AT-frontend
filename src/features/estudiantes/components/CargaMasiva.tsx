@@ -2,9 +2,9 @@ import React, { useState, useCallback, useRef } from 'react';
 import { Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle, Download, X } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { estudiantesService } from '../services/estudiantesService';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
-import { Button } from '@/src/shared/components/ui/Button';
-import { cn } from '@/src/lib/utils';
+import { useNotificationStore } from '@/shared/stores/notification.store';
+import { Button } from '@/shared/components/ui/Button';
+import { cn } from '@/lib/utils';
 
 interface UploadResult {
   insertadas: number;

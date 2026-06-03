@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService, type Usuario } from '../services/adminService';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Card } from '@/src/shared/components/ui/Card';
-import { Badge } from '@/src/shared/components/ui/Badge';
-import { createCharFilter, CharType } from '@/src/lib/validation';
-import { Modal } from '@/src/shared/components/ui/Modal';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { Button } from '@/shared/components/ui/Button';
+import { Card } from '@/shared/components/ui/Card';
+import { Badge } from '@/shared/components/ui/Badge';
+import { createCharFilter, CharType } from '@/lib/validation';
+import { Modal } from '@/shared/components/ui/Modal';
+import { useNotificationStore } from '@/shared/stores/notification.store';
 import { Search, Plus, Pencil, Trash2, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ROLES = [

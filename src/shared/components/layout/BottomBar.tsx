@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, AlertTriangle, BarChart3, Settings, Shield } from 'lucide-react';
 import { useAuthStore } from '../../../features/auth/store/auth.store';
-import { cn } from '@/src/lib/utils';
+import { cn } from '@/lib/utils';
 
 interface BottomNavItem {
   icon: React.ElementType;

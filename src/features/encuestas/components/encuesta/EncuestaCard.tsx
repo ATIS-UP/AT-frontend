@@ -1,9 +1,9 @@
 import {
   FileText, Calendar, Pencil, Send, Lock, Trash2, Share2, BarChart2, Copy,
 } from 'lucide-react';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Badge } from '@/src/shared/components/ui/Badge';
-import type { Encuesta } from '@/src/shared/schemas/encuesta.schema';
+import { Button } from '@/shared/components/ui/Button';
+import { Badge } from '@/shared/components/ui/Badge';
+import type { Encuesta } from '@/shared/schemas/encuesta.schema';
 
 interface EncuestaCardProps {
   encuesta: Encuesta;

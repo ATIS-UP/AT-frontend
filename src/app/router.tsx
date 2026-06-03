@@ -14,7 +14,7 @@ const EstudiantesPage = lazy(() => import('../pages/EstudiantesPage'));
 const AlertasPage = lazy(() => import('../pages/AlertasPage'));
 const EncuestasPage = lazy(() => import('../pages/EncuestasPage'));
 const ArtefactosPage = lazy(() => import('../pages/ArtefactosPage'));
-const ParametrizacionPage = lazy(() => import('../pages/ParametrizacionPage'));
+const ParametrizacionPage = lazy(() => import('@/features/parametrizacion/components/ParametrizacionPage'));
 const PerfilPage = lazy(() => import('../pages/PerfilPage'));
 const CasosEspecialesPage = lazy(() => import('../pages/CasosEspecialesPage'));
 const ActividadesPage = lazy(() => import('../pages/ActividadesPage'));
@@ -22,7 +22,6 @@ const AdminPage = lazy(() => import('../pages/AdminPage'));
 const CaracterizacionPage = lazy(() => import('../pages/CaracterizacionPage'));
 const BienestarPage = lazy(() => import('../pages/BienestarPage'));
 const MonitoreoPage = lazy(() => import('../pages/MonitoreoPage'));
-const ParticipacionPage = lazy(() => import('../pages/ParticipacionPage'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[400px]">
@@ -102,18 +101,6 @@ export const router = createBrowserRouter([
             <ErrorBoundary>
               <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE]}>
                 <MonitoreoPage />
-              </RoleGuard>
-            </ErrorBoundary>
-          </Suspense>
-        ),
-      },
-      {
-        path: 'participacion',
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <ErrorBoundary>
-              <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE]}>
-                <ParticipacionPage />
               </RoleGuard>
             </ErrorBoundary>
           </Suspense>

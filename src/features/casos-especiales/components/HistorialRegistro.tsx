@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useObtenerHistorial, useAgregarHistorial } from '../hooks/useCasosEspeciales';
-import { Button } from '@/src/shared/components/ui/Button';
-import { Badge } from '@/src/shared/components/ui/Badge';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { Button } from '@/shared/components/ui/Button';
+import { Badge } from '@/shared/components/ui/Badge';
+import { useNotificationStore } from '@/shared/stores/notification.store';
 import { ACCIONES_HISTORIAL } from '../types/casosEspeciales.types';
-import { cn } from '@/src/lib/utils';
-import { createCharFilter, CharType } from '@/src/lib/validation';
+import { cn } from '@/lib/utils';
+import { createCharFilter, CharType } from '@/lib/validation';
 import { Plus } from 'lucide-react';
 
 export function HistorialRegistro({ registroId }: { registroId: string }) {

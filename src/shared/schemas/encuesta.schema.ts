@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CharType, ERROR_MSGS } from '@/src/lib/validation';
+import { CharType, ERROR_MSGS } from '@/lib/validation';
 
 export const PREGUNTA_TIPOS = ['texto_libre', 'opcion_multiple', 'escala_likert'] as const;
 export type PreguntaTipo = (typeof PREGUNTA_TIPOS)[number];

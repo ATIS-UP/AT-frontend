@@ -17,9 +17,8 @@ import {
   PieChart,
   HeartPulse,
   BookOpen,
-  UsersRound,
 } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
+import { cn } from '@/lib/utils';
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -119,7 +118,6 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
         lnk(PieChart, 'Caracterización', '/caracterizacion'),
         lnk(HeartPulse, 'Bienestar TCBU', '/bienestar'),
         lnk(BookOpen, 'Monitoreo Académico', '/monitoreo'),
-        lnk(UsersRound, 'Participación', '/participacion'),
         ...(isAdmin ? [lnk(Shield, 'Admin', '/admin')] : []),
       ];
 

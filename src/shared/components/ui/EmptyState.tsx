@@ -1,6 +1,6 @@
 import React from 'react';
 import { Package } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
+import { cn } from '@/lib/utils';
 import { Button } from './Button';
 
 interface EmptyStateProps {

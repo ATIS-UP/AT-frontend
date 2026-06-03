@@ -11,13 +11,13 @@ import {
   Trash2 as TrashIcon,
   UserX,
 } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
-import { createCharFilter, CharType } from '@/src/lib/validation';
+import { cn } from '@/lib/utils';
+import { createCharFilter, CharType } from '@/lib/validation';
 import { useEstudiantes, useCrearEstudiante, useActualizarEstudiante, useEliminarEstudiante, useConteoRelaciones, useCambiarEstadoEstudiante } from '../hooks/useEstudiantes';
-import { Modal } from '@/src/shared/components/ui/Modal';
-import { Button } from '@/src/shared/components/ui/Button';
+import { Modal } from '@/shared/components/ui/Modal';
+import { Button } from '@/shared/components/ui/Button';
 import { CargaMasiva } from './CargaMasiva';
-import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { useNotificationStore } from '@/shared/stores/notification.store';
 import { EMPTY_STUDENT_FORM, validateStudentForm, type StudentForm } from './estudiantes/studentFormUtils';
 
 interface StudentListProps {
