@@ -131,6 +131,8 @@ export function Encuestas() {
     const preguntas = form.preguntas.map((p) => {
       const out: Record<string, unknown> = { texto: p.texto.trim(), tipo: p.tipo, requerida: p.requerida };
       if (p.tipo === 'opcion_multiple' && p.opciones) out.opciones = p.opciones.map((o) => o.trim()).filter(Boolean);
+      if (p.campo) out.campo = p.campo;
+      if (p.editable !== undefined) out.editable = p.editable;
       return out;
     });
     return { titulo: form.titulo.trim(), descripcion: form.descripcion.trim() || undefined, preguntas, fecha_fin: fromLocalDateTimeInput(form.fecha_fin) };

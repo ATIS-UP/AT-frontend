@@ -33,6 +33,8 @@ export function backendPreguntasToForm(preguntas: any[]): PreguntaForm[] {
     tipo: (PREGUNTA_TIPOS as readonly string[]).includes(p.tipo) ? p.tipo : 'texto_libre',
     opciones: Array.isArray(p.opciones) ? p.opciones.map((o: any) => String(o)) : undefined,
     requerida: typeof p.requerida === 'boolean' ? p.requerida : true,
+    campo: typeof p.campo === 'string' ? p.campo : undefined,
+    editable: typeof p.editable === 'boolean' ? p.editable : undefined,
   }));
 }
 

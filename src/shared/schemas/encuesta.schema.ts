@@ -27,6 +27,8 @@ export const preguntaFormSchema = z.object({
   tipo: z.enum(PREGUNTA_TIPOS),
   opciones: z.array(z.string().min(1)).optional(),
   requerida: z.boolean().default(true),
+  campo: z.string().optional(),
+  editable: z.boolean().optional(),
 });
 
 export const encuestaCreateSchema = z.object({
