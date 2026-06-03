@@ -9,7 +9,8 @@ import { cn } from '@/src/lib/utils';
 interface UploadResult {
   insertadas: number;
   actualizadas: number;
-  errores: Array<{ fila: number; campo?: string; error?: string; mensaje?: string }>;
+  errores: number;
+  detalle_errores: Array<{ fila: number; campo?: string; error?: string; mensaje?: string }>;
 }
 
 type Step = 'select' | 'preview' | 'uploading' | 'result';
@@ -81,7 +82,7 @@ export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
       setStep('result');
       queryClient.invalidateQueries({ queryKey: ['estudiantes'] });
       notify({
-        type: data.errores.length > 0 ? 'warning' : 'success',
+        type: data.detalle_errores.length > 0 ? 'warning' : 'success',
         message: `Carga completada: ${data.insertadas} insertadas, ${data.actualizadas} actualizadas`,
       });
     },
@@ -265,21 +266,21 @@ export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
               <p className="text-2xl font-black text-sky-700">{result.actualizadas}</p>
               <p className="text-xs text-sky-600 font-medium">Actualizadas</p>
             </div>
-            <div className={cn('text-center p-4 border rounded-lg', result.errores.length ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100')}>
-              <XCircle className={cn('w-5 h-5 mx-auto mb-1', result.errores.length ? 'text-red-500' : 'text-slate-300')} />
-              <p className={cn('text-2xl font-black', result.errores.length ? 'text-red-700' : 'text-slate-400')}>{result.errores.length}</p>
-              <p className={cn('text-xs font-medium', result.errores.length ? 'text-red-600' : 'text-slate-400')}>Errores</p>
+            <div className={cn('text-center p-4 border rounded-lg', result.detalle_errores.length ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100')}>
+              <XCircle className={cn('w-5 h-5 mx-auto mb-1', result.detalle_errores.length ? 'text-red-500' : 'text-slate-300')} />
+              <p className={cn('text-2xl font-black', result.detalle_errores.length ? 'text-red-700' : 'text-slate-400')}>{result.detalle_errores.length}</p>
+              <p className={cn('text-xs font-medium', result.detalle_errores.length ? 'text-red-600' : 'text-slate-400')}>Errores</p>
             </div>
           </div>
 
-          {result.errores.length > 0 && (
+          {result.detalle_errores.length > 0 && (
             <div className="border border-red-200 rounded-lg overflow-hidden">
               <div className="flex items-center gap-1.5 px-3 py-2 bg-red-50 text-xs font-bold text-red-600 border-b border-red-100">
                 <AlertTriangle className="w-3.5 h-3.5" />
-                {result.errores.length} error{result.errores.length !== 1 ? 'es' : ''} encontrado{result.errores.length !== 1 ? 's' : ''}
+                {result.detalle_errores.length} error{result.detalle_errores.length !== 1 ? 'es' : ''} encontrado{result.detalle_errores.length !== 1 ? 's' : ''}
               </div>
               <ul className="divide-y divide-red-50 max-h-36 overflow-y-auto">
-                {result.errores.map((err, i) => (
+                {result.detalle_errores.map((err, i) => (
                   <li key={i} className="px-3 py-1.5 text-xs text-red-700 font-mono">
                     Fila {err.fila}{err.campo ? ` · ${err.campo}` : ''}: {err.error ?? err.mensaje ?? 'error desconocido'}
                   </li>

@@ -27,7 +27,12 @@ export const Dashboard = () => {
     queryFn: () => dashboardService.recientes(10),
   });
 
-  const isLoading = loadingResumen || loadingEstados || loadingRecientes;
+  const { data: actividadesData, isLoading: loadingActividades } = useQuery({
+    queryKey: ['dashboard', 'actividades'],
+    queryFn: () => dashboardService.actividadesRecientes(5),
+  });
+
+  const isLoading = loadingResumen || loadingEstados || loadingRecientes || loadingActividades;
 
   // extract real values
   const estudiantesActivos = resumen?.estudiantes?.activos ?? 0;
@@ -271,6 +276,61 @@ export const Dashboard = () => {
                       <td className="py-3 px-6 text-xs text-slate-500">{alerta.periodo}</td>
                       <td className="py-3 px-6 text-xs text-slate-400">
                         {alerta.created_at ? new Date(alerta.created_at).toLocaleDateString('es-CO') : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* actividades recientes */}
+      <div className="flex flex-col gap-4">
+        <h2 className="font-display text-lg font-bold text-slate-900 flex items-center gap-2">
+          Actividades Recientes
+          {actividadesData && actividadesData.actividades.length > 0 && (
+            <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded-sm font-bold uppercase tracking-tight">
+              {actividadesData.actividades.length} recientes
+            </span>
+          )}
+        </h2>
+
+        {!actividadesData || actividadesData.actividades.length === 0 ? (
+          <p className="text-sm text-slate-400">No hay actividades recientes registradas.</p>
+        ) : (
+          <div className="glass-panel rounded-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px] bg-slate-50/50">
+                    <th className="pb-3 pt-4 px-6 font-semibold">Tipo</th>
+                    <th className="pb-3 pt-4 px-6 font-semibold">Estado</th>
+                    <th className="pb-3 pt-4 px-6 font-semibold">Encargado</th>
+                    <th className="pb-3 pt-4 px-6 font-semibold">Modalidad</th>
+                    <th className="pb-3 pt-4 px-6 font-semibold">Fecha</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {actividadesData.actividades.map((act, idx) => (
+                    <tr key={act.id ?? idx} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="py-3 px-6">
+                        <Badge variant="outline">{act.tipo}</Badge>
+                      </td>
+                      <td className="py-3 px-6">
+                        <Badge variant={
+                          act.estado === 'EN_CURSO' ? 'warning' :
+                          act.estado === 'FINALIZADA' ? 'success' :
+                          act.estado === 'CANCELADA' ? 'error' : 'default'
+                        }>
+                          {act.estado?.replace('_', ' ')}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-6 text-sm text-slate-700">{act.encargado}</td>
+                      <td className="py-3 px-6 text-xs text-slate-500">{act.modalidad}</td>
+                      <td className="py-3 px-6 text-xs text-slate-400">
+                        {act.created_at ? new Date(act.created_at).toLocaleDateString('es-CO') : '—'}
                       </td>
                     </tr>
                   ))}

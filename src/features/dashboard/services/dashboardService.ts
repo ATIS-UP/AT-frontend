@@ -27,6 +27,16 @@ export interface DashboardRecientes {
   alertas_recientes: AlertaReciente[];
 }
 
+export interface ActividadResumen {
+  id: string;
+  tipo: string;
+  estado: string;
+  descripcion: string;
+  encargado: string;
+  modalidad: string;
+  created_at: string;
+}
+
 export const dashboardService = {
   resumen: () =>
     apiClient.get<DashboardResumen>('/api/dashboard/resumen'),
@@ -36,4 +46,7 @@ export const dashboardService = {
 
   recientes: (limite = 10) =>
     apiClient.get<DashboardRecientes>('/api/dashboard/recientes', { limite }),
+
+  actividadesRecientes: (limite = 5) =>
+    apiClient.get<{ actividades: ActividadResumen[]; total: number }>('/api/actividades-institucionales', { pagina: 1, por_pagina: limite }),
 };

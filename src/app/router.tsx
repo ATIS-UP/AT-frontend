@@ -21,6 +21,8 @@ const ActividadesPage = lazy(() => import('../pages/ActividadesPage'));
 const AdminPage = lazy(() => import('../pages/AdminPage'));
 const CaracterizacionPage = lazy(() => import('../pages/CaracterizacionPage'));
 const BienestarPage = lazy(() => import('../pages/BienestarPage'));
+const MonitoreoPage = lazy(() => import('../pages/MonitoreoPage'));
+const ParticipacionPage = lazy(() => import('../pages/ParticipacionPage'));
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[400px]">
@@ -88,6 +90,30 @@ export const router = createBrowserRouter([
             <ErrorBoundary>
               <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE]}>
                 <BienestarPage />
+              </RoleGuard>
+            </ErrorBoundary>
+          </Suspense>
+        ),
+      },
+      {
+        path: 'monitoreo',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <ErrorBoundary>
+              <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE]}>
+                <MonitoreoPage />
+              </RoleGuard>
+            </ErrorBoundary>
+          </Suspense>
+        ),
+      },
+      {
+        path: 'participacion',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <ErrorBoundary>
+              <RoleGuard allowedRoles={[Rol.ADMINISTRADOR, Rol.DOCENTE]}>
+                <ParticipacionPage />
               </RoleGuard>
             </ErrorBoundary>
           </Suspense>

@@ -713,17 +713,26 @@ function RegistroCasoForm({
   const [form, setForm] = useState({
     tipo: registro.tipo,
     estado: registro.estado,
+    novedad_id: registro.novedad_id || '',
     observaciones: registro.observaciones || '',
   });
-  const [originalForm, setOriginalForm] = useState({ tipo: registro.tipo, estado: registro.estado, observaciones: registro.observaciones || '' });
+
+  const { data: novedades } = useNovedadesCasos(form.tipo);
+  const novedadesParaTipo = novedades || [];
+  const [originalForm, setOriginalForm] = useState({
+    tipo: registro.tipo,
+    estado: registro.estado,
+    novedad_id: registro.novedad_id || '',
+    observaciones: registro.observaciones || '',
+  });
 
   React.useEffect(() => {
     if (prevRegistroIdRef.current !== registro.id) {
       prevRegistroIdRef.current = registro.id;
-      setForm({ tipo: registro.tipo, estado: registro.estado, observaciones: registro.observaciones || '' });
-      setOriginalForm({ tipo: registro.tipo, estado: registro.estado, observaciones: registro.observaciones || '' });
+      setForm({ tipo: registro.tipo, estado: registro.estado, novedad_id: registro.novedad_id || '', observaciones: registro.observaciones || '' });
+      setOriginalForm({ tipo: registro.tipo, estado: registro.estado, novedad_id: registro.novedad_id || '', observaciones: registro.observaciones || '' });
     }
-  }, [registro.id, registro.tipo, registro.estado, registro.observaciones]);
+  }, [registro.id, registro.tipo, registro.estado, registro.novedad_id, registro.observaciones]);
 
   const notification = useNotificationStore();
   const actualizarRegistro = useActualizarRegistro();
@@ -737,8 +746,10 @@ function RegistroCasoForm({
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    const payload: Record<string, any> = { tipo: form.tipo, estado: form.estado, observaciones: form.observaciones };
+    if (form.novedad_id) payload.novedad_id = form.novedad_id;
     actualizarRegistro.mutate(
-      { id: registro.id, data: form },
+      { id: registro.id, data: payload },
       {
         onSuccess: () => {
           notification.add({ type: 'success', message: 'Registro actualizado' });
@@ -800,15 +811,25 @@ function RegistroCasoForm({
         </div>
       </div>
 
-      {registro.novedad && (
-        <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
-          <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">Novedad</p>
-          <p className="text-sm font-medium text-blue-800">{registro.novedad.nombre}</p>
-          {registro.novedad.descripcion && (
-            <p className="text-xs text-blue-700 mt-1 italic">{registro.novedad.descripcion}</p>
-          )}
-        </div>
-      )}
+      <div>
+        <label className="block text-xs font-bold text-slate-600 mb-1">Novedad</label>
+        <select
+          value={form.novedad_id}
+          onChange={(e) => setForm({ ...form, novedad_id: e.target.value })}
+          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none"
+        >
+          <option value="">Seleccione una novedad</option>
+          {novedadesParaTipo.map((n) => (
+            <option key={n.id} value={n.id}>{n.nombre}</option>
+          ))}
+        </select>
+        {(() => {
+          const selected = novedadesParaTipo.find(n => n.id === form.novedad_id);
+          return selected?.descripcion ? (
+            <p className="text-xs text-slate-500 mt-1 italic">{selected.descripcion}</p>
+          ) : null;
+        })()}
+      </div>
 
       <form onSubmit={handleSave} className="space-y-4">
         <div className="grid grid-cols-2 gap-3">

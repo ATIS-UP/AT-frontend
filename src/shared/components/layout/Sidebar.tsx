@@ -16,6 +16,8 @@ import {
   Shield,
   PieChart,
   HeartPulse,
+  BookOpen,
+  UsersRound,
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
@@ -116,6 +118,8 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
         sec('Reportes'),
         lnk(PieChart, 'Caracterización', '/caracterizacion'),
         lnk(HeartPulse, 'Bienestar TCBU', '/bienestar'),
+        lnk(BookOpen, 'Monitoreo Académico', '/monitoreo'),
+        lnk(UsersRound, 'Participación', '/participacion'),
         ...(isAdmin ? [lnk(Shield, 'Admin', '/admin')] : []),
       ];
 

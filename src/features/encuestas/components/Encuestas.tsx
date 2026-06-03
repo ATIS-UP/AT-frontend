@@ -477,6 +477,11 @@ export function Encuestas() {
                 <Badge variant={getEstadoVariant(encuesta.estado)}>
                   {getEstadoLabel(encuesta.estado)}
                 </Badge>
+                {encuesta.estado === 'PUBLICADA' && encuesta.fecha_inicio && (
+                  <Badge variant="info">
+                    Publicada: {new Date(encuesta.fecha_inicio).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })}
+                  </Badge>
+                )}
                 {encuesta.estado === 'PUBLICADA' && encuesta.fecha_fin && (
                   <Badge variant="warning">
                     Cierra: {new Date(encuesta.fecha_fin).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })}

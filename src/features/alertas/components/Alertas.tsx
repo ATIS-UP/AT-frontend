@@ -667,7 +667,8 @@ export function Alertas() {
         }}
         title={descripcionAmpliada?.titulo || 'Descripción de la alerta'}
         description="Descripción completa"
-        className="max-w-2xl"
+        className="max-w-4xl"
+        bodyClassName="max-h-[85vh]"
       >
         <div className="prose prose-sm max-w-none">
           <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
@@ -716,8 +717,8 @@ function DetalleAlertaModal({
       onOpenChange={onOpenChange}
       title={`Detalle de Alerta`}
       description={`Alerta #${alerta.id?.slice(0, 8)} - ${alerta.estudiante_nombre || alerta.estudiante_id}`}
-      className="max-w-3xl"
-      bodyClassName="max-h-[80vh]"
+      className="max-w-5xl"
+      bodyClassName="max-h-[85vh]"
     >
       <Tabs.Root value={tab} onValueChange={onTabChange}>
         <Tabs.List className="flex border-b border-slate-200 mb-4">

@@ -29,7 +29,7 @@ export const estudiantesService = {
     apiClient.get<any[]>(`/api/estudiantes/${id}/historial`),
 
   cargaMasiva: (file: File) =>
-    apiClient.upload<{ insertadas: number; actualizadas: number; errores: any[] }>(
+    apiClient.upload<{ insertadas: number; actualizadas: number; errores: number; detalle_errores: any[] }>(
       '/api/estudiantes/carga-masiva',
       file,
     ),
