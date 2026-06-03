@@ -18,21 +18,11 @@ import { Modal } from '@/src/shared/components/ui/Modal';
 import { Button } from '@/src/shared/components/ui/Button';
 import { CargaMasiva } from './CargaMasiva';
 import { useNotificationStore } from '@/src/shared/stores/notification.store';
+import { EMPTY_STUDENT_FORM, validateStudentForm, type StudentForm } from './estudiantes/studentFormUtils';
 
 interface StudentListProps {
   onSelectStudent: (student: any) => void;
 }
-
-const EMPTY_FORM = {
-  nombres: '',
-  apellidos: '',
-  codigo: '',
-  email: '',
-  programa: '',
-  semestre: 1,
-  documento: '',
-  telefono: '',
-};
 
 export const StudentList = ({ onSelectStudent }: StudentListProps) => {
   const [page, setPage] = useState(1);
@@ -62,43 +52,8 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
   const cambiarEstado = useCambiarEstadoEstudiante();
   const notify = useNotificationStore.getState().add;
 
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState<StudentForm>(EMPTY_STUDENT_FORM);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
-  const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (!form.nombres.trim()) errors.nombres = 'Requerido';
-    else if (!/^[a-zA-ZáéíóúüñÑÁÉÍÓÚÜ\s]+$/.test(form.nombres)) errors.nombres = 'Solo letras';
-    else if (form.nombres.length > 100) errors.nombres = 'Máx 100 caracteres';
-
-    if (!form.apellidos.trim()) errors.apellidos = 'Requerido';
-    else if (!/^[a-zA-ZáéíóúüñÑÁÉÍÓÚÜ\s]+$/.test(form.apellidos)) errors.apellidos = 'Solo letras';
-    else if (form.apellidos.length > 100) errors.apellidos = 'Máx 100 caracteres';
-
-    if (!form.codigo.trim()) errors.codigo = 'Requerido';
-    else if (!/^\d+$/.test(form.codigo)) errors.codigo = 'Solo números';
-    else if (form.codigo.length > 20) errors.codigo = 'Máx 20 caracteres';
-
-    if (form.email && form.email.trim()) {
-      if (!form.email.includes('@')) errors.email = 'Debe contener @';
-      else if (form.email.length > 100) errors.email = 'Máx 100 caracteres';
-    }
-
-    if (!form.documento.trim()) errors.documento = 'Requerido';
-    else if (!/^\d+$/.test(form.documento)) errors.documento = 'Solo números';
-    else if (form.documento.length > 100) errors.documento = 'Máx 100 caracteres';
-
-    if (!form.telefono.trim()) errors.telefono = 'Requerido';
-    else if (!/^\d+$/.test(form.telefono)) errors.telefono = 'Solo números';
-    else if (form.telefono.length > 100) errors.telefono = 'Máx 100 caracteres';
-
-    if (!form.programa.trim()) errors.programa = 'Requerido';
-    else if (form.programa.length > 100) errors.programa = 'Máx 100 caracteres';
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
 
   const estudiantes = data?.estudiantes ?? [];
   const total = data?.total ?? 0;
@@ -112,7 +67,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
   };
 
   const openCreateModal = () => {
-    setForm(EMPTY_FORM);
+    setForm(EMPTY_STUDENT_FORM);
     setEditingStudent(null);
     setShowCreateModal(true);
   };
@@ -134,7 +89,9 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
 
   const handleSubmitStudent = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    const errors = validateStudentForm(form);
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
     if (isEditing && editingStudent) {
       const payload: Record<string, unknown> = {};
@@ -153,7 +110,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
           onSuccess: () => {
             setShowCreateModal(false);
             setEditingStudent(null);
-            setForm(EMPTY_FORM);
+            setForm(EMPTY_STUDENT_FORM);
           },
         },
       );
@@ -170,7 +127,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
         setShowConfirmCreateModal(false);
         setShowCreateModal(false);
         setPendingCreateData(null);
-        setForm(EMPTY_FORM);
+        setForm(EMPTY_STUDENT_FORM);
       },
     });
   };
@@ -184,7 +141,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
           setShowReactivarModal(false);
           setShowCreateModal(false);
           setEditingStudent(null);
-          setForm(EMPTY_FORM);
+          setForm(EMPTY_STUDENT_FORM);
         },
       },
     );
@@ -371,7 +328,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
       <Modal
         open={showCreateModal}
         onOpenChange={(open) => {
-          if (!open) { setEditingStudent(null); setForm(EMPTY_FORM); }
+          if (!open) { setEditingStudent(null); setForm(EMPTY_STUDENT_FORM); }
           setShowCreateModal(open);
         }}
         title={isEditing ? 'Editar Estudiante' : 'Nuevo Estudiante'}
@@ -503,7 +460,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
           )}
 
           <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={() => { setShowCreateModal(false); setEditingStudent(null); setForm(EMPTY_FORM); setFormErrors({}); }}>
+            <Button type="button" variant="outline" onClick={() => { setShowCreateModal(false); setEditingStudent(null); setForm(EMPTY_STUDENT_FORM); setFormErrors({}); }}>
               Cancelar
             </Button>
             <Button type="submit" isLoading={crearEstudiante.isPending || actualizarEstudiante.isPending}>
