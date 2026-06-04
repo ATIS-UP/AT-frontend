@@ -62,7 +62,7 @@ export function RegistroCasoForm({
       {
         onSuccess: () => { notification.add({ type: 'success', message: 'Registro actualizado' }); onClose(); },
         onError: (error: any) => {
-          const msg = error?.response?.data?.detail || 'Error al actualizar';
+          const msg = error?.message || error?.detail || 'Error al actualizar';
           notification.add({ type: 'error', message: msg });
         },
       }

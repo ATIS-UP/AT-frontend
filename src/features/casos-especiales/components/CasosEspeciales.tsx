@@ -244,8 +244,9 @@ export function CasosEspeciales() {
           notification.add({ type: 'success', message: 'Registro creado exitosamente' });
           refetch();
         },
-        onError: () => {
-          notification.add({ type: 'error', message: 'Error al crear el registro' });
+        onError: (error: any) => {
+          const msg = error?.message || error?.detail || 'Error al crear el registro';
+          notification.add({ type: 'error', message: msg });
         },
       }
     );
@@ -268,9 +269,10 @@ export function CasosEspeciales() {
         notification.add({ type: 'success', message: 'Registro eliminado exitosamente' });
         refetch();
       },
-      onError: () => {
+      onError: (error: any) => {
         setDeleteConfirmId(null);
-        notification.add({ type: 'error', message: 'Error al eliminar el registro' });
+        const msg = error?.message || error?.detail || 'Error al eliminar el registro';
+        notification.add({ type: 'error', message: msg });
       },
     });
   };

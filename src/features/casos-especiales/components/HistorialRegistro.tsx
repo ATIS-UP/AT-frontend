@@ -34,7 +34,7 @@ export function HistorialRegistro({ registroId }: { registroId: string }) {
           notification.add({ type: 'success', message: 'Seguimiento agregado' });
         },
         onError: (e: any) => {
-          const msg = e?.response?.data?.detail || 'Error al agregar seguimiento';
+          const msg = e?.message || e?.detail || 'Error al agregar seguimiento';
           notification.add({ type: 'error', message: msg });
         },
       }
