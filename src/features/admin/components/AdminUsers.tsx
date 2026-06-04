@@ -214,7 +214,7 @@ export function AdminUsers() {
             <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Rol</label>
               <select value={form.rol} onChange={(e) => setForm({ ...form, rol: e.target.value })}

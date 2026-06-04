@@ -94,7 +94,7 @@ export const Dashboard = () => {
     <div className="flex flex-col gap-6">
       {/* metrics row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel rounded-card p-5 flex flex-col justify-between h-[120px]">
+        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[120px]">
           <h3 className="text-slate-500 font-display text-[15px] font-semibold">Estudiantes activos</h3>
           <div className="flex items-end justify-between">
             <span className="font-display text-2xl font-bold text-brand-primary tracking-tight">
@@ -104,7 +104,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-card p-5 flex flex-col justify-between h-[120px]">
+        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[120px]">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-slate-500 font-display text-[15px] font-semibold">Encuestas</h3>
             <ClipboardList className="w-4 h-4 text-slate-400" />
@@ -131,7 +131,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-card p-5 flex flex-col justify-between h-[120px]">
+        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[120px]">
           <h3 className="text-slate-500 font-display text-[15px] font-semibold">Casos en seguimiento</h3>
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline gap-1">
@@ -151,7 +151,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-card p-5 flex flex-col justify-between h-[120px] relative overflow-hidden">
+        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[120px] relative overflow-hidden">
           <h3 className="text-slate-500 font-display text-[15px] font-semibold">Alertas resueltas</h3>
           <div className="flex items-end justify-between mt-auto">
             <div className="flex items-baseline gap-1">
@@ -170,7 +170,7 @@ export const Dashboard = () => {
 
       {/* charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-panel rounded-card p-6 h-[340px] flex flex-col">
+        <div className="glass-panel rounded-card p-6 min-h-[340px] flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h2 className="font-display text-lg font-bold text-slate-900 tracking-tight">Tendencia de alertas por período</h2>
             <button className="text-slate-400 hover:text-slate-600 transition-colors">
@@ -202,7 +202,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-card p-6 h-[340px] flex flex-col">
+        <div className="glass-panel rounded-card p-6 min-h-[340px] flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h2 className="font-display text-lg font-bold text-slate-900 tracking-tight">Distribución por nivel de riesgo</h2>
             <button className="text-slate-400 hover:text-slate-600 transition-colors">

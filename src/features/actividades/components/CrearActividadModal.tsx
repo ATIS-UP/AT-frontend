@@ -230,7 +230,7 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
         {/* ── Información general ── */}
         <div className={sectionClass}>
           <p className={sectionTitleClass}>Información general</p>
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <Select
               name="tipo"
               label="Tipo de actividad"
@@ -260,7 +260,7 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
         {/* ── Programación ── */}
         <div className={sectionClass}>
           <p className={sectionTitleClass}>Programación</p>
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="flex flex-col gap-2">
               <Input
                 name="fecha_inicio"
@@ -310,7 +310,7 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
             charType={CharType.LETTERS}
           />
           {isEditing && (
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <Select
                 name="estado"
                 label="Estado"

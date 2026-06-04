@@ -446,7 +446,7 @@ export function Alertas() {
               <p className="text-xs text-red-500 mt-1">❌ {errorEstudiante}</p>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Tipo</label>
               <select
@@ -583,7 +583,7 @@ export function Alertas() {
         description={selectedEstadoAlerta ? `Alerta #${selectedEstadoAlerta.id.slice(0, 8)} - ${selectedEstadoAlerta.estudiante_nombre || selectedEstadoAlerta.estudiante_id}` : ''}
       >
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg">
             <div>
               <p className="text-xs text-slate-500">Estado actual</p>
               <Badge variant={getTrackingVariant(selectedEstadoAlerta?.estado_seguimiento)}>
@@ -744,7 +744,7 @@ function DetalleAlertaModal({
         </Tabs.List>
 
         <Tabs.Content value="datos" className="space-y-4 outline-none">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-slate-50 p-3 rounded-lg">
               <p className="text-xs text-slate-500">Estudiante</p>
               <p className="text-sm font-medium text-slate-800">{alerta.estudiante_nombre || `ID: ${alerta.estudiante_id}`}</p>

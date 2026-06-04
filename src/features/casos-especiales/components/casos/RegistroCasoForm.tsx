@@ -90,7 +90,7 @@ export function RegistroCasoForm({
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg">
         <div><p className="text-xs text-slate-500">Documento</p><p className="text-sm font-medium">{registro.estudiante.documento || registro.estudiante.codigo}</p></div>
         <div><p className="text-xs text-slate-500">Nombre</p><p className="text-sm font-medium">{registro.estudiante.nombres}</p></div>
         <div><p className="text-xs text-slate-500">Apellido</p><p className="text-sm font-medium">{registro.estudiante.apellidos}</p></div>
@@ -110,7 +110,7 @@ export function RegistroCasoForm({
       </div>
 
       <form onSubmit={handleSave} className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Tipo</label>
             <select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value as TipoRegistro })} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none">

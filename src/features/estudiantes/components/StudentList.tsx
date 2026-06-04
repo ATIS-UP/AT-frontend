@@ -353,7 +353,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
         className="max-w-2xl"
       >
         <form onSubmit={handleSubmitStudent} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Nombres *</label>
               <input
@@ -379,7 +379,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
               {formErrors.apellidos && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.apellidos}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Documento *</label>
               <input
@@ -405,7 +405,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
               {formErrors.email && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.email}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Teléfono *</label>
               <input
@@ -419,7 +419,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
               {formErrors.telefono && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.telefono}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Programa *</label>
               <SearchableSelect
@@ -634,7 +634,7 @@ const ActionStudentModal = ({ student, open, onOpenChange, onEliminarTodo, onIna
           ) : (
             <>
               <p className="text-sm font-semibold text-slate-700 mb-2">Datos asociados:</p>
-              <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
                 <span>Alertas: <strong>{conteo?.alertas ?? 0}</strong></span>
                 <span>Casos: <strong>{conteo?.casos ?? 0}</strong></span>
                 <span>Inscripciones: <strong>{conteo?.inscripciones ?? 0}</strong></span>

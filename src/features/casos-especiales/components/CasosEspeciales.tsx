@@ -555,7 +555,7 @@ export function CasosEspeciales() {
         description={`Crear nuevo registro para ${selectedEstudiante?.nombres} ${selectedEstudiante?.apellidos}`}
       >
         <form onSubmit={handleCreateRegistro} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg">
             <div>
               <p className="text-xs text-slate-500">Documento</p>
               <p className="text-sm font-medium">{selectedEstudiante?.documento || selectedEstudiante?.codigo}</p>

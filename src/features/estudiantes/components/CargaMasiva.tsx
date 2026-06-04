@@ -254,7 +254,7 @@ export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
       {/* ── step: result ─────────────────────────────────────── */}
       {step === 'result' && result && (
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="text-center p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
               <CheckCircle className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
               <p className="text-2xl font-black text-emerald-700">{result.insertadas}</p>

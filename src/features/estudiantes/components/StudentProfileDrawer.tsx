@@ -70,7 +70,7 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
                   <FileText className="w-4 h-4 text-brand-primary" />
                   Información Académica
                 </h3>
-                <div className="grid grid-cols-2 gap-y-4 gap-x-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Programa</label>
                     <p className="text-sm font-semibold text-slate-700">{student.programa || '—'}</p>
@@ -96,7 +96,7 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
                   <TrendingUp className="w-4 h-4 text-brand-primary" />
                   Rendimiento Académico
                 </h3>
-                <div className="grid grid-cols-2 gap-y-4 gap-x-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Promedio General</label>
                     <p className="text-sm font-semibold text-slate-700">{formatPromedio(student.promedio_general)}</p>

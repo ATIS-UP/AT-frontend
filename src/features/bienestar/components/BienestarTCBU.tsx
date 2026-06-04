@@ -166,7 +166,7 @@ function UploadPanel() {
       {/* ── result ── */}
       {step === 'done' && result && (
         <div className="space-y-3">
-          <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2">
               <p className="text-lg font-bold text-emerald-700">{result.insertados}</p>
               <p className="text-[10px] text-emerald-600 font-medium">Insertados</p>
