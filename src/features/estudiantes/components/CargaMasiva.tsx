@@ -17,7 +17,6 @@ type Step = 'select' | 'preview' | 'uploading' | 'result';
 
 // ── column spec used both for the inline table and the doc comment ────────────
 const COLUMNS = [
-  { key: 'codigo',    label: 'codigo',    req: true,  example: '20261001' },
   { key: 'nombres',   label: 'nombres',   req: true,  example: 'María' },
   { key: 'apellidos', label: 'apellidos', req: true,  example: 'González' },
   { key: 'documento', label: 'documento', req: false, example: '1098765432' },

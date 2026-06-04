@@ -91,7 +91,7 @@ export function RegistroCasoForm({
       )}
 
       <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg">
-        <div><p className="text-xs text-slate-500">Código</p><p className="text-sm font-medium">{registro.estudiante.codigo}</p></div>
+        <div><p className="text-xs text-slate-500">Documento</p><p className="text-sm font-medium">{registro.estudiante.documento || registro.estudiante.codigo}</p></div>
         <div><p className="text-xs text-slate-500">Nombre</p><p className="text-sm font-medium">{registro.estudiante.nombres}</p></div>
         <div><p className="text-xs text-slate-500">Apellido</p><p className="text-sm font-medium">{registro.estudiante.apellidos}</p></div>
         <div><p className="text-xs text-slate-500">Carrera</p><p className="text-sm font-medium">{registro.estudiante.programa}</p></div>

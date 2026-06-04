@@ -374,7 +374,7 @@ export function CasosEspeciales() {
               {result.estudiante.nombres} {result.estudiante.apellidos}
             </h3>
             <p className="text-sm text-slate-500">
-              Código: {result.estudiante.codigo} | Documento: {result.estudiante.documento || 'N/A'} | Programa: {result.estudiante.programa}
+              Documento: {result.estudiante.documento || result.estudiante.codigo || 'N/A'} | Programa: {result.estudiante.programa}
             </p>
           </div>
 
@@ -524,7 +524,7 @@ export function CasosEspeciales() {
                       {est.nombres} {est.apellidos}
                     </p>
                     <p className="text-xs text-slate-500">
-                      Código: {est.codigo} | {est.programa} | {est.semestre}° semestre
+                      Documento: {est.documento || est.codigo} | {est.programa} | {est.semestre}° semestre
                     </p>
                     {totalRegistros > 0 && (
                       <p className="text-xs text-slate-500 mt-1">
@@ -557,8 +557,8 @@ export function CasosEspeciales() {
         <form onSubmit={handleCreateRegistro} className="space-y-4">
           <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg">
             <div>
-              <p className="text-xs text-slate-500">Código</p>
-              <p className="text-sm font-medium">{selectedEstudiante?.codigo}</p>
+              <p className="text-xs text-slate-500">Documento</p>
+              <p className="text-sm font-medium">{selectedEstudiante?.documento || selectedEstudiante?.codigo}</p>
             </div>
             <div>
               <p className="text-xs text-slate-500">Programa</p>

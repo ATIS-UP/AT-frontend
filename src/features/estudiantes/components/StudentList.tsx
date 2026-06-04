@@ -82,7 +82,6 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
     setForm({
       nombres: student.nombres || '',
       apellidos: student.apellidos || '',
-      codigo: student.codigo || '',
       email: student.email || '',
       programa: student.programa || '',
       semestre: student.semestre || 1,
@@ -127,7 +126,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
 
   const handleConfirmCreate = () => {
     if (!pendingCreateData) return;
-    crearEstudiante.mutate(pendingCreateData as any, {
+    crearEstudiante.mutate({ ...pendingCreateData, codigo: pendingCreateData.documento } as any, {
       onSuccess: () => {
         setShowConfirmCreateModal(false);
         setShowCreateModal(false);
@@ -244,7 +243,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-brand-primary/5 border-b border-slate-100">
-                  <th className="py-4 px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Código</th>
+                  <th className="py-4 px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Documento</th>
                   <th className="py-4 px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nombre</th>
                   <th className="py-4 px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">Sem.</th>
                   <th className="py-4 px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Programa</th>
@@ -259,7 +258,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                     onClick={() => onSelectStudent(est)}
                     className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors cursor-pointer group"
                   >
-                    <td className="py-3 px-6 font-bold text-brand-primary">{est.codigo}</td>
+                    <td className="py-3 px-6 font-bold text-brand-primary">{est.documento}</td>
                     <td className="py-3 px-6 font-semibold">
                       {est.nombres} {est.apellidos}
                     </td>
@@ -382,17 +381,16 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Código *</label>
+              <label className="block text-xs font-bold text-slate-600 mb-1">Documento *</label>
               <input
                 type="text"
-                value={form.codigo}
-                maxLength={20}
-                onChange={(e) => { setForm({ ...form, codigo: createCharFilter(CharType.DIGITS)(e.target.value) }); setFormErrors({ ...formErrors, codigo: '' }); }}
-                className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.codigo ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
-                placeholder="Código estudiantil"
-                disabled={isEditing}
+                value={form.documento}
+                maxLength={15}
+                onChange={(e) => { setForm({ ...form, documento: createCharFilter(CharType.DIGITS)(e.target.value) }); setFormErrors({ ...formErrors, documento: '' }); }}
+                className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.documento ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
+                placeholder="Número de documento"
               />
-              {formErrors.codigo && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.codigo}</p>}
+              {formErrors.documento && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.documento}</p>}
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Email</label>
@@ -408,18 +406,6 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">Documento *</label>
-              <input
-                type="text"
-                value={form.documento}
-                maxLength={100}
-                onChange={(e) => { setForm({ ...form, documento: createCharFilter(CharType.DIGITS)(e.target.value) }); setFormErrors({ ...formErrors, documento: '' }); }}
-                className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.documento ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
-                placeholder="Número de documento"
-              />
-              {formErrors.documento && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.documento}</p>}
-            </div>
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Teléfono *</label>
               <input
@@ -556,25 +542,18 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
         open={showConfirmCreateModal}
         onOpenChange={(open) => { if (!open) { setShowConfirmCreateModal(false); setPendingCreateData(null); } }}
         title="Confirmar registro de estudiante"
-        description="Revisa los datos antes de crear. El código no podrá ser modificado después."
+        description="Revisa los datos antes de crear."
         className="max-w-sm"
       >
         <div className="space-y-4">
           <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5 text-sm">
             <div className="flex justify-between"><span className="text-slate-500">Nombres:</span><span className="font-semibold text-slate-800">{pendingCreateData?.nombres}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">Apellidos:</span><span className="font-semibold text-slate-800">{pendingCreateData?.apellidos}</span></div>
-            <div className="flex justify-between"><span className="text-slate-500">Código:</span><span className="font-semibold text-slate-800">{pendingCreateData?.codigo}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">Documento:</span><span className="font-semibold text-slate-800">{pendingCreateData?.documento}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">Teléfono:</span><span className="font-semibold text-slate-800">{pendingCreateData?.telefono}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">Email:</span><span className="font-semibold text-slate-800">{pendingCreateData?.email || '—'}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">Programa:</span><span className="font-semibold text-slate-800">{pendingCreateData?.programa}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">Semestre:</span><span className="font-semibold text-slate-800">{pendingCreateData?.semestre}</span></div>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-100 rounded-lg">
-            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-            <p className="text-xs text-amber-700">
-              El código del estudiante no podrá ser modificado después de la creación.
-            </p>
           </div>
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => { setShowConfirmCreateModal(false); setPendingCreateData(null); }}>
@@ -644,7 +623,7 @@ const ActionStudentModal = ({ student, open, onOpenChange, onEliminarTodo, onIna
         if (!val && !isPending) onOpenChange(val);
       }}
       title="Gestión de Estudiante"
-      description={`${student.nombres} ${student.apellidos} — Cód: ${student.codigo}`}
+      description={`${student.nombres} ${student.apellidos} — Doc: ${student.documento}`}
       className="max-w-md"
     >
       <div className="space-y-5">

@@ -2,11 +2,6 @@ import { z } from 'zod';
 import { CharType, ERROR_MSGS } from '@/lib/validation';
 
 export const estudianteCreateSchema = z.object({
-  codigo: z
-    .string()
-    .min(1, 'Requerido')
-    .max(20, 'Máximo 20 caracteres')
-    .regex(CharType.DIGITS, ERROR_MSGS.DIGITS),
   nombres: z
     .string()
     .min(1, 'Requerido')
@@ -33,10 +28,9 @@ export const estudianteCreateSchema = z.object({
     .or(z.literal('')),
   documento: z
     .string()
-    .max(100, 'Máximo 100 caracteres')
-    .regex(CharType.DIGITS, ERROR_MSGS.DIGITS)
-    .optional()
-    .or(z.literal('')),
+    .min(5, 'Mínimo 5 caracteres')
+    .max(15, 'Máximo 15 caracteres')
+    .regex(CharType.DIGITS, ERROR_MSGS.DIGITS),
   telefono: z
     .string()
     .max(100, 'Máximo 100 caracteres')

@@ -54,7 +54,7 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
                   {student.nombres} {student.apellidos}
                 </h1>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-slate-400">Cód: {student.codigo}</span>
+                  <span className="text-sm font-medium text-slate-400">Doc: {student.documento}</span>
                   <Badge variant={estadoVariant()}>
                     {student.estado}
                   </Badge>
@@ -84,8 +84,8 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
                     <p className="text-sm font-semibold text-slate-700">{student.estado || '—'}</p>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Código</label>
-                    <p className="text-sm font-semibold text-slate-700">{student.codigo || '—'}</p>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Documento</label>
+                    <p className="text-sm font-semibold text-slate-700">{student.documento || '—'}</p>
                   </div>
                 </div>
               </section>

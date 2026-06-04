@@ -3,9 +3,7 @@ import { useObtenerHistorial, useAgregarHistorial } from '../hooks/useCasosEspec
 import { Button } from '@/shared/components/ui/Button';
 import { Badge } from '@/shared/components/ui/Badge';
 import { useNotificationStore } from '@/shared/stores/notification.store';
-import { ACCIONES_HISTORIAL } from '../types/casosEspeciales.types';
 import { cn } from '@/lib/utils';
-import { createCharFilter, CharType } from '@/lib/validation';
 import { Plus } from 'lucide-react';
 
 export function HistorialRegistro({ registroId }: { registroId: string }) {
@@ -15,15 +13,12 @@ export function HistorialRegistro({ registroId }: { registroId: string }) {
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [observacionesError, setObservacionesError] = useState(false);
-  const [form, setForm] = useState({
-    accion: 'SEGUIMIENTO',
-    observaciones: '',
-  });
+  const [observaciones, setObservaciones] = useState('');
 
   const handleAddHistorial = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.observaciones.trim()) {
+    if (!observaciones.trim()) {
       setObservacionesError(true);
       notification.add({ type: 'error', message: 'Debe ingresar una observación' });
       return;
@@ -31,15 +26,16 @@ export function HistorialRegistro({ registroId }: { registroId: string }) {
     setObservacionesError(false);
 
     agregarHistorial.mutate(
-      { id: registroId, data: form },
+      { id: registroId, data: { accion: 'SEGUIMIENTO', observaciones } },
       {
         onSuccess: () => {
           setShowAddForm(false);
-          setForm({ accion: 'SEGUIMIENTO', observaciones: '' });
+          setObservaciones('');
           notification.add({ type: 'success', message: 'Seguimiento agregado' });
         },
-        onError: () => {
-          notification.add({ type: 'error', message: 'Error al agregar seguimiento' });
+        onError: (e: any) => {
+          const msg = e?.response?.data?.detail || 'Error al agregar seguimiento';
+          notification.add({ type: 'error', message: msg });
         },
       }
     );
@@ -92,23 +88,12 @@ export function HistorialRegistro({ registroId }: { registroId: string }) {
 
       {showAddForm ? (
         <form onSubmit={handleAddHistorial} className="mt-4 p-4 bg-slate-50 rounded-lg space-y-3">
-          <div>
-            <label className="block text-xs font-bold text-slate-600 mb-1">Tipo de seguimiento</label>
-            <select
-              value={form.accion}
-              onChange={(e) => setForm({ ...form, accion: e.target.value })}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none"
-            >
-              {ACCIONES_HISTORIAL.map((a) => (
-                <option key={a.value} value={a.value}>{a.label}</option>
-              ))}
-            </select>
-          </div>
+          <p className="text-xs text-slate-500 font-medium">Registrar seguimiento (no modifica el estado del caso)</p>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Observación *</label>
             <textarea
-              value={form.observaciones}
-              onChange={(e) => { setForm({ ...form, observaciones: createCharFilter(CharType.FULL_TEXT)(e.target.value) }); setObservacionesError(false); }}
+              value={observaciones}
+              onChange={(e) => { setObservaciones(e.target.value); setObservacionesError(false); }}
               className={cn(
                 "w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none min-h-[60px] resize-none",
                 observacionesError ? "border-red-500 focus:border-red-500" : "border-slate-200"
