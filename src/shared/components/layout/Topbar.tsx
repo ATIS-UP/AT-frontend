@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Menu, UserCircle, Settings, LogOut, Bell, CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { Menu, UserCircle, Settings, LogOut, Bell, CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../features/auth/store/auth.store';
 import { useNotificationStore } from '../../stores/notification.store';
@@ -80,15 +80,6 @@ export const Topbar = ({ title, subtitle, onMenuClick, sidebarWidth = 236 }: Top
       </div>
 
       <div className="flex items-center gap-2 md:gap-4">
-        <div className="relative hidden xl:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-[18px] h-[18px]" />
-          <input 
-            className="w-48 xxl:w-64 pl-10 pr-4 py-1.5 bg-slate-100/50 border-none rounded-sm text-sm focus:ring-2 focus:ring-brand-primary/20 transition-all text-on-surface placeholder:text-slate-400" 
-            placeholder="Buscar..." 
-            type="text" 
-          />
-        </div>
-
         {/* notification bell */}
         <div className="relative" ref={notifMenuRef}>
           <button

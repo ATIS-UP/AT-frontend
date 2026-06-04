@@ -7,6 +7,7 @@ import { Modal } from '@/shared/components/ui/Modal';
 import { AlertasStatsCards } from './alertas/AlertasStatsCards';
 import { useNotificationStore } from '@/shared/stores/notification.store';
 import { createCharFilter, CharType } from '@/lib/validation';
+import { cn } from '@/lib/utils';
 import { Plus, Maximize2, Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { parametrizacionService } from '@/features/parametrizacion/services/parametrizacionService';
@@ -60,6 +61,8 @@ export function Alertas() {
   const [estudianteValido, setEstudianteValido] = useState<'ok' | 'error' | 'checking' | null>(null);
   const [estudianteNombre, setEstudianteNombre] = useState<string | null>(null);
   const [errorEstudiante, setErrorEstudiante] = useState<string | null>(null);
+  const [descripcionError, setDescripcionError] = useState(false);
+  const [actividadDescripcionError, setActividadDescripcionError] = useState(false);
 
   const { data: paramsData } = useQuery({
     queryKey: ['parametrizacion'],
@@ -159,9 +162,11 @@ export function Alertas() {
   const handleCreateAlerta = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.estudiante_id || !form.descripcion || !form.periodo) {
+      if (!form.descripcion) setDescripcionError(true);
       useNotificationStore.getState().add({ type: 'warning', message: 'Complete todos los campos requeridos' });
       return;
     }
+    setDescripcionError(false);
     if (estudianteValido !== 'ok') {
       useNotificationStore.getState().add({ type: 'warning', message: 'Verifique que el estudiante existe antes de crear la alerta' });
       return;
@@ -180,9 +185,11 @@ export function Alertas() {
   const handleCreateActividad = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedAlertaId || !actividadForm.descripcion) {
+      if (!actividadForm.descripcion) setActividadDescripcionError(true);
       useNotificationStore.getState().add({ type: 'warning', message: 'Complete la descripción' });
       return;
     }
+    setActividadDescripcionError(false);
     crearActividad.mutate(
       { alertaId: selectedAlertaId, data: actividadForm },
       {
@@ -474,10 +481,17 @@ export function Alertas() {
             <label className="block text-xs font-bold text-slate-600 mb-1">Descripción *</label>
             <textarea
               value={form.descripcion}
-              onChange={(e) => setForm({ ...form, descripcion: createCharFilter(CharType.FULL_TEXT)(e.target.value) })}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px]"
+              onChange={(e) => { setForm({ ...form, descripcion: createCharFilter(CharType.FULL_TEXT)(e.target.value) }); setDescripcionError(false); }}
+              className={cn(
+                "w-full border rounded-lg px-3 py-2 text-sm resize-none focus:ring-1 outline-none min-h-[80px]",
+                descripcionError ? "border-red-500 focus:border-red-500" : "border-slate-200 focus:border-brand-primary focus:ring-brand-primary"
+              )}
               maxLength={DESCRIPCION_MAX_LENGTH}
+              placeholder="Describa el motivo de la alerta"
             />
+            {descripcionError && (
+              <p className="text-xs text-red-500 mt-1">La descripción es obligatoria</p>
+            )}
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
@@ -517,10 +531,16 @@ export function Alertas() {
             <textarea
               value={actividadForm.descripcion}
               maxLength={DESCRIPCION_MAX_LENGTH}
-              onChange={(e) => setActividadForm({ ...actividadForm, descripcion: createCharFilter(CharType.FULL_TEXT)(e.target.value) })}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none"
+              onChange={(e) => { setActividadForm({ ...actividadForm, descripcion: createCharFilter(CharType.FULL_TEXT)(e.target.value) }); setActividadDescripcionError(false); }}
+              className={cn(
+                "w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none min-h-[80px] resize-none",
+                actividadDescripcionError ? "border-red-500 focus:border-red-500" : "border-slate-200 focus:border-brand-primary focus:ring-brand-primary"
+              )}
               placeholder="Describa la actividad realizada"
             />
+            {actividadDescripcionError && (
+              <p className="text-xs text-red-500 mt-1">La descripción es obligatoria</p>
+            )}
             <div className="flex justify-end mt-1">
               <span className="text-[10px] text-slate-400">{actividadForm.descripcion.length}/{DESCRIPCION_MAX_LENGTH}</span>
             </div>

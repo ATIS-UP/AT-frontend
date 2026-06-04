@@ -26,6 +26,7 @@ export const useCrearRegistro = () => {
     mutationFn: (data: RegistroCreate) => casosEspecialesService.crear(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['casos-especiales'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 };
@@ -46,6 +47,7 @@ export const useActualizarRegistro = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['casos-especiales'] });
       queryClient.invalidateQueries({ queryKey: ['casos-especiales', 'obtener', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 };
@@ -67,6 +69,7 @@ export const useAgregarHistorial = () => {
       queryClient.invalidateQueries({ queryKey: ['casos-especiales'] });
       queryClient.invalidateQueries({ queryKey: ['casos-especiales', 'historial', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['casos-especiales', 'obtener', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 };
@@ -77,6 +80,7 @@ export const useEliminarRegistro = () => {
     mutationFn: (id: string) => casosEspecialesService.eliminar(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['casos-especiales'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 };

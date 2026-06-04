@@ -15,21 +15,25 @@ export const Dashboard = () => {
   const { data: resumen, isLoading: loadingResumen } = useQuery({
     queryKey: ['dashboard', 'resumen'],
     queryFn: () => dashboardService.resumen(),
+    staleTime: 30000,
   });
 
   const { data: estados, isLoading: loadingEstados } = useQuery({
     queryKey: ['dashboard', 'estados'],
     queryFn: () => dashboardService.estados(),
+    staleTime: 30000,
   });
 
   const { data: recientes, isLoading: loadingRecientes } = useQuery({
     queryKey: ['dashboard', 'recientes'],
     queryFn: () => dashboardService.recientes(10),
+    staleTime: 30000,
   });
 
   const { data: actividadesData, isLoading: loadingActividades } = useQuery({
     queryKey: ['dashboard', 'actividades'],
     queryFn: () => dashboardService.actividadesRecientes(5),
+    staleTime: 30000,
   });
 
   const isLoading = loadingResumen || loadingEstados || loadingRecientes || loadingActividades;

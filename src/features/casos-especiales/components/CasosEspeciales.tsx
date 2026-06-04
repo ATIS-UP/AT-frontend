@@ -37,14 +37,19 @@ export function CasosEspeciales() {
   const [buscarNuevoEstudiante, setBuscarNuevoEstudiante] = useState('');
   const [searching, setSearching] = useState(false);
   const [studentResults, setStudentResults] = useState<any[]>([]);
+  const searchTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleNuevoCasoSearch = async () => {
-    if (buscarNuevoEstudiante.length < 2) return;
+  const handleNuevoCasoSearch = async (query?: string) => {
+    const q = query ?? buscarNuevoEstudiante;
+    if (q.length < 2) {
+      setStudentResults([]);
+      return;
+    }
     setSearching(true);
     try {
       const res = await apiClient.get<{ resultados: any[]; total: number }>(
         `/api/registros-casos/buscar-estudiante`,
-        { q: buscarNuevoEstudiante, por_pagina: 10 }
+        { q, por_pagina: 10 }
       );
       setStudentResults(res.resultados || []);
     } catch {
@@ -53,6 +58,21 @@ export function CasosEspeciales() {
       setSearching(false);
     }
   };
+
+  // busca automaticamente al escribir (debounce 300ms)
+  React.useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    if (buscarNuevoEstudiante.length < 2) {
+      setStudentResults([]);
+      return;
+    }
+    searchTimerRef.current = setTimeout(() => {
+      handleNuevoCasoSearch(buscarNuevoEstudiante);
+    }, 300);
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    };
+  }, [buscarNuevoEstudiante]);
 
   const handleSelectStudentForCaso = (estudianteConCasos: any) => {
     const est = estudianteConCasos.estudiante || estudianteConCasos;
@@ -150,6 +170,16 @@ export function CasosEspeciales() {
       setUserTouchedObservaciones(false);
     }
   }, [novedadesParaTipo]);
+
+  // auto-select "Otra" novedad when tipo is OTRO
+  React.useEffect(() => {
+    if (form.tipo === 'OTRO' && novedadesParaTipo.length > 0 && !form.novedad_id) {
+      const otra = novedadesParaTipo.find((n) => n.nombre.toLowerCase() === 'otra');
+      if (otra) {
+        setForm((prev) => ({ ...prev, novedad_id: otra.id }));
+      }
+    }
+  }, [form.tipo, novedadesParaTipo, form.novedad_id]);
 
   // Autorrellenar observaciones desde novedad.descripcion SOLO si el usuario
   // no ha editado el textarea manualmente. Se evalúa después de que las
@@ -458,11 +488,11 @@ export function CasosEspeciales() {
               type="text"
               value={buscarNuevoEstudiante}
               onChange={(e) => setBuscarNuevoEstudiante(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleNuevoCasoSearch(); }}
               className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
-              placeholder="Buscar por código, nombre o apellido..."
+              placeholder="Escriba al menos 2 caracteres para buscar..."
+              autoFocus
             />
-            <Button onClick={handleNuevoCasoSearch} disabled={buscarNuevoEstudiante.length < 2 || searching}>
+            <Button onClick={() => handleNuevoCasoSearch()} disabled={buscarNuevoEstudiante.length < 2 || searching}>
               <Search className="w-4 h-4 mr-2" />
               Buscar
             </Button>

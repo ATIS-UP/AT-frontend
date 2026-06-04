@@ -44,6 +44,7 @@ export function useCrearAlerta() {
     mutationFn: (data: Record<string, unknown>) => alertasService.crear(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       notify({ type: 'success', message: 'Alerta creada correctamente' });
     },
     onError: (error: Error) => {
@@ -62,6 +63,7 @@ export function useCambiarEstadoAlerta() {
       alertasService.cambiarEstado(id, estado),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       notify({ type: 'success', message: 'Estado actualizado' });
     },
     onError: () => {
@@ -86,6 +88,7 @@ export function useEliminarAlerta() {
     mutationFn: (id: string) => alertasService.eliminar(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       notify({ type: 'success', message: 'Alerta eliminada correctamente' });
     },
     onError: () => {
@@ -103,6 +106,7 @@ export function useCrearActividad() {
       alertasService.crearActividad(alertaId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       notify({ type: 'success', message: 'Actividad registrada correctamente' });
     },
     onError: () => {

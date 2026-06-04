@@ -40,6 +40,7 @@ export function useCrearEstudiante() {
     mutationFn: (data: Record<string, unknown>) => estudiantesService.crear(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       notify({ type: 'success', message: 'Estudiante creado correctamente' });
     },
     onError: () => {
@@ -57,6 +58,7 @@ export function useActualizarEstudiante() {
       estudiantesService.actualizar(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       notify({ type: 'success', message: 'Estudiante actualizado correctamente' });
     },
     onError: () => {
@@ -73,6 +75,7 @@ export function useEliminarEstudiante() {
     mutationFn: (id: string) => estudiantesService.eliminar(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       notify({ type: 'success', message: 'Estudiante eliminado correctamente' });
     },
     onError: () => {
@@ -98,6 +101,7 @@ export function useCambiarEstadoEstudiante() {
       estudiantesService.cambiarEstado(id, { estado }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       notify({ type: 'success', message: `Estudiante cambiado a ${data.estado || 'nuevo estado'}` });
     },
     onError: () => {
