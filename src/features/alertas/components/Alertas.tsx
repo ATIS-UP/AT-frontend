@@ -342,17 +342,23 @@ export function Alertas() {
                   </td>
                   <td className="py-4 px-6 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-brand-primary hover:text-brand-primary/80 underline underline-offset-4"
-                        onClick={() => {
-                          setSelectedAlertaId(item.id);
-                          setShowActividadModal(true);
-                        }}
-                      >
-                        Registrar actividad
-                      </Button>
+                      {item.estado_seguimiento === 'RESUELTO' || item.estado_seguimiento === 'DESCARTADO' ? (
+                        <span className="text-[10px] text-slate-400 italic whitespace-nowrap">
+                          Alerta {item.estado_seguimiento.toLowerCase()} — no permite más actividades
+                        </span>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-brand-primary hover:text-brand-primary/80 underline underline-offset-4"
+                          onClick={() => {
+                            setSelectedAlertaId(item.id);
+                            setShowActividadModal(true);
+                          }}
+                        >
+                          Registrar actividad
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"

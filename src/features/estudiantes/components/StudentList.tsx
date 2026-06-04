@@ -19,6 +19,8 @@ import { Button } from '@/shared/components/ui/Button';
 import { CargaMasiva } from './CargaMasiva';
 import { useNotificationStore } from '@/shared/stores/notification.store';
 import { EMPTY_STUDENT_FORM, validateStudentForm, type StudentForm } from './estudiantes/studentFormUtils';
+import { PROGRAMAS } from '../constants/programas';
+import { SearchableSelect } from '@/shared/components/ui/SearchableSelect';
 
 interface StudentListProps {
   onSelectStudent: (student: any) => void;
@@ -28,6 +30,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [semestre, setSemestre] = useState('');
+  const [programa, setPrograma] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCargaModal, setShowCargaModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState<any>(null);
@@ -44,6 +47,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
     por_pagina: limit,
     buscar: search || undefined,
     semestre: semestre ? Number(semestre) : undefined,
+    programa: programa || undefined,
   });
 
   const crearEstudiante = useCrearEstudiante();
@@ -63,6 +67,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
   const clearFilters = () => {
     setSearch('');
     setSemestre('');
+    setPrograma('');
     setPage(1);
   };
 
@@ -202,6 +207,19 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
             </option>
           ))}
         </select>
+        <select
+          className="bg-white border border-slate-200 text-slate-600 text-sm rounded-lg px-3 py-2 focus:border-brand-primary outline-none transition-all max-w-[220px]"
+          value={programa}
+          onChange={(e) => {
+            setPrograma(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">Programa</option>
+          {PROGRAMAS.map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
         <button
           onClick={clearFilters}
           className="text-brand-primary font-display text-[11px] font-bold uppercase tracking-wider hover:underline ml-auto"
@@ -333,6 +351,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
         }}
         title={isEditing ? 'Editar Estudiante' : 'Nuevo Estudiante'}
         description={isEditing ? `Editando: ${editingStudent.nombres} ${editingStudent.apellidos}` : 'Registrar un nuevo estudiante en el sistema'}
+        className="max-w-2xl"
       >
         <form onSubmit={handleSubmitStudent} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -417,13 +436,11 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Programa *</label>
-              <input
-                type="text"
+              <SearchableSelect
                 value={form.programa}
-                maxLength={100}
-                onChange={(e) => { setForm({ ...form, programa: createCharFilter(CharType.ALPHANUMERIC)(e.target.value) }); setFormErrors({ ...formErrors, programa: '' }); }}
-                className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.programa ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
-                placeholder="Programa académico"
+                onChange={(val) => { setForm({ ...form, programa: val }); setFormErrors({ ...formErrors, programa: '' }); }}
+                options={PROGRAMAS}
+                placeholder="Seleccionar programa..."
               />
               {formErrors.programa && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.programa}</p>}
             </div>

@@ -54,13 +54,17 @@ export function RegistroCasoForm({
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: Record<string, any> = { tipo: form.tipo, estado: form.estado, observaciones: form.observaciones };
+    const payload: Record<string, any> = { tipo: form.tipo, observaciones: form.observaciones };
+    if (form.estado !== registro.estado) payload.estado = form.estado;
     if (form.novedad_id) payload.novedad_id = form.novedad_id;
     actualizarRegistro.mutate(
       { id: registro.id, data: payload },
       {
         onSuccess: () => { notification.add({ type: 'success', message: 'Registro actualizado' }); onClose(); },
-        onError: () => { notification.add({ type: 'error', message: 'Error al actualizar' }); },
+        onError: (error: any) => {
+          const msg = error?.response?.data?.detail || 'Error al actualizar';
+          notification.add({ type: 'error', message: msg });
+        },
       }
     );
   };

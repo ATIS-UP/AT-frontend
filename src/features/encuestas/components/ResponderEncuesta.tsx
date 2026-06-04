@@ -5,6 +5,8 @@ import { encuestasService } from '../services/encuestasService';
 import { createCharFilter, CharType } from '@/lib/validation';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
+import { SearchableSelect } from '@/shared/components/ui/SearchableSelect';
+import { PROGRAMAS } from '@/features/estudiantes/constants/programas';
 import { FileText, CheckCircle, AlertCircle } from 'lucide-react';
 
 type Step = 'documento' | 'responder' | 'confirmacion' | 'error';
@@ -222,7 +224,15 @@ export function ResponderEncuesta() {
                       )}
                     </label>
 
-                    {pregunta.editable === false && (
+                    {pregunta.editable === false && pregunta.campo === 'programa' && (
+                      <SearchableSelect
+                        value={pregunta.valor_actual || ''}
+                        onChange={() => {}}
+                        options={PROGRAMAS}
+                        disabled
+                      />
+                    )}
+                    {pregunta.editable === false && pregunta.campo !== 'programa' && (
                       <div className="text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
                         {pregunta.valor_actual ?? 'Sin información'}
                       </div>
