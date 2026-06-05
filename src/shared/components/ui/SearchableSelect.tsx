@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Search } from 'lucide-react';
 
 interface SearchableSelectProps {
   value: string;
@@ -13,15 +12,10 @@ interface SearchableSelectProps {
 
 export function SearchableSelect({ value, onChange, options, placeholder, disabled, className }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState('');
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const filtered = options.filter((o) =>
-    o.toLowerCase().includes(search.toLowerCase())
-  );
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -40,14 +34,22 @@ export function SearchableSelect({ value, onChange, options, placeholder, disabl
     if (disabled) return;
     if (!isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      const availableBelow = window.innerHeight - rect.bottom - 4;
-      const maxHeight = Math.min(Math.max(availableBelow, 150), 288);
+      const gap = 4;
+      const vh = window.innerHeight;
+      const availableBelow = vh - rect.bottom - gap;
+      const availableAbove = rect.top - gap;
+      const prefersBelow = availableBelow >= availableAbove && availableBelow > 80;
+      const maxHeight = Math.min(prefersBelow ? availableBelow : availableAbove, 288);
+      let top = prefersBelow ? rect.bottom + gap : rect.top - maxHeight - gap;
+      const left = Math.max(gap, Math.min(rect.left, window.innerWidth - rect.width - gap));
+      top = Math.max(gap, Math.min(top, vh - maxHeight - gap));
       setDropdownStyle({
         position: 'fixed',
-        top: `${rect.bottom + 4}px`,
-        left: `${rect.left}px`,
+        top: `${top}px`,
+        left: `${left}px`,
         width: `${rect.width}px`,
         maxHeight: `${maxHeight}px`,
+        pointerEvents: 'auto',
         zIndex: 10000,
       });
     }
@@ -71,37 +73,21 @@ export function SearchableSelect({ value, onChange, options, placeholder, disabl
         </svg>
       </button>
       {isOpen && createPortal(
-        <div ref={dropdownRef} style={dropdownStyle} onMouseDown={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden flex flex-col">
-          <div className="p-2 border-b border-slate-100 flex items-center gap-2">
-            <Search className="w-4 h-4 text-slate-400 shrink-0" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full border-0 outline-none text-sm bg-transparent"
-              placeholder="Buscar..."
-              autoFocus
-            />
-          </div>
-          <div className="overflow-y-auto flex-1">
-            {filtered.map((opt) => (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => { onChange(opt); setIsOpen(false); setSearch(''); }}
-                className={`w-full text-left px-3 py-2 text-sm cursor-pointer hover:bg-brand-primary/5 ${
-                  opt === value
-                    ? 'bg-brand-primary/10 text-brand-primary font-medium'
-                    : 'text-slate-700'
-                }`}
-              >
-                {opt}
-              </button>
-            ))}
-            {filtered.length === 0 && (
-              <div className="px-3 py-4 text-sm text-slate-400 text-center">Sin resultados</div>
-            )}
-          </div>
+        <div ref={dropdownRef} style={dropdownStyle} onWheel={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-lg shadow-lg overflow-y-auto">
+          {options.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => { onChange(opt); setIsOpen(false); }}
+              className={`w-full text-left px-3 py-2 text-sm cursor-pointer hover:bg-brand-primary/5 ${
+                opt === value
+                  ? 'bg-brand-primary/10 text-brand-primary font-medium'
+                  : 'text-slate-700'
+              }`}
+            >
+              {opt}
+            </button>
+          ))}
         </div>,
         document.body
       )}
