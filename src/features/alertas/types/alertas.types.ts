@@ -1,5 +1,5 @@
 export type NivelRiesgo = 'ROJO' | 'AMARILLO' | 'VERDE';
-export type EstadoSeguimiento = 'PENDIENTE' | 'EN_PROCESO' | 'RESUELTO';
+export type EstadoSeguimiento = 'PENDIENTE' | 'EN_PROCESO' | 'RESUELTO' | 'DESCARTADO';
 
 export interface AlertaAcademica {
   id: string | number;

@@ -10,6 +10,7 @@ const KEYS = {
   stats: [...ALL_KEY, 'stats'] as const,
   detail: (id: string) => [...ALL_KEY, 'detail', id] as const,
   actividades: (id: string) => [...ALL_KEY, 'actividades', id] as const,
+  historial: (id: string) => [...ALL_KEY, 'historial', id] as const,
 };
 
 export function useAlertas(params?: AlertaListParams) {
@@ -76,6 +77,14 @@ export function useAlertaActividades(alertaId: string) {
   return useQuery({
     queryKey: KEYS.actividades(alertaId),
     queryFn: () => alertasService.listarActividades(alertaId),
+    enabled: !!alertaId,
+  });
+}
+
+export function useAlertaHistorial(alertaId: string) {
+  return useQuery({
+    queryKey: KEYS.historial(alertaId),
+    queryFn: () => alertasService.historial(alertaId),
     enabled: !!alertaId,
   });
 }

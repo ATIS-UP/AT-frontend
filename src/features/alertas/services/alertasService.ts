@@ -36,4 +36,7 @@ export const alertasService = {
 
   crearActividad: (alertaId: string, data: Record<string, unknown>) =>
     apiClient.post<any>(`/api/alertas/${alertaId}/actividades`, data),
+
+  historial: (alertaId: string) =>
+    apiClient.get<any[]>(`/api/alertas/${alertaId}/historial`),
 };

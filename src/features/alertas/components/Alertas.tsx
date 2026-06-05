@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAlertas, useAlertasStats, useCrearAlerta, useCrearActividad, useCambiarEstadoAlerta, useEliminarAlerta, useAlertaActividades } from '../hooks/useAlertas';
+import { useAlertas, useAlertasStats, useCrearAlerta, useCrearActividad, useCambiarEstadoAlerta, useEliminarAlerta, useAlertaActividades, useAlertaHistorial } from '../hooks/useAlertas';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
 import { Badge } from '@/shared/components/ui/Badge';
@@ -15,7 +15,7 @@ import { apiClient } from '@/lib/api-client';
 import * as Tabs from '@radix-ui/react-tabs';
 
 type NivelRiesgo = 'ROJO' | 'AMARILLO' | 'VERDE';
-type EstadoSeguimiento = 'PENDIENTE' | 'EN_PROCESO' | 'RESUELTO';
+type EstadoSeguimiento = 'PENDIENTE' | 'EN_PROCESO' | 'RESUELTO' | 'DESCARTADO';
 
 function generarPeriodos(): string[] {
   const year = new Date().getFullYear();
@@ -161,6 +161,7 @@ export function Alertas() {
       case 'PENDIENTE': return 'outline' as const;
       case 'EN_PROCESO': return 'info' as const;
       case 'RESUELTO': return 'success' as const;
+      case 'DESCARTADO': return 'default' as const;
       default: return 'default' as const;
     }
   };
@@ -715,6 +716,19 @@ export function Alertas() {
   );
 }
 
+const HISTORIAL_ICONS: Record<string, string> = {
+  ACTIVIDAD: '📋',
+  CAMBIO_ESTADO: '🔄',
+};
+
+const HISTORIAL_BADGE: Record<string, { variant: 'success' | 'warning' | 'info' | 'outline' | 'default'; label: string }> = {
+  LLAMADA: { variant: 'info', label: 'Llamada' },
+  VISITA: { variant: 'info', label: 'Visita' },
+  REUNION: { variant: 'info', label: 'Reunión' },
+  EMAIL: { variant: 'info', label: 'Email' },
+  OTRO: { variant: 'info', label: 'Otro' },
+};
+
 function DetalleAlertaModal({
   alerta,
   open,
@@ -728,7 +742,7 @@ function DetalleAlertaModal({
   tab: string;
   onTabChange: (tab: string) => void;
 }) {
-  const { data: actividades, isLoading } = useAlertaActividades(open ? alerta.id : '');
+  const { data: historial, isLoading } = useAlertaHistorial(open ? alerta.id : '');
 
   return (
     <Modal
@@ -798,47 +812,45 @@ function DetalleAlertaModal({
             <div className="flex items-center justify-center h-32">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div>
             </div>
-          ) : !actividades || actividades.length === 0 ? (
+          ) : !historial || historial.length === 0 ? (
             <div className="text-center py-8 text-slate-400 text-sm">
               <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p>No hay actividades registradas para esta alerta</p>
+              <p>No hay historial registrado para esta alerta</p>
             </div>
           ) : (
-            <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="sticky top-0 bg-white">
-                  <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px]">
-                    <th className="pb-2 pt-2 px-3 font-semibold">Fecha</th>
-                    <th className="pb-2 pt-2 px-3 font-semibold">Tipo</th>
-                    <th className="pb-2 pt-2 px-3 font-semibold">Descripción</th>
-                    <th className="pb-2 pt-2 px-3 font-semibold">Resultado</th>
-                    <th className="pb-2 pt-2 px-3 font-semibold">Estado</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {actividades.map((act: any) => (
-                    <tr key={act.id} className="hover:bg-slate-50/50">
-                      <td className="py-2 px-3 text-slate-500 text-xs">
-                        {new Date(act.fecha_actividad || act.created_at).toLocaleString('es-CO')}
-                      </td>
-                      <td className="py-2 px-3">
-                        <Badge variant="outline">{act.tipo}</Badge>
-                      </td>
-                      <td className="py-2 px-3 text-slate-600 text-xs max-w-[250px]">
-                        <p className="whitespace-pre-wrap">{act.descripcion}</p>
-                      </td>
-                      <td className="py-2 px-3 text-slate-600 text-xs">
-                        {act.resultado || '—'}
-                      </td>
-                      <td className="py-2 px-3">
-                        <Badge variant={act.completada ? 'success' : 'warning'}>
-                          {act.completada ? 'Completada' : 'Pendiente'}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="relative max-h-[400px] overflow-y-auto pl-8">
+              <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-slate-200" />
+              {historial.map((entry: any) => (
+                <div key={entry.id} className="relative pb-6 last:pb-0">
+                  <div className="absolute -left-[23px] top-1 w-5 h-5 rounded-full bg-white border-2 border-slate-300 flex items-center justify-center text-[10px]">
+                    {HISTORIAL_ICONS[entry.tipo] || '•'}
+                  </div>
+                  <div className="bg-white border border-slate-100 rounded-lg p-3">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-2">
+                        {entry.tipo === 'CAMBIO_ESTADO' ? (
+                          <Badge variant="outline">Cambio de estado</Badge>
+                        ) : (
+                          <Badge variant={HISTORIAL_BADGE[entry.tipo_actividad]?.variant || 'default'}>
+                            {HISTORIAL_BADGE[entry.tipo_actividad]?.label || entry.tipo_actividad}
+                          </Badge>
+                        )}
+                        {entry.estado_anterior && entry.estado_nuevo && (
+                          <span className="text-xs text-slate-500">
+                            {entry.estado_anterior.replace('_', ' ')} → {entry.estado_nuevo.replace('_', ' ')}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                        {new Date(entry.fecha || entry.created_at).toLocaleString('es-CO')}
+                      </span>
+                    </div>
+                    {entry.descripcion && (
+                      <p className="text-xs text-slate-600 mt-1 whitespace-pre-wrap">{entry.descripcion}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </Tabs.Content>
