@@ -1,6 +1,7 @@
 import React, { Component, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { Button } from '@/shared/components/ui/Button';
+import { useNotificationStore } from '@/shared/stores/notification.store';
 
 interface Props {
   children: ReactNode;
@@ -27,6 +28,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   handleReset = (): void => {
+    useNotificationStore.getState().add({ type: 'info', message: 'Reintentando...' });
     this.setState({ hasError: false, error: null });
   };
 
@@ -64,7 +66,10 @@ export class ErrorBoundary extends Component<Props, State> {
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Reintentar
               </Button>
-              <Button onClick={() => window.location.href = '/dashboard'}>
+              <Button onClick={() => {
+                useNotificationStore.getState().add({ type: 'info', message: 'Redirigiendo al inicio...' });
+                window.location.href = '/dashboard';
+              }}>
                 <Home className="w-4 h-4 mr-2" />
                 Ir al inicio
               </Button>

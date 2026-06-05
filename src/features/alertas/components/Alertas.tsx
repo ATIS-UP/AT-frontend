@@ -17,6 +17,18 @@ import * as Tabs from '@radix-ui/react-tabs';
 type NivelRiesgo = 'ROJO' | 'AMARILLO' | 'VERDE';
 type EstadoSeguimiento = 'PENDIENTE' | 'EN_PROCESO' | 'RESUELTO';
 
+function generarPeriodos(): string[] {
+  const year = new Date().getFullYear();
+  const periodos: string[] = [];
+  for (let y = year - 2; y <= year + 2; y++) {
+    periodos.push(`${y}-1`);
+    periodos.push(`${y}-2`);
+  }
+  return periodos;
+}
+
+const PERIODOS = generarPeriodos();
+
 export function Alertas() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showActividadModal, setShowActividadModal] = useState(false);
@@ -90,20 +102,14 @@ export function Alertas() {
     if (/^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]+$/.test(value)) {
       setEstudianteValido('error');
       setEstudianteNombre(null);
-      setErrorEstudiante('ID inválido: debe ser un código numérico o UUID');
+      setErrorEstudiante('ID inválido: debe ser un código de estudiante');
       return;
     }
     setEstudianteValido('checking');
     setErrorEstudiante(null);
     try {
-      let data: any;
-      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (uuidPattern.test(value)) {
-        data = await apiClient.get<any>(`/api/estudiantes/${value}`);
-      } else {
-        const res = await apiClient.get<{ estudiantes: any[]; total: number }>('/api/estudiantes', { buscar: value, por_pagina: 1 });
-        data = res.estudiantes?.[0];
-      }
+      const res = await apiClient.get<{ estudiantes: any[]; total: number }>('/api/estudiantes', { buscar: value, por_pagina: 1 });
+      const data = res.estudiantes?.[0];
       if (data?.nombres) {
         setEstudianteNombre(`${data.nombres} ${data.apellidos || ''}`.trim());
         setEstudianteValido('ok');
@@ -240,13 +246,16 @@ export function Alertas() {
           <option value="RESUELTO">Resuelto</option>
           <option value="DESCARTADO">Descartado</option>
         </select>
-        <input
-          type="text"
+        <select
           value={filtroPeriodo}
           onChange={(e) => setFiltroPeriodo(e.target.value)}
-          placeholder="Periodo (ej: 2025-1)"
           className="border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-brand-primary max-w-[160px]"
-        />
+        >
+          <option value="">Todos los periodos</option>
+          {PERIODOS.map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
         {(filtroNivel || filtroEstado || filtroPeriodo) && (
           <button
             onClick={() => { setFiltroNivel(''); setFiltroEstado(''); setFiltroPeriodo(''); }}
@@ -434,7 +443,7 @@ export function Alertas() {
                     ? 'border-red-400 focus:border-red-500'
                     : 'border-slate-200 focus:border-brand-primary'
               }`}
-              placeholder="Código o ID del estudiante"
+              placeholder="Código del estudiante"
             />
             {estudianteValido === 'checking' && (
               <p className="text-xs text-slate-400 mt-1">Verificando estudiante...</p>
@@ -475,13 +484,16 @@ export function Alertas() {
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Periodo *</label>
-            <input
-              type="text"
+            <select
               value={form.periodo}
               onChange={(e) => setForm({ ...form, periodo: e.target.value })}
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
-              placeholder="Ej: 2025-1"
-            />
+            >
+              <option value="">Seleccionar periodo...</option>
+              {PERIODOS.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Descripción *</label>

@@ -47,10 +47,10 @@ export const Dashboard = () => {
   const criticas = resumen?.alertas?.criticas ?? 0;
   const casosTotal = pendientes + enProceso + resueltas || totalAlertas;
 
-  // build trend data from resumen.tendencias
+  // build trend data from resumen.tendencias (mostrar antiguo → reciente)
   const tendencias = resumen?.tendencias ?? [];
   const trendData = tendencias.length > 0
-    ? tendencias.map((t) => ({ year: t.periodo, value: t.total }))
+    ? [...tendencias].reverse().map((t) => ({ year: t.periodo, value: t.total }))
     : [{ year: 'Sin datos', value: 0 }];
 
   // build chart data from estados

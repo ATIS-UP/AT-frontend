@@ -134,6 +134,16 @@ class ApiClient {
     clearTimeout(timeoutId);
 
     if (response.status === 401) {
+      const token = this.getAccessToken();
+      if (!token) {
+        const errorData: ApiError = await response.json().catch(() => ({
+          message: response.statusText || 'Unauthorized',
+          error_code: 'UNAUTHORIZED',
+          status_code: 401,
+          timestamp: new Date().toISOString(),
+        }));
+        throw errorData;
+      }
       try {
         const newToken = await this.refreshTokenWithQueue();
         // retry original request with new token

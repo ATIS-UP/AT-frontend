@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Search } from 'lucide-react';
 
 interface SearchableSelectProps {
@@ -13,7 +14,10 @@ interface SearchableSelectProps {
 export function SearchableSelect({ value, onChange, options, placeholder, disabled, className }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const filtered = options.filter((o) =>
     o.toLowerCase().includes(search.toLowerCase())
@@ -21,7 +25,10 @@ export function SearchableSelect({ value, onChange, options, placeholder, disabl
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const isOutsideContainer = containerRef.current && !containerRef.current.contains(target);
+      const isOutsideDropdown = dropdownRef.current && !dropdownRef.current.contains(target);
+      if (isOutsideContainer && isOutsideDropdown) {
         setIsOpen(false);
       }
     };
@@ -29,12 +36,28 @@ export function SearchableSelect({ value, onChange, options, placeholder, disabl
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleToggle = () => {
+    if (disabled) return;
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: 'fixed',
+        top: `${rect.bottom + 4}px`,
+        left: `${rect.left}px`,
+        width: `${rect.width}px`,
+        zIndex: 10000,
+      });
+    }
+    setIsOpen((prev) => !prev);
+  };
+
   return (
     <div ref={containerRef} className={`relative ${className || ''}`}>
       <button
+        ref={buttonRef}
         type="button"
         disabled={disabled}
-        onClick={() => { if (!disabled) setIsOpen(!isOpen); }}
+        onClick={handleToggle}
         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm cursor-pointer flex items-center justify-between bg-white disabled:bg-slate-100 disabled:cursor-not-allowed text-left"
       >
         <span className={value ? 'text-slate-800' : 'text-slate-400 truncate'}>
@@ -44,8 +67,8 @@ export function SearchableSelect({ value, onChange, options, placeholder, disabl
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-      {isOpen && (
-        <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg max-h-72 overflow-hidden flex flex-col">
+      {isOpen && createPortal(
+        <div ref={dropdownRef} style={dropdownStyle} className="bg-white border border-slate-200 rounded-lg shadow-lg max-h-72 overflow-hidden flex flex-col">
           <div className="p-2 border-b border-slate-100 flex items-center gap-2">
             <Search className="w-4 h-4 text-slate-400 shrink-0" />
             <input
@@ -76,7 +99,8 @@ export function SearchableSelect({ value, onChange, options, placeholder, disabl
               <div className="px-3 py-4 text-sm text-slate-400 text-center">Sin resultados</div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
