@@ -40,11 +40,14 @@ export function SearchableSelect({ value, onChange, options, placeholder, disabl
     if (disabled) return;
     if (!isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      const availableBelow = window.innerHeight - rect.bottom - 4;
+      const maxHeight = Math.min(Math.max(availableBelow, 150), 288);
       setDropdownStyle({
         position: 'fixed',
         top: `${rect.bottom + 4}px`,
         left: `${rect.left}px`,
         width: `${rect.width}px`,
+        maxHeight: `${maxHeight}px`,
         zIndex: 10000,
       });
     }
@@ -68,7 +71,7 @@ export function SearchableSelect({ value, onChange, options, placeholder, disabl
         </svg>
       </button>
       {isOpen && createPortal(
-        <div ref={dropdownRef} style={dropdownStyle} className="bg-white border border-slate-200 rounded-lg shadow-lg max-h-72 overflow-hidden flex flex-col">
+        <div ref={dropdownRef} style={dropdownStyle} onMouseDown={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden flex flex-col">
           <div className="p-2 border-b border-slate-100 flex items-center gap-2">
             <Search className="w-4 h-4 text-slate-400 shrink-0" />
             <input
