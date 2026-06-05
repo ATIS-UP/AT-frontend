@@ -141,7 +141,7 @@ export function RegistroCasoForm({
         </div>
       </form>
 
-      <HistorialRegistro registroId={registro.id} />
+      <HistorialRegistro registroId={registro.id} estadoActual={registro.estado} />
     </div>
   );
 }
