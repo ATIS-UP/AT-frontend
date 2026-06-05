@@ -17,6 +17,7 @@ import {
   Pencil,
   Trash2,
   ExternalLink,
+  X,
 } from 'lucide-react';
 import {
   TIPO_OPTIONS,
@@ -116,14 +117,63 @@ function DocChip({ anexo }: { anexo: AnexoActividad }) {
   );
 }
 
-function ImagePreview({ anexo }: { anexo: AnexoActividad }) {
+function ImagePreviewModal({ anexo, onClose }: { anexo: AnexoActividad; onClose: () => void }) {
+  const downloadUrl = anexosActividadesService.descargarUrl(anexo.id);
+  const blobUrl = useAuthBlobUrl(downloadUrl);
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Vista previa de imagen"
+    >
+      <div
+        className="relative max-w-4xl max-h-[90vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-t-lg px-4 py-2">
+          <span className="text-sm text-white truncate mr-4">{anexo.nombre}</span>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-white border-white/30 hover:bg-white/20"
+              onClick={() => triggerDownload(downloadUrl, anexo.nombre)}
+            >
+              <Download className="w-3.5 h-3.5" />
+              Descargar
+            </Button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1 text-white/70 hover:text-white transition-colors bg-transparent border-none cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+        <div className="flex items-center justify-center bg-black/40 rounded-b-lg p-2 overflow-auto">
+          {blobUrl ? (
+            <img src={blobUrl} alt={anexo.nombre} className="max-w-full max-h-[75vh] object-contain rounded" />
+          ) : (
+            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ImagePreview({ anexo, onPreview }: { anexo: AnexoActividad; onPreview: (a: AnexoActividad) => void }) {
   const downloadUrl = anexosActividadesService.descargarUrl(anexo.id);
   const blobUrl = useAuthBlobUrl(downloadUrl);
 
   return (
     <button
       type="button"
-      onClick={() => triggerDownload(downloadUrl, anexo.nombre)}
+      onClick={() => onPreview(anexo)}
       className="group relative aspect-[4/3] rounded-lg border border-slate-200 overflow-hidden bg-slate-50
                  hover:border-brand-primary/40 hover:shadow-md transition-all w-full"
     >
@@ -148,6 +198,12 @@ function ImagePreview({ anexo }: { anexo: AnexoActividad }) {
           <span className="truncate font-medium">{anexo.nombre}</span>
         </div>
       </div>
+      <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-[10px] bg-black/60 text-white px-1.5 py-0.5 rounded">
+          <Download className="w-3 h-3 inline-block mr-0.5" />
+          Descargar
+        </span>
+      </div>
     </button>
   );
 }
@@ -163,6 +219,7 @@ export function DetalleActividadModal({
     actividad?.id ?? '',
     open && !!actividad,
   );
+  const [previewImage, setPreviewImage] = useState<AnexoActividad | null>(null);
 
   if (!actividad) return null;
 
@@ -298,7 +355,7 @@ export function DetalleActividadModal({
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {imagenes.map((anexo) => (
-                      <ImagePreview key={anexo.id} anexo={anexo} />
+                      <ImagePreview key={anexo.id} anexo={anexo} onPreview={setPreviewImage} />
                     ))}
                   </div>
                 </div>
@@ -324,6 +381,10 @@ export function DetalleActividadModal({
           )}
         </div>
       </div>
+
+      {previewImage && (
+        <ImagePreviewModal anexo={previewImage} onClose={() => setPreviewImage(null)} />
+      )}
     </Modal>
   );
 }

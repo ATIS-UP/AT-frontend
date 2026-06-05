@@ -6,7 +6,7 @@ import { Input } from '@/shared/components/ui/Input';
 import { Select } from '@/shared/components/ui/Select';
 import { Textarea } from '@/shared/components/ui/Textarea';
 import { useCrearActividad, useActualizarActividad } from '../hooks/useActividades';
-import { useSubirAnexo, useEliminarAnexo } from '../hooks/useAnexosActividades';
+import { useAnexosActividad, useSubirAnexo, useEliminarAnexo } from '../hooks/useAnexosActividades';
 import { useNotificationStore } from '@/shared/stores/notification.store';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { AnexosUpload } from './AnexosUpload';
@@ -20,7 +20,8 @@ import {
   MODALIDAD_OPTIONS,
 } from '../types/actividades.types';
 import type { ActividadFormData, ActividadInstitucional } from '../types/actividades.types';
-import { Clock } from 'lucide-react';
+import type { AnexoActividad } from '../types/anexosActividades.types';
+import { Clock, Trash2, File, FileText, FileSpreadsheet } from 'lucide-react';
 
 interface CrearActividadModalProps {
   open: boolean;
@@ -102,6 +103,11 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
   const [horaInicio, setHoraInicio] = useState('');
   const [horaFin, setHoraFin] = useState('');
   const [timeError, setTimeError] = useState('');
+
+  const { data: anexosExistentes } = useAnexosActividad(
+    actividad?.id ?? '',
+    open && isEditing && !!actividad?.id,
+  );
 
   const toDateOnly = (iso: string) => iso ? iso.slice(0, 10) : '';
 
@@ -348,6 +354,38 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
         {/* ── Archivos ── */}
         <div className={sectionClass}>
           <p className={sectionTitleClass}>Archivos adjuntos</p>
+          {isEditing && anexosExistentes?.anexos && anexosExistentes.anexos.length > 0 && (
+            <div className="mb-3 space-y-1.5">
+              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Archivos existentes</p>
+              {anexosExistentes.anexos.map((a: AnexoActividad) => (
+                <div key={a.id} className="flex items-center justify-between bg-white border border-slate-200 rounded-lg px-3 py-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {(() => {
+                      const ext = a.nombre.split('.').pop()?.toLowerCase();
+                      if (ext === 'pdf') return <FileText className="w-4 h-4 text-red-500 shrink-0" />;
+                      if (ext === 'xlsx' || ext === 'xls') return <FileSpreadsheet className="w-4 h-4 text-emerald-500 shrink-0" />;
+                      if (ext === 'doc' || ext === 'docx') return <FileText className="w-4 h-4 text-blue-500 shrink-0" />;
+                      return <File className="w-4 h-4 text-slate-400 shrink-0" />;
+                    })()}
+                    <span className="text-sm text-slate-700 truncate">{a.nombre}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      eliminarAnexo.mutate(
+                        { anexoId: a.id, actividadId: actividad!.id },
+                        { onSuccess: () => notification.add({ type: 'success', message: 'Archivo eliminado' }) },
+                      );
+                    }}
+                    className="p-1 text-slate-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer shrink-0"
+                    title="Eliminar archivo"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           <AnexosUpload
             files={anexos}
             onFilesAdd={handleFilesAdd}
