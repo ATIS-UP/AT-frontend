@@ -111,7 +111,7 @@ export function Caracterizacion() {
       </div>
 
       {/* summary stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <StatCard icon={Users} label="Estudiantes activos" value={total} color="brand" />
         <StatCard icon={MapPin} label="Locales / Foráneos" value={`${locales} / ${foraneos}`} sub="procedencia" color="amber" />
       </div>

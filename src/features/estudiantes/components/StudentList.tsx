@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Trash2 as TrashIcon,
   UserX,
+  GraduationCap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createCharFilter, CharType } from '@/lib/validation';
@@ -40,6 +41,12 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
   const [showConfirmCreateModal, setShowConfirmCreateModal] = useState(false);
   const [showReactivarModal, setShowReactivarModal] = useState(false);
   const [pendingCreateData, setPendingCreateData] = useState<any>(null);
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [notesStudent, setNotesStudent] = useState<any>(null);
+  const [notesForm, setNotesForm] = useState<{ promedio_general: string; promedio_acumulado: string }>({
+    promedio_general: '',
+    promedio_acumulado: '',
+  });
   const limit = 20;
 
   const { data, isLoading, isError } = useEstudiantes({
@@ -294,6 +301,13 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                           title="Editar estudiante"
                         >
                           <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setNotesStudent(est); setNotesForm({ promedio_general: String(est.promedio_general ?? ''), promedio_acumulado: String(est.promedio_acumulado ?? '') }); setShowNotesModal(true); }}
+                          className="p-1.5 rounded-lg hover:bg-amber-50 text-slate-400 hover:text-amber-600 transition-colors"
+                          title="Editar notas"
+                        >
+                          <GraduationCap className="w-4 h-4" />
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); setActionStudent(est); setShowOptionsModal(true); }}
@@ -587,6 +601,75 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
             </Button>
             <Button type="button" onClick={handleReactivar} isLoading={cambiarEstado.isPending}>
               Sí, reactivar
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* notes modal */}
+      <Modal
+        open={showNotesModal}
+        onOpenChange={(open) => { if (!open) setShowNotesModal(false); }}
+        title="Editar Notas"
+        description={notesStudent ? `${notesStudent.nombres} ${notesStudent.apellidos}` : ''}
+        className="max-w-sm"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-600 mb-1">Promedio General</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              max="5"
+              value={notesForm.promedio_general}
+              onChange={(e) => setNotesForm({ ...notesForm, promedio_general: e.target.value })}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
+              placeholder="0.00 - 5.00"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-600 mb-1">Promedio Acumulado</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              max="5"
+              value={notesForm.promedio_acumulado}
+              onChange={(e) => setNotesForm({ ...notesForm, promedio_acumulado: e.target.value })}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
+              placeholder="0.00 - 5.00"
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={() => setShowNotesModal(false)}>
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                if (!notesStudent) return;
+                const payload: Record<string, unknown> = {};
+                if (notesForm.promedio_general !== '' && notesForm.promedio_general !== String(notesStudent.promedio_general ?? '')) {
+                  payload.promedio_general = Number(notesForm.promedio_general);
+                }
+                if (notesForm.promedio_acumulado !== '' && notesForm.promedio_acumulado !== String(notesStudent.promedio_acumulado ?? '')) {
+                  payload.promedio_acumulado = Number(notesForm.promedio_acumulado);
+                }
+                if (Object.keys(payload).length === 0) {
+                  notify({ type: 'info', message: 'No hay cambios para guardar' });
+                  return;
+                }
+                actualizarEstudiante.mutate(
+                  { id: notesStudent.id, data: payload },
+                  {
+                    onSuccess: () => setShowNotesModal(false),
+                  },
+                );
+              }}
+              isLoading={actualizarEstudiante.isPending}
+            >
+              Guardar Notas
             </Button>
           </div>
         </div>
