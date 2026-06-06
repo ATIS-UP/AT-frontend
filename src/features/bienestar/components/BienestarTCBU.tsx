@@ -276,7 +276,7 @@ export function BienestarTCBU() {
         <button
           onClick={toggleAll}
           className={cn(
-            'text-[11px] font-bold px-3 py-1 rounded-full border transition-colors',
+            'text-[0.6875rem] font-bold px-3 py-1 rounded-full border transition-colors',
             allVisible
               ? 'bg-slate-800 text-white border-slate-800'
               : 'bg-white text-slate-500 border-slate-300 hover:border-slate-500',
@@ -291,7 +291,7 @@ export function BienestarTCBU() {
               key={s}
               onClick={() => toggleSerie(s)}
               className={cn(
-                'text-[11px] font-semibold px-3 py-1 rounded-full border transition-all',
+                'text-[0.6875rem] font-semibold px-3 py-1 rounded-full border transition-all',
                 active
                   ? 'text-white border-transparent'
                   : 'bg-white text-slate-400 border-slate-200 hover:border-slate-400',
@@ -317,11 +317,11 @@ export function BienestarTCBU() {
         </div>
 
         {isLoading ? (
-          <div className="h-[420px] flex items-center justify-center">
+          <div className="h-[26.25rem] flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
           </div>
         ) : series.length === 0 ? (
-          <div className="h-[420px] flex flex-col items-center justify-center text-slate-400">
+          <div className="h-[26.25rem] flex flex-col items-center justify-center text-slate-400">
             <Activity className="w-10 h-10 mb-2 opacity-40" />
             <p className="text-sm">Sin datos para el rango seleccionado</p>
           </div>
@@ -375,7 +375,7 @@ export function BienestarTCBU() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-[10px] uppercase tracking-wider text-slate-400">
+                <tr className="border-b border-slate-100 text-[0.625rem] uppercase tracking-wider text-slate-400">
                   <th className="text-left px-5 py-2 font-semibold">Servicio</th>
                   <th className="text-right px-5 py-2 font-semibold">Total</th>
                   <th className="text-right px-5 py-2 font-semibold">Máx. periodo</th>

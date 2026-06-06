@@ -220,7 +220,7 @@ export function ResponderEncuesta() {
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       {idx + 1}. {pregunta.texto}
                       {pregunta.campo && pregunta.editable === false && (
-                        <span className="ml-1.5 text-[10px] text-slate-400 font-normal">(informativo)</span>
+                        <span className="ml-1.5 text-[0.625rem] text-slate-400 font-normal">(informativo)</span>
                       )}
                     </label>
 
@@ -264,7 +264,7 @@ export function ResponderEncuesta() {
                             setErrorMsg(null);
                           }
                         }}
-                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none min-h-[60px] resize-none ${
+                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none min-h-[3.75rem] resize-none ${
                           campoErrors[pregunta.campo]
                             ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
                             : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary'

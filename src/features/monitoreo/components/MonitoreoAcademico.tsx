@@ -27,7 +27,7 @@ function StatCard({ icon: Icon, label, value, sub, color = 'brand' }: {
       <div className="min-w-0">
         <p className="text-2xl font-black text-slate-900 leading-none">{value}</p>
         <p className="text-xs font-semibold text-slate-500 mt-0.5">{label}</p>
-        {sub && <p className="text-[10px] text-slate-400 mt-0.5">{sub}</p>}
+        {sub && <p className="text-[0.625rem] text-slate-400 mt-0.5">{sub}</p>}
       </div>
     </div>
   );
@@ -46,11 +46,11 @@ function ChartCard({ title, subtitle, children, isLoading }: {
         {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
       </div>
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center min-h-[220px]">
+        <div className="flex-1 flex items-center justify-center min-h-[13.75rem]">
           <div className="w-7 h-7 border-2 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="flex-1 min-h-[220px]">{children}</div>
+        <div className="flex-1 min-h-[13.75rem]">{children}</div>
       )}
     </div>
   );

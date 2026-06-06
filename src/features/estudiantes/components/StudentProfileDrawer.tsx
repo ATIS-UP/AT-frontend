@@ -39,7 +39,7 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-screen w-full max-w-[480px] bg-white shadow-2xl z-[70] flex flex-col"
+            className="fixed top-0 right-0 h-screen w-full max-w-[30rem] bg-white shadow-2xl z-[70] flex flex-col"
           >
             {/* Header */}
             <header className="px-6 pt-8 pb-4 border-b border-slate-100 flex items-start gap-4 relative">
@@ -66,25 +66,25 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Academic Info */}
               <section className="glass-panel p-5 rounded-card space-y-4">
-                <h3 className="font-display text-[15px] font-bold text-slate-800 flex items-center gap-2">
+                <h3 className="font-display text-[0.9375rem] font-bold text-slate-800 flex items-center gap-2">
                   <FileText className="w-4 h-4 text-brand-primary" />
                   Información Académica
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-4">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Programa</label>
+                    <label className="block text-[0.625rem] font-bold uppercase tracking-widest text-slate-400 mb-1">Programa</label>
                     <p className="text-sm font-semibold text-slate-700">{student.programa || '—'}</p>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Semestre</label>
+                    <label className="block text-[0.625rem] font-bold uppercase tracking-widest text-slate-400 mb-1">Semestre</label>
                     <p className="text-sm font-semibold text-slate-700">{student.semestre ?? '—'}</p>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Estado</label>
+                    <label className="block text-[0.625rem] font-bold uppercase tracking-widest text-slate-400 mb-1">Estado</label>
                     <p className="text-sm font-semibold text-slate-700">{student.estado || '—'}</p>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Documento</label>
+                    <label className="block text-[0.625rem] font-bold uppercase tracking-widest text-slate-400 mb-1">Documento</label>
                     <p className="text-sm font-semibold text-slate-700">{student.documento || '—'}</p>
                   </div>
                 </div>
@@ -92,17 +92,17 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
 
               {/* Grades Info */}
               <section className="glass-panel p-5 rounded-card space-y-4">
-                <h3 className="font-display text-[15px] font-bold text-slate-800 flex items-center gap-2">
+                <h3 className="font-display text-[0.9375rem] font-bold text-slate-800 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-brand-primary" />
                   Rendimiento Académico
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-4">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Promedio General</label>
+                    <label className="block text-[0.625rem] font-bold uppercase tracking-widest text-slate-400 mb-1">Promedio General</label>
                     <p className="text-sm font-semibold text-slate-700">{formatPromedio(student.promedio_general)}</p>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Promedio Acumulado</label>
+                    <label className="block text-[0.625rem] font-bold uppercase tracking-widest text-slate-400 mb-1">Promedio Acumulado</label>
                     <p className="text-sm font-semibold text-slate-700">{formatPromedio(student.promedio_acumulado)}</p>
                   </div>
                 </div>
@@ -110,7 +110,7 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
 
               {/* Contact Info */}
               <section className="glass-panel p-5 rounded-card space-y-4">
-                <h3 className="font-display text-[15px] font-bold text-slate-800 flex items-center gap-2">
+                <h3 className="font-display text-[0.9375rem] font-bold text-slate-800 flex items-center gap-2">
                   <User className="w-4 h-4 text-brand-primary" />
                   Información de Contacto
                 </h3>

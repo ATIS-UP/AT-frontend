@@ -170,7 +170,7 @@ export function Actividades() {
 
       {/* Grid de tarjetas */}
       {isLoading ? (
-        <div className="flex items-center justify-center min-h-[300px]">
+        <div className="flex items-center justify-center min-h-[18.75rem]">
           <div className="w-8 h-8 border-3 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
         </div>
       ) : actividadesFiltradas.length === 0 ? (
@@ -189,19 +189,19 @@ export function Actividades() {
             {actividadesFiltradas.map((act) => (
               <div
                 key={act.id}
-                className={`glass-panel rounded-card flex flex-col min-h-[300px] p-6 border-t-[3px] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group ${
+                className={`glass-panel rounded-card flex flex-col min-h-[18.75rem] p-6 border-t-[3px] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group ${
                   TIPO_ACCENT[act.tipo] || 'border-t-slate-300'
                 }`}
               >
                 {/* Top section */}
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <span
-                    className={`px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider shrink-0 ${TIPO_COLORS[act.tipo] || 'border-slate-200 text-slate-600 bg-slate-50'}`}
+                    className={`px-2 py-0.5 border text-[0.625rem] font-bold uppercase tracking-wider shrink-0 ${TIPO_COLORS[act.tipo] || 'border-slate-200 text-slate-600 bg-slate-50'}`}
                   >
                     {TIPO_OPTIONS.find((t) => t.value === act.tipo)?.label ?? act.tipo}
                   </span>
                   <span
-                    className={`px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider shrink-0 ${ESTADO_COLORS[act.estado] || 'border-slate-200 text-slate-500 bg-slate-50'}`}
+                    className={`px-2 py-0.5 border text-[0.625rem] font-bold uppercase tracking-wider shrink-0 ${ESTADO_COLORS[act.estado] || 'border-slate-200 text-slate-500 bg-slate-50'}`}
                   >
                     {ESTADO_OPTIONS.find((e) => e.value === act.estado)?.label ?? act.estado}
                   </span>

@@ -128,12 +128,12 @@ export default function ParametrizacionPage() {
                     <p className="text-xs text-slate-400 mt-0.5">{param.descripcion}</p>
                   )}
                   {param.tipo && (
-                    <span className="inline-block mt-1 text-[9px] font-bold uppercase tracking-wider text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                    <span className="inline-block mt-1 text-[0.5625rem] font-bold uppercase tracking-wider text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
                       {param.tipo}
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 sm:w-[320px]">
+                <div className="flex items-center gap-2 sm:w-[20rem]">
                   <input
                     type="text"
                     value={editedValues[param.id] ?? param.valor}

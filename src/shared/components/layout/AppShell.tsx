@@ -109,8 +109,8 @@ export function AppShell() {
       >
         <style>{`
           @media (min-width: 1024px) {
-            .app-main-content { margin-left: ${effectiveWidth}px; }
-            .app-topbar-offset { left: ${effectiveWidth}px; }
+            .app-main-content { margin-left: ${effectiveWidth / 16}rem; }
+            .app-topbar-offset { left: ${effectiveWidth / 16}rem; }
           }
         `}</style>
         <Topbar 
@@ -120,7 +120,7 @@ export function AppShell() {
           sidebarWidth={effectiveWidth}
         />
         
-        <div className="app-main-content px-4 md:px-10 py-8 flex-1 mt-[56px] transition-[margin] duration-150">
+        <div className="app-main-content px-4 md:px-10 py-8 flex-1 mt-14 transition-[margin] duration-150">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -135,7 +135,7 @@ export function AppShell() {
         </div>
         
         <footer className="app-main-content px-4 md:px-10 py-6 border-t border-slate-100/60 bg-white/50 text-center pb-20 md:pb-6 transition-[margin] duration-150">
-           <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400">
+           <p className="text-[0.625rem] uppercase tracking-widest font-bold text-slate-400">
              © 2026 Universidad de Pamplona - Programa de Ingeniería de Sistemas
            </p>
         </footer>

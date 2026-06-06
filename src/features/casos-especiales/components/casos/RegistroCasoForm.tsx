@@ -123,7 +123,7 @@ export function RegistroCasoForm({
               {ESTADOS_REGISTRO.map((e) => (<option key={e.value} value={e.value}>{e.label}</option>))}
             </select>
             {form.estado === 'CERRADO' && (
-              <p className="text-[11px] text-slate-500 mt-1">Para reabrir el caso, cambia el estado a <strong>Activo</strong> y guarda.</p>
+              <p className="text-[0.6875rem] text-slate-500 mt-1">Para reabrir el caso, cambia el estado a <strong>Activo</strong> y guarda.</p>
             )}
           </div>
         </div>
@@ -133,8 +133,8 @@ export function RegistroCasoForm({
         </div>
         <div>
           <label className="block text-xs font-bold text-slate-600 mb-1">Observaciones</label>
-          <textarea value={form.observaciones} maxLength={OBSERVACIONES_MAX_LENGTH} onChange={(e) => setForm({ ...form, observaciones: createCharFilter(CharType.FULL_TEXT)(e.target.value) })} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none" />
-          <div className="flex justify-end mt-1"><span className="text-[10px] text-slate-400">{form.observaciones.length}/{OBSERVACIONES_MAX_LENGTH}</span></div>
+          <textarea value={form.observaciones} maxLength={OBSERVACIONES_MAX_LENGTH} onChange={(e) => setForm({ ...form, observaciones: createCharFilter(CharType.FULL_TEXT)(e.target.value) })} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[5rem] resize-none" />
+          <div className="flex justify-end mt-1"><span className="text-[0.625rem] text-slate-400">{form.observaciones.length}/{OBSERVACIONES_MAX_LENGTH}</span></div>
         </div>
         <div className="flex justify-end gap-3 pt-2">
           <Button type="submit" isLoading={actualizarRegistro.isPending}>Guardar Cambios</Button>

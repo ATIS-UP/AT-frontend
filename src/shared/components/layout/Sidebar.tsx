@@ -36,7 +36,7 @@ interface NavDividerProps {
 const NavDivider = ({ label, collapsed }: NavDividerProps) => (
   <li className={cn('px-6 pt-4 pb-1', collapsed && 'px-2')}>
     {!collapsed && (
-      <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-slate-600/50 select-none">
+      <span className="text-[0.5625rem] font-bold uppercase tracking-[0.1em] text-slate-600/50 select-none">
         {label}
       </span>
     )}
@@ -62,9 +62,9 @@ const NavItem = ({ icon: Icon, label, to, collapsed, onClick }: NavItemProps) =>
             : "text-slate-500 hover:text-white/80 hover:bg-white/5"
         )}
       >
-        <Icon className={cn("w-[18px] h-[18px] shrink-0", active ? "text-brand-secondary" : "group-hover:text-white/60")} />
+        <Icon className={cn("w-[1.125rem] h-[1.125rem] shrink-0", active ? "text-brand-secondary" : "group-hover:text-white/60")} />
         {!collapsed && (
-          <span className="font-display text-[11px] uppercase tracking-[0.05em] font-bold whitespace-nowrap overflow-hidden">
+          <span className="font-display text-[0.6875rem] uppercase tracking-[0.05em] font-bold whitespace-nowrap overflow-hidden">
             {label}
           </span>
         )}
@@ -153,13 +153,13 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
         className={cn(
           "h-screen fixed left-0 top-0 z-50 bg-[#10192A] border-r border-white/10 shadow-2xl flex flex-col justify-between py-6 lg:translate-x-0 transition-[width] duration-150",
           // mobile: always 236px
-          "w-[236px]",
+          "w-[14.75rem]",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
-        style={{ width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? `${width}px` : undefined }}
+        style={{ width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? `${width / 16}rem` : undefined }}
       >
         {/* override width on desktop via css */}
-        <style>{`@media (min-width: 1024px) { .sidebar-nav { width: ${width}px !important; } }`}</style>
+        <style>{`@media (min-width: 1024px) { .sidebar-nav { width: ${width / 16}rem !important; } }`}</style>
 
         <div className="flex-1 flex flex-col overflow-y-auto">
           {/* header with title and collapse toggle */}
@@ -167,7 +167,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
             {!collapsed && (
               <div className="flex flex-col min-w-0 overflow-hidden">
                 <span className="text-white font-black tracking-tighter text-base leading-none whitespace-nowrap">UNIPAMPLONA</span>
-                <span className="text-white/60 font-display text-[9px] uppercase tracking-[0.05em] font-bold whitespace-nowrap">Gestión Académica</span>
+                <span className="text-white/60 font-display text-[0.5625rem] uppercase tracking-[0.05em] font-bold whitespace-nowrap">Gestión Académica</span>
               </div>
             )}
             {/* collapse toggle (desktop only) */}
@@ -222,9 +222,9 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
                   collapsed && "justify-center px-0"
                 )}
               >
-                <LogOut className="w-[18px] h-[18px] shrink-0 group-hover:text-white/60" />
+                <LogOut className="w-[1.125rem] h-[1.125rem] shrink-0 group-hover:text-white/60" />
                 {!collapsed && (
-                  <span className="font-display text-[11px] uppercase tracking-[0.05em] font-bold whitespace-nowrap">
+                  <span className="font-display text-[0.6875rem] uppercase tracking-[0.05em] font-bold whitespace-nowrap">
                     Cerrar Sesión
                   </span>
                 )}

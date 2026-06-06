@@ -135,26 +135,26 @@ export function AdminUsers() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px] bg-slate-50/50">
-                  <th className="pb-3 pt-4 px-6 font-semibold">Nombre</th>
-                  <th className="pb-3 pt-4 px-6 font-semibold">Email</th>
-                  <th className="pb-3 pt-4 px-6 font-semibold">Rol</th>
-                  <th className="pb-3 pt-4 px-6 font-semibold">Estado</th>
-                  <th className="pb-3 pt-4 px-6 font-semibold text-right">Acciones</th>
+                <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[0.625rem] bg-slate-50/50">
+                  <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Nombre</th>
+                  <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Email</th>
+                  <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Rol</th>
+                  <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Estado</th>
+                  <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {usuariosList.map((u) => (
                   <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="py-4 px-6 font-medium text-slate-800">{u.nombre}</td>
-                    <td className="py-4 px-6 text-slate-600 text-xs">{u.email}</td>
-                    <td className="py-4 px-6"><Badge variant="outline">{u.rol}</Badge></td>
-                    <td className="py-4 px-6">
-                      <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${u.is_active ? 'text-emerald-700 bg-emerald-50' : 'text-slate-400 bg-slate-100'}`}>
+                    <td className="py-4 px-2 sm:px-4 lg:px-6 font-medium text-slate-800">{u.nombre}</td>
+                    <td className="py-4 px-2 sm:px-4 lg:px-6 text-slate-600 text-xs">{u.email}</td>
+                    <td className="py-4 px-2 sm:px-4 lg:px-6"><Badge variant="outline">{u.rol}</Badge></td>
+                    <td className="py-4 px-2 sm:px-4 lg:px-6">
+                      <span className={`inline-block text-[0.625rem] px-2 py-0.5 rounded-full font-bold uppercase ${u.is_active ? 'text-emerald-700 bg-emerald-50' : 'text-slate-400 bg-slate-100'}`}>
                         {u.is_active ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-right">
+                    <td className="py-4 px-2 sm:px-4 lg:px-6 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="sm" className="text-xs" onClick={() => openEdit(u)}>
                           <Pencil className="w-3.5 h-3.5 mr-1" /> Editar
@@ -175,7 +175,7 @@ export function AdminUsers() {
             </table>
           </div>
           {total > limit && (
-            <div className="px-6 py-3 flex items-center justify-between border-t border-slate-100">
+            <div className="px-3 sm:px-6 py-3 flex items-center justify-between border-t border-slate-100">
               <span className="text-xs text-slate-400">{total} usuario(s)</span>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>

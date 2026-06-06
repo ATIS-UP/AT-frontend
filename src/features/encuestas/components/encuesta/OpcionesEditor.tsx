@@ -16,7 +16,7 @@ export function OpcionesEditor({
 }: OpcionesEditorProps) {
   return (
     <div className="ml-8 pl-3 border-l-2 border-slate-100 space-y-1.5">
-      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Opciones</p>
+      <p className="text-[0.625rem] font-bold text-slate-500 uppercase tracking-wide">Opciones</p>
       <SortableList
         items={opciones}
         onReorder={onReorder}
@@ -45,7 +45,7 @@ export function OpcionesEditor({
           </SortableRow>
         )}
       />
-      <button type="button" onClick={onAdd} className="text-[10px] text-brand-primary hover:text-brand-primary/80 font-semibold transition-colors">
+      <button type="button" onClick={onAdd} className="text-[0.625rem] text-brand-primary hover:text-brand-primary/80 font-semibold transition-colors">
         + Añadir opción
       </button>
     </div>

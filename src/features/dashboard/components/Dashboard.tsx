@@ -72,7 +72,7 @@ export const Dashboard = () => {
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="glass-panel rounded-card p-5 h-[120px] animate-pulse">
+            <div key={i} className="glass-panel rounded-card p-5 h-[7.5rem] animate-pulse">
               <div className="h-4 bg-slate-200 rounded w-2/3 mb-4"></div>
               <div className="h-8 bg-slate-200 rounded w-1/3"></div>
             </div>
@@ -80,9 +80,9 @@ export const Dashboard = () => {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {[...Array(2)].map((_, i) => (
-            <div key={i} className="glass-panel rounded-card p-6 h-[340px] animate-pulse">
+            <div key={i} className="glass-panel rounded-card p-6 h-[21.25rem] animate-pulse">
               <div className="h-5 bg-slate-200 rounded w-1/2 mb-6"></div>
-              <div className="h-[250px] bg-slate-100 rounded"></div>
+              <div className="h-[15.625rem] bg-slate-100 rounded"></div>
             </div>
           ))}
         </div>
@@ -94,8 +94,8 @@ export const Dashboard = () => {
     <div className="flex flex-col gap-6">
       {/* metrics row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[120px]">
-          <h3 className="text-slate-500 font-display text-[15px] font-semibold">Estudiantes activos</h3>
+        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[7.5rem]">
+          <h3 className="text-slate-500 font-display text-[0.9375rem] font-semibold">Estudiantes activos</h3>
           <div className="flex items-end justify-between">
             <span className="font-display text-2xl font-bold text-brand-primary tracking-tight">
               {estudiantesActivos.toLocaleString()}
@@ -104,14 +104,14 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[120px]">
+        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[7.5rem]">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-slate-500 font-display text-[15px] font-semibold">Encuestas</h3>
+            <h3 className="text-slate-500 font-display text-[0.9375rem] font-semibold">Encuestas</h3>
             <ClipboardList className="w-4 h-4 text-slate-400" />
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
-              <div className="flex justify-between text-[11px] text-slate-600 font-medium">
+              <div className="flex justify-between text-[0.6875rem] text-slate-600 font-medium">
                 <span>Pendientes</span>
                 <span>{pendientes}</span>
               </div>
@@ -120,7 +120,7 @@ export const Dashboard = () => {
               </div>
             </div>
             <div className="flex flex-col gap-1">
-              <div className="flex justify-between text-[11px] text-slate-600 font-medium">
+              <div className="flex justify-between text-[0.6875rem] text-slate-600 font-medium">
                 <span>En proceso</span>
                 <span>{enProceso}</span>
               </div>
@@ -131,19 +131,19 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[120px]">
-          <h3 className="text-slate-500 font-display text-[15px] font-semibold">Casos en seguimiento</h3>
+        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[7.5rem]">
+          <h3 className="text-slate-500 font-display text-[0.9375rem] font-semibold">Casos en seguimiento</h3>
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-bold text-slate-900 leading-none">{casosTotal}</span>
-              <span className="text-[12px] text-slate-400">Totales</span>
+              <span className="text-[0.75rem] text-slate-400">Totales</span>
             </div>
             <div className="w-full h-2 rounded-sm overflow-hidden flex shadow-inner">
               <div className="bg-red-500 h-full" style={{ width: `${(totalRojo / totalNiveles) * 100}%` }}></div>
               <div className="bg-amber-400 h-full" style={{ width: `${(totalAmarillo / totalNiveles) * 100}%` }}></div>
               <div className="bg-blue-300 h-full" style={{ width: `${(totalVerde / totalNiveles) * 100}%` }}></div>
             </div>
-            <div className="flex justify-between text-[10px] text-slate-500 font-medium tracking-tight">
+            <div className="flex justify-between text-[0.625rem] text-slate-500 font-medium tracking-tight">
               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-red-500 rounded-sm"></span>{totalRojo} Críticos</span>
               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-amber-400 rounded-sm"></span>{totalAmarillo} Alerta</span>
               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-blue-300 rounded-sm"></span>{totalVerde} Normal</span>
@@ -151,14 +151,14 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[120px] relative overflow-hidden">
-          <h3 className="text-slate-500 font-display text-[15px] font-semibold">Alertas resueltas</h3>
+        <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[7.5rem] relative overflow-hidden">
+          <h3 className="text-slate-500 font-display text-[0.9375rem] font-semibold">Alertas resueltas</h3>
           <div className="flex items-end justify-between mt-auto">
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-bold text-brand-primary">{resueltas}</span>
               <span className="text-sm text-slate-400">/ {casosTotal}</span>
             </div>
-            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+            <span className="text-[0.625rem] uppercase font-bold text-slate-500 tracking-wider">
               {casosTotal ? Math.round((resueltas / casosTotal) * 100) : 0}% Resuelto
             </span>
           </div>
@@ -170,7 +170,7 @@ export const Dashboard = () => {
 
       {/* charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-panel rounded-card p-6 min-h-[340px] flex flex-col">
+        <div className="glass-panel rounded-card p-6 min-h-[21.25rem] flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h2 className="font-display text-lg font-bold text-slate-900 tracking-tight">Tendencia de alertas por período</h2>
             <button className="text-slate-400 hover:text-slate-600 transition-colors">
@@ -202,7 +202,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="glass-panel rounded-card p-6 min-h-[340px] flex flex-col">
+        <div className="glass-panel rounded-card p-6 min-h-[21.25rem] flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h2 className="font-display text-lg font-bold text-slate-900 tracking-tight">Distribución por nivel de riesgo</h2>
             <button className="text-slate-400 hover:text-slate-600 transition-colors">
@@ -233,7 +233,7 @@ export const Dashboard = () => {
         <h2 className="font-display text-lg font-bold text-slate-900 flex items-center gap-2">
           Alertas Recientes
           {alertasRecientes.length > 0 && (
-            <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded-sm font-bold uppercase tracking-tight">
+            <span className="bg-slate-200 text-slate-600 text-[0.625rem] px-2 py-0.5 rounded-sm font-bold uppercase tracking-tight">
               {alertasRecientes.length} recientes
             </span>
           )}
@@ -248,21 +248,21 @@ export const Dashboard = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px] bg-slate-50/50">
-                    <th className="pb-3 pt-4 px-6 font-semibold">Estudiante</th>
-                    <th className="pb-3 pt-4 px-6 font-semibold">Nivel</th>
-                    <th className="pb-3 pt-4 px-6 font-semibold">Estado</th>
-                    <th className="pb-3 pt-4 px-6 font-semibold">Período</th>
-                    <th className="pb-3 pt-4 px-6 font-semibold">Fecha</th>
+                  <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[0.625rem] bg-slate-50/50">
+                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Estudiante</th>
+                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Nivel</th>
+                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Estado</th>
+                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Período</th>
+                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Fecha</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {alertasRecientes.map((alerta, idx) => (
                     <tr key={alerta.id ?? idx} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="py-3 px-6 font-medium text-slate-800">
+                      <td className="py-3 px-2 sm:px-4 lg:px-6 font-medium text-slate-800">
                         {alerta.estudiante_nombre || `ID: ${alerta.estudiante_id?.slice(0, 8)}...`}
                       </td>
-                      <td className="py-3 px-6">
+                      <td className="py-3 px-2 sm:px-4 lg:px-6">
                         <Badge
                           variant={
                             alerta.nivel_riesgo === 'ROJO' ? 'error' :
@@ -272,13 +272,13 @@ export const Dashboard = () => {
                           {alerta.nivel_riesgo}
                         </Badge>
                       </td>
-                      <td className="py-3 px-6">
+                      <td className="py-3 px-2 sm:px-4 lg:px-6">
                         <Badge variant="outline">
                           {alerta.estado_seguimiento?.replace('_', ' ')}
                         </Badge>
                       </td>
-                      <td className="py-3 px-6 text-xs text-slate-500">{alerta.periodo}</td>
-                      <td className="py-3 px-6 text-xs text-slate-400">
+                      <td className="py-3 px-2 sm:px-4 lg:px-6 text-xs text-slate-500">{alerta.periodo}</td>
+                      <td className="py-3 px-2 sm:px-4 lg:px-6 text-xs text-slate-400">
                         {alerta.created_at ? new Date(alerta.created_at).toLocaleDateString('es-CO') : '—'}
                       </td>
                     </tr>
@@ -295,7 +295,7 @@ export const Dashboard = () => {
         <h2 className="font-display text-lg font-bold text-slate-900 flex items-center gap-2">
           Actividades Recientes
           {actividadesData && actividadesData.actividades.length > 0 && (
-            <span className="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded-sm font-bold uppercase tracking-tight">
+            <span className="bg-slate-200 text-slate-600 text-[0.625rem] px-2 py-0.5 rounded-sm font-bold uppercase tracking-tight">
               {actividadesData.actividades.length} recientes
             </span>
           )}
@@ -308,21 +308,21 @@ export const Dashboard = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px] bg-slate-50/50">
-                    <th className="pb-3 pt-4 px-6 font-semibold">Tipo</th>
-                    <th className="pb-3 pt-4 px-6 font-semibold">Estado</th>
-                    <th className="pb-3 pt-4 px-6 font-semibold">Encargado</th>
-                    <th className="pb-3 pt-4 px-6 font-semibold">Modalidad</th>
-                    <th className="pb-3 pt-4 px-6 font-semibold">Fecha</th>
+                  <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[0.625rem] bg-slate-50/50">
+                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Tipo</th>
+                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Estado</th>
+                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Encargado</th>
+                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Modalidad</th>
+                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Fecha</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {actividadesData.actividades.map((act, idx) => (
                     <tr key={act.id ?? idx} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="py-3 px-6">
+                      <td className="py-3 px-2 sm:px-4 lg:px-6">
                         <Badge variant="outline">{act.tipo}</Badge>
                       </td>
-                      <td className="py-3 px-6">
+                      <td className="py-3 px-2 sm:px-4 lg:px-6">
                         <Badge variant={
                           act.estado === 'EN_CURSO' ? 'warning' :
                           act.estado === 'FINALIZADA' ? 'success' :
@@ -331,9 +331,9 @@ export const Dashboard = () => {
                           {act.estado?.replace('_', ' ')}
                         </Badge>
                       </td>
-                      <td className="py-3 px-6 text-sm text-slate-700">{act.encargado}</td>
-                      <td className="py-3 px-6 text-xs text-slate-500">{act.modalidad}</td>
-                      <td className="py-3 px-6 text-xs text-slate-400">
+                      <td className="py-3 px-2 sm:px-4 lg:px-6 text-sm text-slate-700">{act.encargado}</td>
+                      <td className="py-3 px-2 sm:px-4 lg:px-6 text-xs text-slate-500">{act.modalidad}</td>
+                      <td className="py-3 px-2 sm:px-4 lg:px-6 text-xs text-slate-400">
                         {act.created_at ? new Date(act.created_at).toLocaleDateString('es-CO') : '—'}
                       </td>
                     </tr>

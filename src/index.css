@@ -34,14 +34,14 @@
   --color-inverse-primary: #b4c5fb;
   --color-surface-border: #e5e7eb;
 
-  --radius-btn: 2px;
-  --radius-card: 4px;
+  --radius-btn: 0.125rem;
+  --radius-card: 0.25rem;
 
-  --text-headline-md: 32px;
-  --text-display-xl: 80px;
-  --text-body-md: 16px;
-  --text-technical-sm: 14px;
-  --text-label-caps: 12px;
+  --text-headline-md: 2rem;
+  --text-display-xl: 5rem;
+  --text-body-md: 1rem;
+  --text-technical-sm: 0.875rem;
+  --text-label-caps: 0.75rem;
 }
 
 @layer base {

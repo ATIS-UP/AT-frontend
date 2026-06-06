@@ -250,7 +250,7 @@ export function Alertas() {
         <select
           value={filtroPeriodo}
           onChange={(e) => setFiltroPeriodo(e.target.value)}
-          className="border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-brand-primary max-w-[160px]"
+          className="border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-brand-primary max-w-[10rem]"
         >
           <option value="">Todos los periodos</option>
           {PERIODOS.map((p) => (
@@ -280,17 +280,17 @@ export function Alertas() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px] bg-slate-50/50">
-                <th className="pb-3 pt-4 px-6 font-semibold flex items-center gap-2">
+                <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold flex items-center gap-2">
                   Estudiante
                   {isFetching && !isLoading && (
                     <span className="w-3 h-3 border border-brand-primary/40 border-t-brand-primary rounded-full animate-spin inline-block" />
                   )}
                 </th>
-                <th className="pb-3 pt-4 px-6 font-semibold">Descripción</th>
-                <th className="pb-3 pt-4 px-6 font-semibold">Nivel</th>
-                <th className="pb-3 pt-4 px-6 font-semibold">Seguimiento</th>
-                <th className="pb-3 pt-4 px-6 font-semibold">Periodo</th>
-                <th className="pb-3 pt-4 px-6 font-semibold text-right">Acciones</th>
+                <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Descripción</th>
+                <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Nivel</th>
+                <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Seguimiento</th>
+                <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Periodo</th>
+                <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -310,12 +310,12 @@ export function Alertas() {
               )}
               {alertas.map((item: any) => (
                 <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
-                  <td className="py-4 px-6">
+                  <td className="py-4 px-2 sm:px-4 lg:px-6">
                     <p className="font-medium text-slate-800">{item.estudiante_nombre || `ID: ${item.estudiante_id}`}</p>
                   </td>
-                  <td className="py-4 px-6">
+                  <td className="py-4 px-2 sm:px-4 lg:px-6">
                     {item.descripcion ? (
-                      <div className="flex items-center gap-2 max-w-[260px]">
+                      <div className="flex items-center gap-2 max-w-[16.25rem]">
                         <p className="text-slate-600 text-xs line-clamp-2 flex-1">{item.descripcion}</p>
                         <button
                           type="button"
@@ -337,23 +337,23 @@ export function Alertas() {
                       <span className="text-xs text-slate-400">—</span>
                     )}
                   </td>
-                  <td className="py-4 px-6">
+                  <td className="py-4 px-2 sm:px-4 lg:px-6">
                     <Badge variant={getStatusVariant(item.nivel_riesgo)}>
                       {item.nivel_riesgo}
                     </Badge>
                   </td>
-                  <td className="py-4 px-6">
+                  <td className="py-4 px-2 sm:px-4 lg:px-6">
                     <Badge variant={getTrackingVariant(item.estado_seguimiento)}>
                       {item.estado_seguimiento?.replace('_', ' ')}
                     </Badge>
                   </td>
-                  <td className="py-4 px-6">
+                  <td className="py-4 px-2 sm:px-4 lg:px-6">
                     <span className="text-xs text-slate-500">{item.periodo}</span>
                   </td>
-                  <td className="py-4 px-6 text-right">
+                  <td className="py-4 px-2 sm:px-4 lg:px-6 text-right">
                     <div className="flex items-center justify-end gap-1">
                       {item.estado_seguimiento === 'RESUELTO' || item.estado_seguimiento === 'DESCARTADO' ? (
-                        <span className="text-[10px] text-slate-400 italic whitespace-nowrap">
+                        <span className="text-[0.625rem] text-slate-400 italic whitespace-nowrap">
                           Alerta {item.estado_seguimiento.toLowerCase()} — no permite más actividades
                         </span>
                       ) : (
@@ -561,7 +561,7 @@ export function Alertas() {
               <p className="text-xs text-red-500 mt-1">La descripción es obligatoria</p>
             )}
             <div className="flex justify-end mt-1">
-              <span className="text-[10px] text-slate-400">{actividadForm.descripcion.length}/{DESCRIPCION_MAX_LENGTH}</span>
+              <span className="text-[0.625rem] text-slate-400">{actividadForm.descripcion.length}/{DESCRIPCION_MAX_LENGTH}</span>
             </div>
           </div>
           <div>
@@ -822,7 +822,7 @@ function DetalleAlertaModal({
               <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-slate-200" />
               {historial.map((entry: any) => (
                 <div key={entry.id} className="relative pb-6 last:pb-0">
-                  <div className="absolute -left-[23px] top-1 w-5 h-5 rounded-full bg-white border-2 border-slate-300 flex items-center justify-center text-[10px]">
+                  <div className="absolute -left-[23px] top-1 w-5 h-5 rounded-full bg-white border-2 border-slate-300 flex items-center justify-center text-[0.625rem]">
                     {HISTORIAL_ICONS[entry.tipo] || '•'}
                   </div>
                   <div className="bg-white border border-slate-100 rounded-lg p-3">
@@ -841,7 +841,7 @@ function DetalleAlertaModal({
                           </span>
                         )}
                       </div>
-                      <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                      <span className="text-[0.625rem] text-slate-400 whitespace-nowrap">
                         {new Date(entry.fecha || entry.created_at).toLocaleString('es-CO')}
                       </span>
                     </div>
