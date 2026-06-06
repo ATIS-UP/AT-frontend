@@ -168,7 +168,7 @@ export const Login = () => {
                   />
                   <button 
                     aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'} 
-                    className="text-primary-container hover:text-secondary transition-colors flex items-center justify-center p-1 bg-transparent border-none cursor-pointer" 
+                    className="text-primary-container hover:text-secondary transition-colors flex items-center justify-center p-2 bg-transparent border-none cursor-pointer" 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                   >
@@ -208,7 +208,7 @@ export const Login = () => {
         <button
           type="button"
           onClick={() => setShowCredits(true)}
-          className="text-[10px] text-slate-400 hover:text-slate-600 transition-colors bg-transparent border-none p-0 cursor-pointer"
+          className="text-[0.625rem] text-slate-400 hover:text-slate-600 transition-colors bg-transparent border-none p-0 cursor-pointer"
         >
           © SATISUP
         </button>

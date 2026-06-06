@@ -67,7 +67,7 @@ export function Modal({
             </div>
             <Dialog.Close asChild>
               <button
-                className="rounded p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+                className="rounded p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
                 aria-label="Cerrar"
               >
                 <X className="w-4 h-4" />

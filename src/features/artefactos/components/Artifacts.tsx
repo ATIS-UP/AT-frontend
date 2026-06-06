@@ -193,47 +193,47 @@ export const Artifacts = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px] bg-slate-50/50">
-                  <th className="pb-3 pt-4 px-6 font-semibold">Archivo</th>
-                  <th className="pb-3 pt-4 px-6 font-semibold">Tipo</th>
-                  <th className="pb-3 pt-4 px-6 font-semibold">Fecha de carga</th>
-                  <th className="pb-3 pt-4 px-6 font-semibold">Subido por</th>
-                  <th className="pb-3 pt-4 px-6 font-semibold text-right">Acciones</th>
+                <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[0.625rem] bg-slate-50/50">
+                  <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Archivo</th>
+                  <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Tipo</th>
+                  <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Fecha de carga</th>
+                  <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Subido por</th>
+                  <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {artefactos.map((item: any) => (
                   <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-2 sm:px-4 lg:px-6">
                       <div className="flex items-center gap-3">
                         {getFileIcon(item.tipo)}
-                        <span className="font-medium text-slate-800 truncate max-w-[200px]">
+                        <span className="font-medium text-slate-800 truncate max-w-[12.5rem]">
                           {item.nombre || item.nombre_archivo || 'Sin nombre'}
                         </span>
                       </div>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-2 sm:px-4 lg:px-6">
                       <Badge variant="default">{item.tipo || 'OTRO'}</Badge>
                     </td>
-                    <td className="py-4 px-6 text-slate-500 text-xs">
+                    <td className="py-4 px-2 sm:px-4 lg:px-6 text-slate-500 text-xs">
                       {formatDate(item.fecha_carga || item.created_at)}
                     </td>
-                    <td className="py-4 px-6 text-slate-500 text-xs">
+                    <td className="py-4 px-2 sm:px-4 lg:px-6 text-slate-500 text-xs">
                       {item.subido_por || item.usuario_nombre || '—'}
                     </td>
-                    <td className="py-4 px-6 text-right">
+                    <td className="py-4 px-2 sm:px-4 lg:px-6 text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleDownload(item.id, item.nombre)}
                           disabled={downloadingId === item.id}
-                          className="p-1.5 text-slate-400 hover:text-brand-primary hover:bg-slate-100 rounded transition-all disabled:opacity-50 disabled:cursor-wait"
+                          className="p-2 text-slate-400 hover:text-brand-primary hover:bg-slate-100 rounded transition-all disabled:opacity-50 disabled:cursor-wait"
                           title="Descargar"
                         >
                           <Download className={`w-4 h-4 ${downloadingId === item.id ? 'animate-pulse' : ''}`} />
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(item.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
                           title="Eliminar"
                         >
                           <Trash2 className="w-4 h-4" />

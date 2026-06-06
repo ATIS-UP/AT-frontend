@@ -400,7 +400,7 @@ export function CasosEspeciales() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px] bg-slate-50/50">
+                    <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[0.625rem] bg-slate-50/50">
                       <th className="pb-3 pt-4 px-4 font-semibold">#</th>
                       <th className="pb-3 pt-4 px-4 font-semibold hidden md:table-cell">Tipo</th>
                       <th className="pb-3 pt-4 px-4 font-semibold">Novedad</th>
@@ -609,7 +609,7 @@ export function CasosEspeciales() {
                 <button
                   type="button"
                   onClick={() => applyNovedadDescripcion(form.novedad_id)}
-                  className="text-[11px] text-brand-primary hover:underline flex items-center gap-1"
+                  className="text-[0.6875rem] text-brand-primary hover:underline flex items-center gap-1"
                   title="Reemplazar el contenido del textarea con la descripción oficial de la novedad"
                 >
                   ↻ Usar descripción oficial
@@ -624,14 +624,14 @@ export function CasosEspeciales() {
                 setObservacionesError(false);
                 setUserTouchedObservaciones(true);
               }}
-              className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[80px] resize-none ${observacionesError ? 'border-red-500 focus:border-red-500' : 'border-slate-200'}`}
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[5rem] resize-none ${observacionesError ? 'border-red-500 focus:border-red-500' : 'border-slate-200'}`}
               placeholder="Describa la situación del estudiante"
             />
             <div className="flex justify-between items-center mt-1">
               {observacionesError ? (
                 <p className="text-xs text-red-500">Debe ingresar las observaciones del caso</p>
               ) : <span />}
-              <span className="text-[10px] text-slate-400">{form.observaciones.length}/{OBSERVACIONES_MAX_LENGTH}</span>
+              <span className="text-[0.625rem] text-slate-400">{form.observaciones.length}/{OBSERVACIONES_MAX_LENGTH}</span>
             </div>
           </div>
 

@@ -85,10 +85,10 @@ function DocChip({ anexo }: { anexo: AnexoActividad }) {
                  hover:border-brand-primary/30 hover:bg-slate-50 transition-colors group min-w-0"
     >
       {fileIcon(anexo.nombre)}
-      <span className="text-sm text-slate-700 truncate max-w-[200px] group-hover:text-brand-primary transition-colors">
+      <span className="text-sm text-slate-700 truncate max-w-[12.5rem] group-hover:text-brand-primary transition-colors">
         {anexo.nombre}
       </span>
-      <span className="text-[10px] font-bold uppercase text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded shrink-0">
+      <span className="text-[0.625rem] font-bold uppercase text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded shrink-0">
         {docExt(anexo.nombre)}
       </span>
       <Download className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-primary transition-colors shrink-0" />
@@ -150,16 +150,16 @@ export function DetalleActividadModal({
           </h3>
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`px-2.5 py-1 border text-[11px] font-bold uppercase tracking-wider ${TIPO_COLORS[actividad.tipo] || 'border-slate-200 text-slate-600 bg-slate-50'}`}
+              className={`px-2.5 py-1 border text-[0.6875rem] font-bold uppercase tracking-wider ${TIPO_COLORS[actividad.tipo] || 'border-slate-200 text-slate-600 bg-slate-50'}`}
             >
               {tipoLabel}
             </span>
             <span
-              className={`px-2.5 py-1 border text-[11px] font-bold uppercase tracking-wider ${ESTADO_COLORS[actividad.estado] || 'border-slate-200 text-slate-500 bg-slate-50'}`}
+              className={`px-2.5 py-1 border text-[0.6875rem] font-bold uppercase tracking-wider ${ESTADO_COLORS[actividad.estado] || 'border-slate-200 text-slate-500 bg-slate-50'}`}
             >
               {estadoLabel}
             </span>
-            <span className="px-2.5 py-1 border text-[11px] font-bold uppercase tracking-wider border-slate-200 text-slate-600 bg-slate-50">
+            <span className="px-2.5 py-1 border text-[0.6875rem] font-bold uppercase tracking-wider border-slate-200 text-slate-600 bg-slate-50">
               {modalidadLabel}
             </span>
           </div>

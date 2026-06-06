@@ -49,7 +49,7 @@ export function BottomBar() {
                 )}
               >
                 <item.icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium leading-none">{item.label}</span>
+                <span className="text-[0.625rem] font-medium leading-none">{item.label}</span>
               </NavLink>
             </li>
           );

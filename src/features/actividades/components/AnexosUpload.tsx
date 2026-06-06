@@ -109,7 +109,7 @@ export function AnexosUpload({ files, onFilesAdd, onFileRemove, disabled }: Anex
               <button
                 type="button"
                 onClick={() => onFileRemove(f.id)}
-                className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
+                className="p-2 rounded text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
                 title="Eliminar archivo"
               >
                 <X className="w-3.5 h-3.5" />

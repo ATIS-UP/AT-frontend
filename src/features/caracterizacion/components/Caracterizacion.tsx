@@ -31,7 +31,7 @@ function StatCard({ icon: Icon, label, value, sub, color = 'brand' }: {
       <div className="min-w-0">
         <p className="text-2xl font-black text-slate-900 leading-none">{value}</p>
         <p className="text-xs font-semibold text-slate-500 mt-0.5">{label}</p>
-        {sub && <p className="text-[10px] text-slate-400 mt-0.5">{sub}</p>}
+        {sub && <p className="text-[0.625rem] text-slate-400 mt-0.5">{sub}</p>}
       </div>
     </div>
   );
@@ -50,11 +50,11 @@ function ChartCard({ title, subtitle, children, isLoading }: {
         {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
       </div>
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center min-h-[220px]">
+        <div className="flex-1 flex items-center justify-center min-h-[13.75rem]">
           <div className="w-7 h-7 border-2 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="flex-1 min-h-[220px]">{children}</div>
+        <div className="flex-1 min-h-[13.75rem]">{children}</div>
       )}
     </div>
   );
@@ -152,7 +152,7 @@ export function Caracterizacion() {
               {socio.agrupado.map(g => (
                 <div key={g.grupo} className="flex-1 min-w-[100px] bg-slate-50 rounded-lg px-3 py-2 text-center border border-slate-100">
                   <p className="text-lg font-bold text-slate-800">{g.cantidad}</p>
-                  <p className="text-[10px] text-slate-500 font-medium">{g.grupo}</p>
+                  <p className="text-[0.625rem] text-slate-500 font-medium">{g.grupo}</p>
                 </div>
               ))}
             </div>
@@ -197,7 +197,7 @@ export function Caracterizacion() {
                     <div className="w-3 h-3 rounded-sm shrink-0" style={{ background: COLOR_PROCEDENCIA[i] }} />
                     <div>
                       <p className="text-sm font-bold text-slate-800">{d.cantidad} <span className="text-xs font-normal text-slate-400">({pct}%)</span></p>
-                      <p className="text-[10px] text-slate-500">{d.procedencia}</p>
+                      <p className="text-[0.625rem] text-slate-500">{d.procedencia}</p>
                     </div>
                   </div>
                 );
@@ -212,7 +212,7 @@ export function Caracterizacion() {
           subtitle="Composición de género del cuerpo estudiantil"
           isLoading={loadingGen}
         >
-          <div className="flex items-center gap-4 h-[220px]">
+          <div className="flex items-center gap-4 h-[13.75rem]">
             <ResponsiveContainer width="60%" height="100%">
               <PieChart>
                 <Pie
@@ -247,14 +247,14 @@ export function Caracterizacion() {
                     <div className="w-3 h-3 rounded-full shrink-0" style={{ background: COLORS_GENERO[i] }} />
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-slate-800 leading-none">{d.cantidad}</p>
-                      <p className="text-[10px] text-slate-500">{d.genero} · {pct}%</p>
+                      <p className="text-[0.625rem] text-slate-500">{d.genero} · {pct}%</p>
                     </div>
                   </div>
                 );
               })}
               {gen && (
                 <div className="mt-1 pt-2 border-t border-slate-100">
-                  <p className="text-[10px] text-slate-400">Total: <span className="font-semibold text-slate-600">{gen.total_estudiantes}</span></p>
+                  <p className="text-[0.625rem] text-slate-400">Total: <span className="font-semibold text-slate-600">{gen.total_estudiantes}</span></p>
                 </div>
               )}
             </div>

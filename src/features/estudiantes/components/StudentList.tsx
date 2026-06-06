@@ -168,14 +168,14 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowCargaModal(true)}
-            className="flex items-center gap-2 px-4 py-2 border border-brand-primary text-brand-primary rounded-btn font-display text-[11px] font-bold uppercase tracking-wider hover:bg-brand-primary/5 transition-all"
+            className="flex items-center gap-2 px-4 py-2 border border-brand-primary text-brand-primary rounded-btn font-display text-[0.6875rem] font-bold uppercase tracking-wider hover:bg-brand-primary/5 transition-all"
           >
             <FileUp className="w-4 h-4" />
             Cargar lista
           </button>
           <button
             onClick={openCreateModal}
-            className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-btn font-display text-[11px] font-bold uppercase tracking-wider hover:bg-brand-primary/90 transition-all shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-btn font-display text-[0.6875rem] font-bold uppercase tracking-wider hover:bg-brand-primary/90 transition-all shadow-sm"
           >
             <UserPlus className="w-4 h-4" />
             Nuevo estudiante
@@ -228,7 +228,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
         </select>
         <button
           onClick={clearFilters}
-          className="text-brand-primary font-display text-[11px] font-bold uppercase tracking-wider hover:underline ml-auto"
+          className="text-brand-primary font-display text-[0.6875rem] font-bold uppercase tracking-wider hover:underline ml-auto"
         >
           Limpiar filtros
         </button>
@@ -250,39 +250,39 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-brand-primary/5 border-b border-slate-100">
-                  <th className="py-4 px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Documento</th>
-                  <th className="py-4 px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nombre</th>
-                  <th className="py-4 px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">Sem.</th>
-                  <th className="py-4 px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Programa</th>
-                  <th className="py-4 px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Estado</th>
-                  <th className="py-4 px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Acciones</th>
+                  <th className="py-4 px-2 sm:px-4 lg:px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Documento</th>
+                  <th className="py-4 px-2 sm:px-4 lg:px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nombre</th>
+                  <th className="py-4 px-2 sm:px-4 lg:px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">Sem.</th>
+                  <th className="py-4 px-2 sm:px-4 lg:px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Programa</th>
+                  <th className="py-4 px-2 sm:px-4 lg:px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest">Estado</th>
+                  <th className="py-4 px-2 sm:px-4 lg:px-6 font-display text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="text-[13px] text-slate-700 font-medium">
+              <tbody className="text-[0.8125rem] text-slate-700 font-medium">
                 {estudiantes.map((est: any) => (
                   <tr
                     key={est.id}
                     onClick={() => onSelectStudent(est)}
                     className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors cursor-pointer group"
                   >
-                    <td className="py-3 px-6 font-bold text-brand-primary">{est.documento}</td>
-                    <td className="py-3 px-6 font-semibold">
+                    <td className="py-3 px-2 sm:px-4 lg:px-6 font-bold text-brand-primary">{est.documento}</td>
+                    <td className="py-3 px-2 sm:px-4 lg:px-6 font-semibold">
                       {est.nombres} {est.apellidos}
                     </td>
-                    <td className="py-3 px-6 text-center">
+                    <td className="py-3 px-2 sm:px-4 lg:px-6 text-center">
                       <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-blue-50 text-brand-primary text-xs font-bold">
                         {est.semestre}
                       </span>
                     </td>
-                    <td className="py-3 px-6">
+                    <td className="py-3 px-2 sm:px-4 lg:px-6">
                       <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200/50">
                         {est.programa}
                       </span>
                     </td>
-                    <td className="py-3 px-6">
+                    <td className="py-3 px-2 sm:px-4 lg:px-6">
                       <span
                         className={cn(
-                          'inline-block text-[9px] px-2 py-0.5 rounded uppercase font-bold',
+                          'inline-block text-[0.5625rem] px-2 py-0.5 rounded uppercase font-bold',
                           est.estado === 'ACTIVO'
                             ? 'text-emerald-700 bg-emerald-50'
                             : est.estado === 'SUSPENDIDO'
@@ -293,25 +293,25 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                         {est.estado}
                       </span>
                     </td>
-                    <td className="py-3 px-6 text-right relative">
+                    <td className="py-3 px-2 sm:px-4 lg:px-6 text-right relative">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={(e) => { e.stopPropagation(); openEditModal(est); }}
-                          className="p-1.5 rounded-lg hover:bg-brand-primary/10 text-slate-400 hover:text-brand-primary transition-colors"
+                          className="p-2 rounded-lg hover:bg-brand-primary/10 text-slate-400 hover:text-brand-primary transition-colors"
                           title="Editar estudiante"
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); setNotesStudent(est); setNotesForm({ promedio_general: String(est.promedio_general ?? ''), promedio_acumulado: String(est.promedio_acumulado ?? '') }); setShowNotesModal(true); }}
-                          className="p-1.5 rounded-lg hover:bg-amber-50 text-slate-400 hover:text-amber-600 transition-colors"
+                          className="p-2 rounded-lg hover:bg-amber-50 text-slate-400 hover:text-amber-600 transition-colors"
                           title="Editar notas"
                         >
                           <GraduationCap className="w-4 h-4" />
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); setActionStudent(est); setShowOptionsModal(true); }}
-                          className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
+                          className="p-2 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
                           title="Eliminar estudiante"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -327,7 +327,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
 
         {/* pagination */}
         {total > limit && (
-          <div className="px-6 py-4 flex items-center justify-between border-t border-slate-100 bg-slate-50/30">
+          <div className="px-3 sm:px-6 py-4 flex items-center justify-between border-t border-slate-100 bg-slate-50/30">
             <span className="text-xs text-slate-500">
               Mostrando {(page - 1) * limit + 1} a {Math.min(page * limit, total)} de {total}
             </span>
@@ -378,7 +378,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.nombres ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Nombres completos"
               />
-              {formErrors.nombres && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.nombres}</p>}
+              {formErrors.nombres && <p className="text-[0.625rem] text-red-500 mt-0.5">{formErrors.nombres}</p>}
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Apellidos *</label>
@@ -390,7 +390,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.apellidos ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Apellidos"
               />
-              {formErrors.apellidos && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.apellidos}</p>}
+              {formErrors.apellidos && <p className="text-[0.625rem] text-red-500 mt-0.5">{formErrors.apellidos}</p>}
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -404,7 +404,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.documento ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Número de documento"
               />
-              {formErrors.documento && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.documento}</p>}
+              {formErrors.documento && <p className="text-[0.625rem] text-red-500 mt-0.5">{formErrors.documento}</p>}
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Email</label>
@@ -416,7 +416,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="correo@ejemplo.com"
               />
-              {formErrors.email && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.email}</p>}
+              {formErrors.email && <p className="text-[0.625rem] text-red-500 mt-0.5">{formErrors.email}</p>}
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -430,7 +430,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 className={cn('w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none transition-all', formErrors.telefono ? 'border-red-300 focus:border-red-500 focus:ring-red-500/30' : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary')}
                 placeholder="Número de teléfono"
               />
-              {formErrors.telefono && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.telefono}</p>}
+              {formErrors.telefono && <p className="text-[0.625rem] text-red-500 mt-0.5">{formErrors.telefono}</p>}
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -442,7 +442,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 options={PROGRAMAS}
                 placeholder="Seleccionar programa..."
               />
-              {formErrors.programa && <p className="text-[10px] text-red-500 mt-0.5">{formErrors.programa}</p>}
+              {formErrors.programa && <p className="text-[0.625rem] text-red-500 mt-0.5">{formErrors.programa}</p>}
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-600 mb-1">Semestre *</label>

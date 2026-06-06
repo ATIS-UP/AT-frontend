@@ -63,7 +63,7 @@ export function HistorialRegistro({ registroId, estadoActual }: { registroId: st
         <h4 className="text-sm font-bold text-slate-700">Historial del Registro</h4>
         {ultimaAccion && (
           <span className={cn(
-            'text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border',
+            'text-[0.625rem] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border',
             ACCION_STYLES[ultimaAccion]?.border,
             ACCION_STYLES[ultimaAccion]?.bg?.replace('50', '100')
           )}>
@@ -87,21 +87,21 @@ export function HistorialRegistro({ registroId, estadoActual }: { registroId: st
                 <div className={cn('border rounded-lg p-3', style.border, style.bg)}>
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className={cn(
-                      'text-[10px] uppercase tracking-wider font-bold',
+                      'text-[0.625rem] uppercase tracking-wider font-bold',
                       h.accion === 'APERTURA' ? 'text-emerald-700' :
                       h.accion === 'CIERRE' ? 'text-slate-600' :
                       h.accion === 'REAPERTURA' ? 'text-amber-700' : 'text-blue-700'
                     )}>
                       {style.label}
                     </span>
-                    <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                    <span className="text-[0.625rem] text-slate-400 whitespace-nowrap">
                       {new Date(h.created_at).toLocaleString('es-CO')}
                     </span>
                   </div>
                   {h.observaciones && (
                     <p className="text-xs text-slate-600 whitespace-pre-wrap">{h.observaciones}</p>
                   )}
-                  <p className="text-[10px] text-slate-400 mt-1">por {h.responsable_nombre}</p>
+                  <p className="text-[0.625rem] text-slate-400 mt-1">por {h.responsable_nombre}</p>
                 </div>
               </div>
             );
@@ -129,7 +129,7 @@ export function HistorialRegistro({ registroId, estadoActual }: { registroId: st
               value={observaciones}
               onChange={(e) => { setObservaciones(e.target.value); setObservacionesError(false); }}
               className={cn(
-                "w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none min-h-[60px] resize-none",
+                "w-full border rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none min-h-[3.75rem] resize-none",
                 observacionesError ? "border-red-500 focus:border-red-500" : "border-slate-200"
               )}
               placeholder="Describa..."

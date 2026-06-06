@@ -59,7 +59,7 @@ export const Topbar = ({ title, subtitle, onMenuClick, sidebarWidth = 236 }: Top
   const hasUnread = notifications.length > 0;
 
   return (
-    <header className="app-topbar-offset h-[56px] fixed top-0 right-0 left-0 z-40 glass-panel border-b border-white/55 flex items-center justify-between px-4 md:px-6 transition-all duration-150">
+    <header className="app-topbar-offset h-14 fixed top-0 right-0 left-0 z-40 glass-panel border-b border-white/55 flex items-center justify-between px-4 md:px-6 transition-all duration-150">
       <div className="flex items-center gap-4">
         <button 
           onClick={onMenuClick}
@@ -126,7 +126,7 @@ export const Topbar = ({ title, subtitle, onMenuClick, sidebarWidth = 236 }: Top
                       <p className="flex-1 text-sm text-slate-700 leading-snug">{n.message}</p>
                       <button
                         onClick={() => removeNotification(n.id)}
-                        className="p-0.5 text-slate-400 hover:text-slate-600 shrink-0"
+                        className="p-1.5 text-slate-400 hover:text-slate-600 shrink-0"
                         title="Descartar"
                       >
                         <X className="w-3.5 h-3.5" />
@@ -145,10 +145,10 @@ export const Topbar = ({ title, subtitle, onMenuClick, sidebarWidth = 236 }: Top
               onClick={() => setProfileOpen((prev) => !prev)}
               className="flex items-center gap-2 hover:bg-slate-100 p-1 rounded-sm md:pr-3 transition-all"
             >
-              <div className="w-7 h-7 rounded-sm bg-brand-primary flex items-center justify-center text-white text-[10px] font-bold shadow-sm shrink-0 select-none">
+              <div className="w-7 h-7 rounded-sm bg-brand-primary flex items-center justify-center text-white text-[0.625rem] font-bold shadow-sm shrink-0 select-none">
                 {(user?.nombre ?? 'U').split(' ').map((s: string) => s[0]).join('').slice(0, 2).toUpperCase()}
               </div>
-              <span className="font-display text-[11px] font-bold uppercase tracking-wider text-slate-700 hidden sm:block truncate max-w-[100px]">
+              <span className="font-display text-[0.6875rem] font-bold uppercase tracking-wider text-slate-700 hidden sm:block truncate max-w-[6.25rem]">
                 {user?.nombre ?? 'Usuario'}
               </span>
             </button>

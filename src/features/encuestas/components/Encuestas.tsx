@@ -303,29 +303,29 @@ export function Encuestas() {
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Descripción</label>
-            <textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: createCharFilter(CharType.FULL_TEXT)(e.target.value) })} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[60px] resize-none" placeholder="Descripción breve de la encuesta" />
+            <textarea value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: createCharFilter(CharType.FULL_TEXT)(e.target.value) })} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none min-h-[3.75rem] resize-none" placeholder="Descripción breve de la encuesta" />
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">
               Cerrar automáticamente el
-              <span className="ml-1 text-[10px] text-slate-400 font-normal">(opcional)</span>
+              <span className="ml-1 text-[0.625rem] text-slate-400 font-normal">(opcional)</span>
             </label>
             <div className="flex gap-2 items-center">
               <input type="datetime-local" value={form.fecha_fin} onChange={(e) => setForm({ ...form, fecha_fin: e.target.value })} className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none" />
               {form.fecha_fin && (
-                <button type="button" onClick={() => setForm({ ...form, fecha_fin: '' })} className="text-slate-400 hover:text-slate-600 p-1" title="Quitar fecha de cierre">
+                <button type="button" onClick={() => setForm({ ...form, fecha_fin: '' })} className="text-slate-400 hover:text-slate-600 p-2" title="Quitar fecha de cierre">
                   <X className="w-4 h-4" />
                 </button>
               )}
             </div>
-            <p className="text-[10px] text-slate-400 mt-1">Si defines una fecha, la encuesta se cerrará automáticamente al llegar a esa fecha (botón "Verificar estados").</p>
+            <p className="text-[0.625rem] text-slate-400 mt-1">Si defines una fecha, la encuesta se cerrará automáticamente al llegar a esa fecha (botón "Verificar estados").</p>
             {form.fecha_fin && mode === null && (
-              <p className="text-[10px] text-red-500 mt-1">La fecha de cierre debe ser posterior a la fecha de creación</p>
+              <p className="text-[0.625rem] text-red-500 mt-1">La fecha de cierre debe ser posterior a la fecha de creación</p>
             )}
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Preguntas *</label>
-            <p className="text-[10px] text-slate-400 mb-2">Arrastra el handle <span className="font-mono">⋮⋮</span> para reordenar.</p>
+            <p className="text-[0.625rem] text-slate-400 mb-2">Arrastra el handle <span className="font-mono">⋮⋮</span> para reordenar.</p>
             <SortableList
               items={form.preguntas}
               onReorder={setPreguntas}
@@ -340,7 +340,7 @@ export function Encuestas() {
                         <span className="text-xs text-slate-400 font-mono mt-2.5 min-w-[20px]">{index + 1}.</span>
                         <div className="flex-1">
                           <input type="text" value={pregunta.texto} maxLength={PREGUNTA_MAX_LENGTH} onChange={(e) => updatePregunta(pregunta.id, { texto: e.target.value })} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none" placeholder={`Escriba la pregunta ${index + 1}`} />
-                          <div className="flex justify-end mt-0.5"><span className="text-[10px] text-slate-400">{pregunta.texto.length}/{PREGUNTA_MAX_LENGTH}</span></div>
+                          <div className="flex justify-end mt-0.5"><span className="text-[0.625rem] text-slate-400">{pregunta.texto.length}/{PREGUNTA_MAX_LENGTH}</span></div>
                         </div>
                         <select value={pregunta.tipo} onChange={(e) => handleChangeTipo(pregunta.id, e.target.value as PreguntaTipo)} className="mt-1 text-xs border border-slate-200 rounded px-2 py-1.5 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none" title="Tipo de pregunta">
                           {PREGUNTA_TIPOS.map((t) => (<option key={t} value={t}>{PREGUNTA_TIPO_LABELS[t]}</option>))}

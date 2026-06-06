@@ -196,7 +196,7 @@ function Pagination({
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="p-1.5 rounded hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          className="p-2 rounded hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
           aria-label="Página anterior"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -222,7 +222,7 @@ function Pagination({
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
-          className="p-1.5 rounded hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+          className="p-2 rounded hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
           aria-label="Página siguiente"
         >
           <ChevronRight className="w-4 h-4" />

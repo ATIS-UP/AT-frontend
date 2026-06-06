@@ -86,7 +86,7 @@ function TimePicker({ value, onChange }: TimePickerProps) {
           </option>
         ))}
       </select>
-      <span className="text-[10px] text-slate-400 italic ml-0.5">opcional</span>
+      <span className="text-[0.625rem] text-slate-400 italic ml-0.5">opcional</span>
     </div>
   );
 }
@@ -384,7 +384,7 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
           <p className={sectionTitleClass}>Archivos adjuntos</p>
           {isEditing && anexosExistentes?.anexos && anexosExistentes.anexos.length > 0 && (
             <div className="mb-3 space-y-1.5">
-              <p className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Archivos existentes</p>
+              <p className="text-[0.625rem] uppercase tracking-wider text-slate-400 font-semibold">Archivos existentes</p>
               {anexosExistentes.anexos.map((a: AnexoActividad) => (
                 <div key={a.id} className="flex items-center justify-between bg-white border border-slate-200 rounded-lg px-3 py-2">
                   <div className="flex items-center gap-2 min-w-0">
@@ -405,7 +405,7 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
                         { onSuccess: () => notification.add({ type: 'success', message: 'Archivo eliminado' }) },
                       );
                     }}
-                    className="p-1 text-slate-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer shrink-0"
+                    className="p-2 text-slate-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer shrink-0"
                     title="Eliminar archivo"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
