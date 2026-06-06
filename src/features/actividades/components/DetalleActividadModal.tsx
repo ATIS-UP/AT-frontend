@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Modal } from '@/shared/components/ui/Modal';
 import { Button } from '@/shared/components/ui/Button';
 import { useAnexosActividad } from '../hooks/useAnexosActividades';
 import { anexosActividadesService } from '../services/anexosActividadesService';
 import { apiClient } from '@/lib/api-client';
+import { useNotificationStore } from '@/shared/stores/notification.store';
 import {
   Calendar,
   Clock,
@@ -13,11 +14,8 @@ import {
   Download,
   File,
   FileSpreadsheet,
-  Image as ImageIcon,
   Pencil,
   Trash2,
-  ExternalLink,
-  X,
 } from 'lucide-react';
 import {
   TIPO_OPTIONS,
@@ -51,13 +49,6 @@ function formatTime(dateStr: string) {
   return d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 }
 
-const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.bmp'];
-
-function isImage(name: string) {
-  const ext = name.split('.').pop()?.toLowerCase();
-  return ext ? IMAGE_EXTS.includes(`.${ext}`) : false;
-}
-
 function docExt(name: string) {
   return name.split('.').pop()?.toUpperCase() ?? 'FILE';
 }
@@ -70,28 +61,16 @@ function fileIcon(name: string) {
   return <File className="w-4 h-4 text-slate-400" />;
 }
 
-function useAuthBlobUrl(url: string) {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  useEffect(() => {
-    let alive = true;
-    apiClient.downloadBlob(url).then(({ blob }) => {
-      if (alive) setBlobUrl(URL.createObjectURL(blob));
-    }).catch(() => {});
-    return () => {
-      alive = false;
-      setBlobUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
-    };
-  }, [url]);
-  return blobUrl;
-}
-
 function triggerDownload(url: string, nombre: string) {
+  const notify = useNotificationStore.getState().add;
   apiClient.downloadBlob(url).then(({ blob, filename }) => {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = nombre || filename;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  }).catch((err) => {
+    notify({ type: 'error', message: err instanceof Error ? err.message : 'Error al descargar el archivo' });
   });
 }
 
@@ -117,97 +96,6 @@ function DocChip({ anexo }: { anexo: AnexoActividad }) {
   );
 }
 
-function ImagePreviewModal({ anexo, onClose }: { anexo: AnexoActividad; onClose: () => void }) {
-  const downloadUrl = anexosActividadesService.descargarUrl(anexo.id);
-  const blobUrl = useAuthBlobUrl(downloadUrl);
-
-  return (
-    <div
-      className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Vista previa de imagen"
-    >
-      <div
-        className="relative max-w-4xl max-h-[90vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-t-lg px-4 py-2">
-          <span className="text-sm text-white truncate mr-4">{anexo.nombre}</span>
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-white border-white/30 hover:bg-white/20"
-              onClick={() => triggerDownload(downloadUrl, anexo.nombre)}
-            >
-              <Download className="w-3.5 h-3.5" />
-              Descargar
-            </Button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1 text-white/70 hover:text-white transition-colors bg-transparent border-none cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-        <div className="flex items-center justify-center bg-black/40 rounded-b-lg p-2 overflow-auto">
-          {blobUrl ? (
-            <img src={blobUrl} alt={anexo.nombre} className="max-w-full max-h-[75vh] object-contain rounded" />
-          ) : (
-            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ImagePreview({ anexo, onPreview }: { anexo: AnexoActividad; onPreview: (a: AnexoActividad) => void }) {
-  const downloadUrl = anexosActividadesService.descargarUrl(anexo.id);
-  const blobUrl = useAuthBlobUrl(downloadUrl);
-
-  return (
-    <button
-      type="button"
-      onClick={() => onPreview(anexo)}
-      className="group relative aspect-[4/3] rounded-lg border border-slate-200 overflow-hidden bg-slate-50
-                 hover:border-brand-primary/40 hover:shadow-md transition-all w-full"
-    >
-      {blobUrl ? (
-        <img
-          src={blobUrl}
-          alt={anexo.nombre}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <div className="w-5 h-5 border-2 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
-        </div>
-      )}
-      <div
-        className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent
-                    opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5"
-      >
-        <div className="flex items-center gap-1.5 text-xs text-white truncate">
-          <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate font-medium">{anexo.nombre}</span>
-        </div>
-      </div>
-      <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-        <span className="text-[10px] bg-black/60 text-white px-1.5 py-0.5 rounded">
-          <Download className="w-3 h-3 inline-block mr-0.5" />
-          Descargar
-        </span>
-      </div>
-    </button>
-  );
-}
-
 export function DetalleActividadModal({
   open,
   onOpenChange,
@@ -219,7 +107,6 @@ export function DetalleActividadModal({
     actividad?.id ?? '',
     open && !!actividad,
   );
-  const [previewImage, setPreviewImage] = useState<AnexoActividad | null>(null);
 
   if (!actividad) return null;
 
@@ -228,10 +115,7 @@ export function DetalleActividadModal({
   const modalidadLabel =
     MODALIDAD_OPTIONS.find((m) => m.value === actividad.modalidad)?.label ?? actividad.modalidad;
 
-  const imagenes =
-    anexosData?.anexos?.filter((a) => isImage(a.nombre)) ?? [];
-  const documentos =
-    anexosData?.anexos?.filter((a) => !isImage(a.nombre)) ?? [];
+  const anexos = anexosData?.anexos ?? [];
 
   return (
     <Modal
@@ -346,32 +230,16 @@ export function DetalleActividadModal({
             <div className="flex items-center justify-center py-8">
               <div className="w-5 h-5 border-2 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
             </div>
-          ) : anexosData?.anexos && anexosData.anexos.length > 0 ? (
-            <div className="space-y-4">
-              {imagenes.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
-                    Imágenes ({imagenes.length})
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {imagenes.map((anexo) => (
-                      <ImagePreview key={anexo.id} anexo={anexo} onPreview={setPreviewImage} />
-                    ))}
-                  </div>
-                </div>
-              )}
-              {documentos.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
-                    Documentos ({documentos.length})
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {documentos.map((anexo) => (
-                      <DocChip key={anexo.id} anexo={anexo} />
-                    ))}
-                  </div>
-                </div>
-              )}
+          ) : anexos.length > 0 ? (
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
+                Archivos ({anexos.length})
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {anexos.map((anexo) => (
+                  <DocChip key={anexo.id} anexo={anexo} />
+                ))}
+              </div>
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-slate-200 p-6 text-center">
@@ -382,9 +250,7 @@ export function DetalleActividadModal({
         </div>
       </div>
 
-      {previewImage && (
-        <ImagePreviewModal anexo={previewImage} onClose={() => setPreviewImage(null)} />
-      )}
+
     </Modal>
   );
 }

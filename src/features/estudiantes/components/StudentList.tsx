@@ -200,7 +200,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
           }}
         >
           <option value="">Semestre</option>
-          {Array.from({ length: 10 }, (_, i) => i + 1).map((s) => (
+          {Array.from({ length: 12 }, (_, i) => i + 1).map((s) => (
             <option key={s} value={s}>
               {s}
             </option>
@@ -437,7 +437,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                 onChange={(e) => setForm({ ...form, semestre: Number(e.target.value) })}
                 className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary outline-none"
               >
-                {Array.from({ length: 10 }, (_, i) => i + 1).map((s) => (
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
@@ -479,7 +479,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
         onOpenChange={setShowCargaModal}
         title="Carga Masiva"
         description="Cargar estudiantes desde un archivo CSV o Excel"
-        className="max-w-2xl"
+        className="max-w-5xl"
       >
         <CargaMasiva onClose={() => setShowCargaModal(false)} />
       </Modal>

@@ -46,12 +46,14 @@ export function Encuestas() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['encuestas'],
     queryFn: () => encuestasService.listar(),
+    refetchInterval: 30000,
   });
 
   const { data: resultadosData, isLoading: isLoadingResultados } = useQuery({
     queryKey: ['encuesta-resultados', resultadosEncuestaId],
     queryFn: () => encuestasService.resultados(resultadosEncuestaId!),
     enabled: !!resultadosEncuestaId,
+    refetchInterval: resultadosEncuestaId ? 30000 : undefined,
   });
 
   const resetForm = () => {
@@ -119,7 +121,7 @@ export function Encuestas() {
     ...prev,
     preguntas: prev.preguntas.map((p) => {
       if (p.id !== preguntaId) return p;
-      if (tipo === 'opcion_multiple') {
+      if (tipo === 'opcion_multiple' || tipo === 'opcion_multiple_multi') {
         const opciones = p.opciones && p.opciones.length >= 2 ? p.opciones : ['Opción 1', 'Opción 2'];
         return { ...p, tipo, opciones };
       }
@@ -130,7 +132,7 @@ export function Encuestas() {
   const buildPayload = () => {
     const preguntas = form.preguntas.map((p) => {
       const out: Record<string, unknown> = { texto: p.texto.trim(), tipo: p.tipo, requerida: p.requerida };
-      if (p.tipo === 'opcion_multiple' && p.opciones) out.opciones = p.opciones.map((o) => o.trim()).filter(Boolean);
+      if ((p.tipo === 'opcion_multiple' || p.tipo === 'opcion_multiple_multi') && p.opciones) out.opciones = p.opciones.map((o) => o.trim()).filter(Boolean);
       if (p.campo) out.campo = p.campo;
       if (p.editable !== undefined) out.editable = p.editable;
       return out;
@@ -317,6 +319,9 @@ export function Encuestas() {
               )}
             </div>
             <p className="text-[10px] text-slate-400 mt-1">Si defines una fecha, la encuesta se cerrará automáticamente al llegar a esa fecha (botón "Verificar estados").</p>
+            {form.fecha_fin && mode === null && (
+              <p className="text-[10px] text-red-500 mt-1">La fecha de cierre debe ser posterior a la fecha de creación</p>
+            )}
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Preguntas *</label>
@@ -344,7 +349,7 @@ export function Encuestas() {
                           <button type="button" onClick={() => removePregunta(pregunta.id)} disabled={isDragging} className="mt-2 text-red-400 hover:text-red-600 transition-colors text-xs font-bold disabled:opacity-30" title="Eliminar pregunta">✕</button>
                         )}
                       </div>
-                      {pregunta.tipo === 'opcion_multiple' && (
+                      {(pregunta.tipo === 'opcion_multiple' || pregunta.tipo === 'opcion_multiple_multi') && (
                         <OpcionesEditor
                           preguntaId={pregunta.id}
                           opciones={pregunta.opciones ?? []}

@@ -22,6 +22,7 @@ import {
 import type { ActividadFormData, ActividadInstitucional } from '../types/actividades.types';
 import type { AnexoActividad } from '../types/anexosActividades.types';
 import { Clock, Trash2, File, FileText, FileSpreadsheet } from 'lucide-react';
+import { useWatch } from 'react-hook-form';
 
 interface CrearActividadModalProps {
   open: boolean;
@@ -111,6 +112,10 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
 
   const toDateOnly = (iso: string) => iso ? iso.slice(0, 10) : '';
 
+  const [lugarEdit, enlaceEdit] = actividad?.modalidad === 'HIBRIDA' && (actividad?.lugar_enlace ?? '').includes(' | ')
+    ? (actividad.lugar_enlace.split(' | '))
+    : [actividad?.lugar_enlace ?? '', ''];
+
   const defaultValues: ActividadFormData = actividad
     ? {
         tipo: actividad.tipo,
@@ -122,7 +127,8 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
         observaciones: actividad.observaciones ?? '',
         anexos: '',
         modalidad: actividad.modalidad,
-        lugar_enlace: actividad.lugar_enlace,
+        lugar_enlace: lugarEdit,
+        enlace: actividad.modalidad === 'HIBRIDA' ? enlaceEdit : '',
       }
     : {
         tipo: 'TALLER',
@@ -134,6 +140,7 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
         anexos: '',
         modalidad: 'PRESENCIAL',
         lugar_enlace: '',
+        enlace: '',
       };
 
   const {
@@ -146,6 +153,12 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
     defaultValues,
     resolver: zodResolver(actividadCreateSchema) as any,
   });
+
+  const modalidadValue = useWatch({ control, name: 'modalidad' });
+
+  const lugarLabel = modalidadValue === 'PRESENCIAL' ? 'Lugar' : modalidadValue === 'VIRTUAL' ? 'Enlace virtual' : 'Lugar';
+  const lugarPlaceholder = modalidadValue === 'PRESENCIAL' ? 'Auditorio, salón, edificio...' : modalidadValue === 'VIRTUAL' ? 'https://meet.google.com/...' : 'Auditorio, salón, edificio...';
+  const maxLugarChars = modalidadValue === 'HIBRIDA' ? 230 : modalidadValue === 'VIRTUAL' ? 300 : 500;
 
   React.useEffect(() => {
     if (open) {
@@ -187,6 +200,10 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
 
       data.fecha_inicio = startDateTime.toISOString();
       data.fecha_fin = endDateTime.toISOString();
+
+      if (data.modalidad === 'HIBRIDA') {
+        data.lugar_enlace = `${data.lugar_enlace} | ${data.enlace || ''}`;
+      }
 
       if (isEditing && actividad) {
         await actualizarActividad.mutateAsync({ id: actividad.id, data });
@@ -254,13 +271,24 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
           </div>
           <Input
             name="lugar_enlace"
-            label="Lugar / Enlace"
-            placeholder="Ej: Auditorio Principal, o enlace virtual..."
+            label={lugarLabel}
+            placeholder={lugarPlaceholder}
             control={control}
-            rules={{ required: 'Indica el lugar o enlace' }}
-            maxLength={500}
+            rules={{ required: 'Requerido' }}
+            maxLength={maxLugarChars}
             charType={CharType.ALPHANUMERIC}
           />
+          {modalidadValue === 'HIBRIDA' && (
+            <Input
+              name="enlace"
+              label="Enlace virtual"
+              placeholder="https://meet.google.com/..."
+              control={control}
+              rules={{ required: 'Requerido' }}
+              maxLength={260}
+              charType={CharType.ALPHANUMERIC}
+            />
+          )}
         </div>
 
         {/* ── Programación ── */}

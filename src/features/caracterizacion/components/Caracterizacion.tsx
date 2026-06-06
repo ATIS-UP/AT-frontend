@@ -82,7 +82,6 @@ export function Caracterizacion() {
   // Derived stats
   const locales = proc?.datos.find(d => d.codigo === 'LOCAL')?.cantidad ?? 0;
   const foraneos = proc?.datos.find(d => d.codigo === 'FORANEO')?.cantidad ?? 0;
-  const hombres = gen?.datos.find(d => d.codigo === 'H')?.cantidad ?? 0;
 
   return (
     <div className="space-y-8 fade-in">
@@ -115,7 +114,6 @@ export function Caracterizacion() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard icon={Users} label="Estudiantes activos" value={total} color="brand" />
         <StatCard icon={MapPin} label="Locales / Foráneos" value={`${locales} / ${foraneos}`} sub="procedencia" color="amber" />
-        <StatCard icon={UserCheck} label="Hombres" value={hombres} sub={`de ${total} estudiantes`} color="emerald" />
       </div>
 
       {/* charts grid */}

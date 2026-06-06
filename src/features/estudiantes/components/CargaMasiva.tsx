@@ -5,6 +5,7 @@ import { estudiantesService } from '../services/estudiantesService';
 import { useNotificationStore } from '@/shared/stores/notification.store';
 import { Button } from '@/shared/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { PROGRAMAS } from '../constants/programas';
 
 interface UploadResult {
   insertadas: number;
@@ -25,6 +26,7 @@ const COLUMNS = [
   { key: 'programa',  label: 'programa',  req: true,  example: 'Ing. Sistemas' },
   { key: 'semestre',  label: 'semestre',  req: true,  example: '3' },
   { key: 'estado',    label: 'estado',    req: false, example: 'ACTIVO' },
+  { key: 'sede',      label: 'sede',      req: false, example: 'PAMPLONA' },
 ];
 
 // ── horizontal spreadsheet preview of the template ────────────────────────────
@@ -187,6 +189,16 @@ export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
               Formato del archivo (horizontal)
             </p>
             <FormatoHorizontal />
+            <details className="mt-2">
+              <summary className="text-[10px] text-slate-500 cursor-pointer hover:text-slate-700 font-medium">
+                Carreras disponibles ({PROGRAMAS.length}) — haz clic para ver
+              </summary>
+              <div className="mt-1.5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-1">
+                {PROGRAMAS.map((p) => (
+                  <span key={p} className="text-[10px] text-slate-500 truncate">{p}</span>
+                ))}
+              </div>
+            </details>
           </div>
         </>
       )}
@@ -278,7 +290,7 @@ export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
                 <AlertTriangle className="w-3.5 h-3.5" />
                 {result.detalle_errores.length} error{result.detalle_errores.length !== 1 ? 'es' : ''} encontrado{result.detalle_errores.length !== 1 ? 's' : ''}
               </div>
-              <ul className="divide-y divide-red-50 max-h-36 overflow-y-auto">
+              <ul className="divide-y divide-red-50 max-h-96 overflow-y-auto">
                 {result.detalle_errores.map((err, i) => (
                   <li key={i} className="px-3 py-1.5 text-xs text-red-700 font-mono">
                     Fila {err.fila}{err.campo ? ` · ${err.campo}` : ''}: {err.error ?? err.mensaje ?? 'error desconocido'}
