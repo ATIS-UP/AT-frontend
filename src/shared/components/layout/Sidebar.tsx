@@ -161,7 +161,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
         {/* override width on desktop via css */}
         <style>{`@media (min-width: 1024px) { .sidebar-nav { width: ${width}px !important; } }`}</style>
 
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-y-auto">
           {/* header with title and collapse toggle */}
           <div className={cn("px-4 mb-8 flex items-center shrink-0", collapsed ? "justify-center px-2" : "justify-between")}>
             {!collapsed && (

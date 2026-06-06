@@ -48,6 +48,7 @@ export interface ActividadFormData {
   anexos?: string;
   modalidad: Modalidad;
   lugar_enlace: string;
+  enlace?: string;
 }
 
 export interface ActividadListResponse {

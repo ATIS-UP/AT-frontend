@@ -29,6 +29,12 @@ export const actividadCreateSchema = z.object({
     .optional()
     .or(z.literal('')),
   anexos: z.string().optional(),
+  enlace: z
+    .string()
+    .max(260, 'Máximo 260 caracteres')
+    .regex(CharType.ALPHANUMERIC, ERROR_MSGS.ALPHANUMERIC)
+    .optional()
+    .or(z.literal('')),
 });
 
 export type ActividadCreate = z.infer<typeof actividadCreateSchema>;

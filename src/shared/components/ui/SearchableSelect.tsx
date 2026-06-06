@@ -30,31 +30,41 @@ export function SearchableSelect({ value, onChange, options, placeholder, disabl
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const recalcPosition = () => {
+    if (!isOpen || !buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    const gap = 4;
+    const vh = window.innerHeight;
+    const availableBelow = vh - rect.bottom - gap;
+    const availableAbove = rect.top - gap;
+    const prefersBelow = availableBelow >= availableAbove && availableBelow > 80;
+    const maxHeight = Math.min(prefersBelow ? availableBelow : availableAbove, 288);
+    let top = prefersBelow ? rect.bottom + gap : rect.top - maxHeight - gap;
+    const left = Math.max(gap, Math.min(rect.left, window.innerWidth - rect.width - gap));
+    setDropdownStyle({
+      position: 'fixed',
+      top: `${Math.max(gap, Math.min(top, vh - maxHeight - gap))}px`,
+      left: `${left}px`,
+      width: `${rect.width}px`,
+      maxHeight: `${maxHeight}px`,
+      pointerEvents: 'auto',
+      zIndex: 10000,
+    });
+  };
+
   const handleToggle = () => {
     if (disabled) return;
-    if (!isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const gap = 4;
-      const vh = window.innerHeight;
-      const availableBelow = vh - rect.bottom - gap;
-      const availableAbove = rect.top - gap;
-      const prefersBelow = availableBelow >= availableAbove && availableBelow > 80;
-      const maxHeight = Math.min(prefersBelow ? availableBelow : availableAbove, 288);
-      let top = prefersBelow ? rect.bottom + gap : rect.top - maxHeight - gap;
-      const left = Math.max(gap, Math.min(rect.left, window.innerWidth - rect.width - gap));
-      top = Math.max(gap, Math.min(top, vh - maxHeight - gap));
-      setDropdownStyle({
-        position: 'fixed',
-        top: `${top}px`,
-        left: `${left}px`,
-        width: `${rect.width}px`,
-        maxHeight: `${maxHeight}px`,
-        pointerEvents: 'auto',
-        zIndex: 10000,
-      });
-    }
+    if (!isOpen && buttonRef.current) recalcPosition();
     setIsOpen((prev) => !prev);
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    recalcPosition();
+    const onScroll = () => recalcPosition();
+    window.addEventListener('scroll', onScroll, true);
+    return () => window.removeEventListener('scroll', onScroll, true);
+  }, [isOpen]);
 
   return (
     <div ref={containerRef} className={`relative ${className || ''}`}>

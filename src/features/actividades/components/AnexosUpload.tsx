@@ -105,13 +105,7 @@ export function AnexosUpload({ files, onFilesAdd, onFileRemove, disabled }: Anex
               <span className="text-xs text-slate-400 shrink-0">
                 {(f.file.size / 1024 / 1024).toFixed(1)} MB
               </span>
-              {f.preview && (
-                <img
-                  src={f.preview}
-                  alt=""
-                  className="w-8 h-8 rounded object-cover border border-slate-200"
-                />
-              )}
+
               <button
                 type="button"
                 onClick={() => onFileRemove(f.id)}

@@ -479,7 +479,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
         onOpenChange={setShowCargaModal}
         title="Carga Masiva"
         description="Cargar estudiantes desde un archivo CSV o Excel"
-        className="max-w-2xl"
+        className="max-w-5xl"
       >
         <CargaMasiva onClose={() => setShowCargaModal(false)} />
       </Modal>

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { CharType, ERROR_MSGS } from '@/lib/validation';
 
-export const PREGUNTA_TIPOS = ['texto_libre', 'opcion_multiple', 'escala_likert'] as const;
+export const PREGUNTA_TIPOS = ['texto_libre', 'opcion_multiple', 'opcion_multiple_multi', 'escala_likert'] as const;
 export type PreguntaTipo = (typeof PREGUNTA_TIPOS)[number];
 
 export const preguntaBackendSchema = z.object({
@@ -89,6 +89,7 @@ export type PreguntaForm = z.infer<typeof preguntaFormSchema>;
 export const PREGUNTA_TIPO_LABELS: Record<PreguntaTipo, string> = {
   texto_libre: 'Texto libre',
   opcion_multiple: 'Opción múltiple',
+  opcion_multiple_multi: 'Opción múltiple (multi-respuesta)',
   escala_likert: 'Escala 1-5',
 };
 
