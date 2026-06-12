@@ -2,9 +2,42 @@ import type { ApiError } from './api-client.types';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 const REQUEST_TIMEOUT_MS = 30000;
+const MAX_RETRIES = 3;
+const BASE_RETRY_DELAY_MS = 500;
+const MAX_RETRY_DELAY_MS = 30000;
 
 const TOKEN_KEY = 'sat_access_token';
 const REFRESH_TOKEN_KEY = 'sat_refresh_token';
+
+const IDEMPOTENT_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
+export interface RetryConfig {
+  enabled?: boolean;
+  maxRetries?: number;
+}
+
+function isRetryableStatus(status: number): boolean {
+  return status >= 500 || status === 408 || status === 429;
+}
+
+function computeBackoff(attempt: number, response: Response | null): number {
+  if (response) {
+    const retryAfter = response.headers.get('Retry-After');
+    if (retryAfter) {
+      const seconds = Number.parseInt(retryAfter, 10);
+      if (Number.isFinite(seconds) && seconds >= 0) {
+        return Math.min(seconds * 1000, MAX_RETRY_DELAY_MS);
+      }
+    }
+  }
+  const exponential = BASE_RETRY_DELAY_MS * Math.pow(2, attempt);
+  const jitter = 0.85 + Math.random() * 0.3;
+  return Math.min(exponential * jitter, MAX_RETRY_DELAY_MS);
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 class ApiClient {
   private baseUrl: string;
@@ -84,7 +117,6 @@ class ApiClient {
 
   private async refreshTokenWithQueue(): Promise<string> {
     if (this.isRefreshing) {
-      // queue concurrent requests while refresh is in progress
       return new Promise<string>((resolve, reject) => {
         this.refreshQueue.push({ resolve, reject });
       });
@@ -94,12 +126,10 @@ class ApiClient {
 
     try {
       const newToken = await this.handleRefresh();
-      // resolve all queued requests with the new token
       this.refreshQueue.forEach(({ resolve }) => resolve(newToken));
       this.refreshQueue = [];
       return newToken;
     } catch (error) {
-      // reject all queued requests
       this.refreshQueue.forEach(({ reject }) => reject(error as Error));
       this.refreshQueue = [];
       this.clearTokens();
@@ -110,28 +140,59 @@ class ApiClient {
     }
   }
 
-  private async request<T>(url: string, options: RequestInit): Promise<T> {
-    let response: Response;
+  private async fetchWithRetry(
+    url: string,
+    options: RequestInit,
+    retryConfig?: RetryConfig
+  ): Promise<Response> {
+    const method = (options.method ?? 'GET').toUpperCase();
+    const isIdempotent = IDEMPOTENT_METHODS.has(method);
+    const retryEnabled = retryConfig?.enabled ?? isIdempotent;
+    const maxRetries = retryEnabled
+      ? Math.max(0, retryConfig?.maxRetries ?? MAX_RETRIES)
+      : 0;
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    let lastNetworkError: Error | null = null;
 
-    try {
-      response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
-      });
-    } catch (error) {
-      clearTimeout(timeoutId);
-      if ((error as Error).name === 'AbortError') {
-        throw new Error('Request timed out. Please try again.');
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+      try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!isRetryableStatus(response.status) || attempt === maxRetries) {
+          return response;
+        }
+
+        await sleep(computeBackoff(attempt, response));
+      } catch (error) {
+        clearTimeout(timeoutId);
+        lastNetworkError = error as Error;
+
+        if (attempt === maxRetries) {
+          if (lastNetworkError.name === 'AbortError') {
+            throw new Error('Request timed out. Please try again.');
+          }
+          throw new Error(
+            `Network error: ${lastNetworkError.message || 'Unable to reach server'}`
+          );
+        }
+
+        await sleep(computeBackoff(attempt, null));
       }
-      throw new Error(
-        `Network error: ${error instanceof Error ? error.message : 'Unable to reach server'}`
-      );
     }
 
-    clearTimeout(timeoutId);
+    throw new Error('Request failed after retries');
+  }
+
+  private async request<T>(
+    url: string,
+    options: RequestInit,
+    retryConfig?: RetryConfig
+  ): Promise<T> {
+    const response = await this.fetchWithRetry(url, options, retryConfig);
 
     if (response.status === 401) {
       const token = this.getAccessToken();
@@ -146,7 +207,6 @@ class ApiClient {
       }
       try {
         const newToken = await this.refreshTokenWithQueue();
-        // retry original request with new token
         const retryHeaders = new Headers(options.headers);
         retryHeaders.set('Authorization', `Bearer ${newToken}`);
         const retryResponse = await fetch(url, { ...options, headers: retryHeaders });
@@ -183,36 +243,48 @@ class ApiClient {
     return response.json() as Promise<T>;
   }
 
-  async get<T>(url: string, params?: Record<string, string | number | boolean | undefined>): Promise<T> {
+  async get<T>(
+    url: string,
+    params?: Record<string, string | number | boolean | undefined>,
+    retryConfig?: RetryConfig
+  ): Promise<T> {
     const fullUrl = this.buildUrl(url, params);
     const headers = this.buildHeaders();
-    return this.request<T>(fullUrl, { method: 'GET', headers });
+    return this.request<T>(fullUrl, { method: 'GET', headers }, retryConfig);
   }
 
-  async post<T>(url: string, data?: unknown): Promise<T> {
+  async post<T>(url: string, data?: unknown, retryConfig?: RetryConfig): Promise<T> {
     const fullUrl = this.buildUrl(url);
     const headers = this.buildHeaders();
-    return this.request<T>(fullUrl, {
-      method: 'POST',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
-    });
+    return this.request<T>(
+      fullUrl,
+      {
+        method: 'POST',
+        headers,
+        body: data ? JSON.stringify(data) : undefined,
+      },
+      retryConfig
+    );
   }
 
-  async put<T>(url: string, data?: unknown): Promise<T> {
+  async put<T>(url: string, data?: unknown, retryConfig?: RetryConfig): Promise<T> {
     const fullUrl = this.buildUrl(url);
     const headers = this.buildHeaders();
-    return this.request<T>(fullUrl, {
-      method: 'PUT',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
-    });
+    return this.request<T>(
+      fullUrl,
+      {
+        method: 'PUT',
+        headers,
+        body: data ? JSON.stringify(data) : undefined,
+      },
+      retryConfig
+    );
   }
 
-  async delete(url: string): Promise<void> {
+  async delete(url: string, retryConfig?: RetryConfig): Promise<void> {
     const fullUrl = this.buildUrl(url);
     const headers = this.buildHeaders();
-    return this.request<void>(fullUrl, { method: 'DELETE', headers });
+    return this.request<void>(fullUrl, { method: 'DELETE', headers }, retryConfig);
   }
 
   async downloadBlob(url: string): Promise<{ blob: Blob; filename: string }> {
@@ -221,7 +293,7 @@ class ApiClient {
     const token = this.getAccessToken();
     if (token) headers.set('Authorization', `Bearer ${token}`);
 
-    let response = await fetch(fullUrl, { method: 'GET', headers });
+    let response = await this.fetchWithRetry(fullUrl, { method: 'GET', headers });
 
     if (response.status === 401) {
       const newToken = await this.refreshTokenWithQueue();
@@ -249,15 +321,17 @@ class ApiClient {
       });
     }
 
-    // do not set content-type header; browser sets multipart boundary automatically
     const headers = new Headers();
     const token = this.getAccessToken();
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }
 
-    return this.request<T>(fullUrl, { method: 'POST', headers, body: formData });
+    // POST (upload) is never retried by default: re-uploading a file because the response
+    // was lost would create duplicate resources on the server.
+    return this.request<T>(fullUrl, { method: 'POST', headers, body: formData }, { enabled: false });
   }
 }
 
 export const apiClient = new ApiClient();
+export { isRetryableStatus, computeBackoff, MAX_RETRIES, BASE_RETRY_DELAY_MS };
