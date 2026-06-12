@@ -84,12 +84,16 @@ export const CargaMasiva = ({ onClose }: { onClose?: () => void }) => {
       queryClient.invalidateQueries({ queryKey: ['estudiantes'] });
       notify({
         type: data.detalle_errores.length > 0 ? 'warning' : 'success',
-        message: `Carga completada: ${data.insertadas} insertadas, ${data.actualizadas} actualizadas`,
+        message: `Carga completada: ${data.insertadas} insertadas, ${data.actualizadas} actualizadas` +
+          (data.errores ? `, ${data.errores} con errores` : ''),
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       setStep('select');
-      notify({ type: 'error', message: 'Error al procesar el archivo. Verifica el formato.' });
+      notify({
+        type: 'error',
+        message: error?.message || 'Error al procesar el archivo. Verifica el formato.',
+      });
     },
   });
 
