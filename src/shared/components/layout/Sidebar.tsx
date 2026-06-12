@@ -19,6 +19,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -88,6 +89,9 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
   const isApoyo = rol === 'APOYO';
   const navRef = React.useRef<HTMLElement>(null);
   const touchStartX = React.useRef<number | null>(null);
+  // reactive desktop check (replaces one-shot window.innerWidth read so the
+  // sidebar width updates when crossing the 1024px breakpoint via resize)
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   const isAdmin = rol === 'ADMINISTRADOR';
 
@@ -138,29 +142,26 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse, 
   return (
     <>
       {/* overlay for mobile */}
-      <div 
+      <div
         className={cn(
-          "fixed inset-0 bg-black/50 z-50 lg:hidden transition-opacity duration-300",
+          "fixed inset-0 bg-black/50 z-[54] lg:hidden transition-opacity duration-300",
           isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
         onClick={onClose}
       />
-      
+
       <nav
         ref={navRef}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         className={cn(
-          "h-screen fixed left-0 top-0 z-50 bg-[#10192A] border-r border-white/10 shadow-2xl flex flex-col justify-between py-6 lg:translate-x-0 transition-[width] duration-150",
+          "h-screen fixed left-0 top-0 z-[55] bg-[#10192A] border-r border-white/10 shadow-2xl flex flex-col justify-between pt-6 pb-20 lg:py-6 lg:translate-x-0 transition-[width] duration-150",
           // mobile: always 236px
           "w-[14.75rem]",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
-        style={{ width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? `${width / 16}rem` : undefined }}
+        style={{ width: isDesktop ? `${width / 16}rem` : undefined }}
       >
-        {/* override width on desktop via css */}
-        <style>{`@media (min-width: 1024px) { .sidebar-nav { width: ${width / 16}rem !important; } }`}</style>
-
         <div className="flex-1 flex flex-col overflow-y-auto">
           {/* header with title and collapse toggle */}
           <div className={cn("px-4 mb-8 flex items-center shrink-0", collapsed ? "justify-center px-2" : "justify-between")}>

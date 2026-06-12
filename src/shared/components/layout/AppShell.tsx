@@ -103,7 +103,7 @@ export function AppShell() {
       
       <main
         id="main-content"
-        className="flex-1 flex flex-col min-h-screen"
+        className="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden"
         style={{ marginLeft: undefined }}
         role="main"
       >
@@ -134,7 +134,7 @@ export function AppShell() {
           </AnimatePresence>
         </div>
         
-        <footer className="app-main-content px-4 md:px-10 py-6 border-t border-slate-100/60 bg-white/50 text-center pb-20 md:pb-6 transition-[margin] duration-150">
+        <footer className="app-main-content px-4 md:px-10 py-6 border-t border-slate-100/60 bg-white/50 text-center pb-20 lg:pb-6 transition-[margin] duration-150">
            <p className="text-[0.625rem] uppercase tracking-widest font-bold text-slate-400">
              © 2026 Universidad de Pamplona - Programa de Ingeniería de Sistemas
            </p>

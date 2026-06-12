@@ -266,7 +266,7 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                     className="border-b border-slate-50 hover:bg-slate-50/80 transition-colors cursor-pointer group"
                   >
                     <td className="py-3 px-2 sm:px-4 lg:px-6 font-bold text-brand-primary">{est.documento}</td>
-                    <td className="py-3 px-2 sm:px-4 lg:px-6 font-semibold">
+                    <td className="py-3 px-2 sm:px-4 lg:px-6 font-semibold max-w-[240px] truncate" title={`${est.nombres} ${est.apellidos}`}>
                       {est.nombres} {est.apellidos}
                     </td>
                     <td className="py-3 px-2 sm:px-4 lg:px-6 text-center">
@@ -274,8 +274,11 @@ export const StudentList = ({ onSelectStudent }: StudentListProps) => {
                         {est.semestre}
                       </span>
                     </td>
-                    <td className="py-3 px-2 sm:px-4 lg:px-6">
-                      <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200/50">
+                    <td className="py-3 px-2 sm:px-4 lg:px-6 max-w-[200px]">
+                      <span
+                        className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200/50 inline-block max-w-full truncate align-bottom"
+                        title={est.programa}
+                      >
                         {est.programa}
                       </span>
                     </td>
