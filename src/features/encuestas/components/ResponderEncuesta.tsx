@@ -7,7 +7,7 @@ import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
 import { SearchableSelect } from '@/shared/components/ui/SearchableSelect';
 import { PROGRAMAS } from '@/features/estudiantes/constants/programas';
-import { FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle } from 'lucide-react';
 
 type Step = 'documento' | 'responder' | 'confirmacion' | 'error';
 
@@ -39,7 +39,7 @@ export function ResponderEncuesta() {
     estudiante_nombre: string | null;
     estudiante_id: string | null;
   } | null>(null);
-  const [respuestas, setRespuestas] = useState<Record<string, string>>({});
+  const [respuestas, setRespuestas] = useState<Record<string, string | string[]>>({});
   const [preguntasConDatos, setPreguntasConDatos] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [campoErrors, setCampoErrors] = useState<Record<string, string>>({});
@@ -97,9 +97,11 @@ export function ResponderEncuesta() {
         setStep('responder');
         const preguntas = res.preguntas || encuesta?.preguntas || [];
         setPreguntasConDatos(preguntas);
-        const init: Record<string, string> = {};
+        const init: Record<string, string | string[]> = {};
         preguntas.forEach((p: any) => {
-          if (p.editable === false) {
+          if (p.tipo === 'opcion_multiple_multi') {
+            init[String(p.id)] = [];
+          } else if (p.editable === false) {
             init[String(p.id)] = p.valor_actual ?? '';
           } else if (p.valor_actual != null && p.valor_actual !== undefined) {
             const masked = String(p.valor_actual);
@@ -135,7 +137,7 @@ export function ResponderEncuesta() {
     );
     const allAnswered = editableQuestions
       .map((p: any) => respuestas[String(p.id)])
-      .every((v: string) => v && v.trim());
+      .every((v: string | string[]) => (Array.isArray(v) ? v.length > 0 : v && v.trim()));
     if (editableQuestions.length > 0 && !allAnswered) {
       setErrorMsg('Por favor responda todas las preguntas antes de enviar.');
       return;
@@ -172,7 +174,6 @@ export function ResponderEncuesta() {
       <div className="w-full max-w-2xl">
         {/* header */}
         <div className="text-center mb-8">
-          <FileText className="w-10 h-10 text-brand-primary mx-auto mb-3" />
           <h1 className="text-2xl font-bold text-slate-800">{encuesta.titulo}</h1>
           {encuesta.descripcion && (
             <p className="text-slate-500 mt-1 text-sm">{encuesta.descripcion}</p>
@@ -217,7 +218,7 @@ export function ResponderEncuesta() {
               <div className="space-y-4">
                 {preguntasConDatos.map((pregunta: any, idx: number) => (
                   <div key={pregunta.id}>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 mb-1 break-words [overflow-wrap:anywhere]">
                       {idx + 1}. {pregunta.texto}
                       {pregunta.campo && pregunta.editable === false && (
                         <span className="ml-1.5 text-[0.625rem] text-slate-400 font-normal">(informativo)</span>
@@ -264,7 +265,7 @@ export function ResponderEncuesta() {
                             setErrorMsg(null);
                           }
                         }}
-                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none min-h-[3.75rem] resize-none ${
+                        className={`w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none min-h-[3.75rem] resize-none break-words [overflow-wrap:anywhere] ${
                           campoErrors[pregunta.campo]
                             ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
                             : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary'
@@ -280,7 +281,7 @@ export function ResponderEncuesta() {
                     {pregunta.editable !== false && pregunta.tipo === 'opcion_multiple' && (
                       <div className="space-y-1">
                         {(pregunta.opciones || []).map((opt: string) => (
-                          <label key={opt} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                          <label key={opt} className="flex items-start gap-2 text-sm text-slate-700 cursor-pointer min-w-0">
                             <input
                               type="radio"
                               name={`pregunta_${pregunta.id}`}
@@ -300,11 +301,49 @@ export function ResponderEncuesta() {
                                   setErrorMsg(null);
                                 }
                               }}
-                              className="accent-brand-primary"
+                              className="accent-brand-primary mt-0.5 shrink-0"
                             />
-                            {opt}
+                            <span className="min-w-0 break-words [overflow-wrap:anywhere]">{opt}</span>
                           </label>
                         ))}
+                      </div>)}
+                    {pregunta.editable !== false && pregunta.tipo === 'opcion_multiple_multi' && (
+                      <div className="space-y-1">
+                        {(pregunta.opciones || []).map((opt: string) => {
+                          const seleccionadas = Array.isArray(respuestas[String(pregunta.id)])
+                            ? (respuestas[String(pregunta.id)] as string[])
+                            : [];
+                          return (
+                            <label key={opt} className="flex items-start gap-2 text-sm text-slate-700 cursor-pointer min-w-0">
+                              <input
+                                type="checkbox"
+                                value={opt}
+                                checked={seleccionadas.includes(opt)}
+                                onChange={(e) => {
+                                  setRespuestas((prev) => {
+                                    const actuales = Array.isArray(prev[String(pregunta.id)])
+                                      ? (prev[String(pregunta.id)] as string[])
+                                      : [];
+                                    const next = e.target.checked
+                                      ? [...actuales, opt]
+                                      : actuales.filter((o) => o !== opt);
+                                    return { ...prev, [String(pregunta.id)]: next };
+                                  });
+                                  if (campoErrors[pregunta.campo]) {
+                                    setCampoErrors((prev) => {
+                                      const next = { ...prev };
+                                      delete next[pregunta.campo];
+                                      return next;
+                                    });
+                                    setErrorMsg(null);
+                                  }
+                                }}
+                                className="accent-brand-primary mt-0.5 shrink-0"
+                              />
+                              <span className="min-w-0 break-words [overflow-wrap:anywhere]">{opt}</span>
+                            </label>
+                          );
+                        })}
                       </div>)}
                     {pregunta.editable !== false && pregunta.tipo === 'escala_likert' && (
                       <div className="flex gap-2">
