@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, User, FileText, Mail, Hash, BookOpen, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -23,23 +24,16 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
     return val.toFixed(2);
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-brand-primary/20 backdrop-blur-sm z-[60]"
-          />
           <motion.aside
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-screen w-full max-w-[30rem] bg-white shadow-2xl z-[70] flex flex-col"
+            className="fixed top-14 right-0 bottom-0 w-full max-w-[30rem] bg-white shadow-2xl z-[70] flex flex-col"
           >
             {/* Header */}
             <header className="px-6 pt-8 pb-4 border-b border-slate-100 flex items-start gap-4 relative">
@@ -143,6 +137,7 @@ export const StudentProfileDrawer = ({ student, isOpen, onClose }: { student: an
           </motion.aside>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
