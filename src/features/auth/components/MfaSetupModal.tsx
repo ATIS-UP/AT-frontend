@@ -64,9 +64,12 @@ export function MfaSetupModal({ open, onOpenChange, onComplete }: MfaSetupModalP
     setIsLoading(true);
     setError('');
 
+    let generatedCodes: string[] = [];
+
     if (selectedMethods.includes('backup_codes')) {
       try {
         const resp = await apiClient.post<{ codes: string[]; remaining: number }>('/api/auth/mfa/generate-backup-codes');
+        generatedCodes = resp.codes;
         setBackupCodes(resp.codes);
       } catch (err: any) {
         setError(err?.detail || 'Error al generar códigos de respaldo');
@@ -88,7 +91,7 @@ export function MfaSetupModal({ open, onOpenChange, onComplete }: MfaSetupModalP
     } else {
       const data = await apiClient.post<MfaSetupData>('/api/auth/mfa/setup', { methods: selectedMethods });
       setSetupData(data);
-      if (backupCodes.length > 0) {
+      if (generatedCodes.length > 0) {
         setStep('backup-codes');
       } else {
         setStep('success');
