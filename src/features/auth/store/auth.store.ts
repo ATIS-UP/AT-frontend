@@ -19,22 +19,35 @@ interface Tokens {
 }
 
 interface LoginResponse {
-  access_token: string;
+  access_token?: string;
   refresh_token?: string;
-  usuario: {
+  usuario?: {
     id: string;
     email: string;
     nombre: string;
     rol: Rol;
+    mfa_enabled?: boolean;
   };
+  mfa_required?: boolean;
+  temp_token?: string;
+}
+
+interface MfaSetupResponse {
+  secret: string;
+  uri: string;
+  qr_code_url: string;
 }
 
 interface AuthStore {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  mfaTempToken: string | null;
   login: (tokens: Tokens, user: AuthUser) => void;
-  loginWithCredentials: (email: string, password: string) => Promise<AuthUser>;
+  loginWithCredentials: (email: string, password: string) => Promise<AuthUser | { mfa_required: true; temp_token: string }>;
+  verifyMfaTotp: (tempToken: string, totpCode: string) => Promise<void>;
+  verifyMfaEmailOtp: (tempToken: string, emailCode: string) => Promise<void>;
+  requestMfaEmailOtp: (tempToken: string) => Promise<void>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
 }
@@ -43,34 +56,79 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   isAuthenticated: false,
   isLoading: true,
+  mfaTempToken: null,
 
   login: (tokens, user) => {
     localStorage.setItem(TOKEN_KEY, tokens.access_token);
     localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token);
-    set({ user, isAuthenticated: true, isLoading: false });
+    set({ user, isAuthenticated: true, isLoading: false, mfaTempToken: null });
   },
 
-  loginWithCredentials: async (email, password): Promise<AuthUser> => {
+  loginWithCredentials: async (email, password): Promise<AuthUser | { mfa_required: true; temp_token: string }> => {
     const fullEmail = email.includes('@') ? email : `${email}@unipamplona.edu.co`;
-    
+
     try {
-      const data = await apiClient.post<LoginResponse>('/api/auth/login', { 
-        email: fullEmail, 
-        password 
+      const data = await apiClient.post<LoginResponse>('/api/auth/login', {
+        email: fullEmail,
+        password
       });
-      
-      localStorage.setItem(TOKEN_KEY, data.access_token);
+
+      if (data.mfa_required && data.temp_token) {
+        set({ mfaTempToken: data.temp_token, isLoading: false });
+        return { mfa_required: true as const, temp_token: data.temp_token };
+      }
+
+      localStorage.setItem(TOKEN_KEY, data.access_token!);
       localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token ?? '');
-      set({ 
-        user: data.usuario, 
-        isAuthenticated: true, 
-        isLoading: false 
+      set({
+        user: data.usuario!,
+        isAuthenticated: true,
+        isLoading: false,
+        mfaTempToken: null,
       });
-      return data.usuario;
+      return data.usuario!;
     } catch (error) {
       set({ isLoading: false });
       throw error;
     }
+  },
+
+  verifyMfaTotp: async (tempToken: string, totpCode: string) => {
+    const data = await apiClient.post<LoginResponse>('/api/auth/mfa/verify', {
+      temp_token: tempToken,
+      totp_code: totpCode,
+    });
+
+    localStorage.setItem(TOKEN_KEY, data.access_token!);
+    localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token ?? '');
+    set({
+      user: data.usuario!,
+      isAuthenticated: true,
+      isLoading: false,
+      mfaTempToken: null,
+    });
+  },
+
+  verifyMfaEmailOtp: async (tempToken: string, emailCode: string) => {
+    const data = await apiClient.post<LoginResponse>('/api/auth/mfa/verify-email-otp', {
+      temp_token: tempToken,
+      email_code: emailCode,
+    });
+
+    localStorage.setItem(TOKEN_KEY, data.access_token!);
+    localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token ?? '');
+    set({
+      user: data.usuario!,
+      isAuthenticated: true,
+      isLoading: false,
+      mfaTempToken: null,
+    });
+  },
+
+  requestMfaEmailOtp: async (tempToken: string) => {
+    await apiClient.post('/api/auth/mfa/email-otp', {
+      temp_token: tempToken,
+    });
   },
 
   logout: async () => {
@@ -85,7 +143,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     } finally {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(REFRESH_TOKEN_KEY);
-      set({ user: null, isAuthenticated: false, isLoading: false });
+      set({ user: null, isAuthenticated: false, isLoading: false, mfaTempToken: null });
       window.location.href = '/login';
     }
   },

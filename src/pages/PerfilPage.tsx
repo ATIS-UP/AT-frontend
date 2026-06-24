@@ -1,20 +1,48 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Mail, Shield, UserCircle, Clock3, Lock } from 'lucide-react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { Mail, Shield, UserCircle, Clock3, Lock, Smartphone, Check } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { authService } from '../features/auth/services/authService';
 import { cambiarPasswordSchema, CambiarPasswordInput } from '../shared/schemas/auth.schema';
 import { useNotificationStore } from '../shared/stores/notification.store';
+import { apiClient } from '@/lib/api-client';
+import { MfaSetupModal } from '@/features/auth/components/MfaSetupModal';
 
 export default function PerfilPage() {
   const notify = useNotificationStore((s) => s.add);
+  const queryClient = useQueryClient();
+  const [showMfaSetup, setShowMfaSetup] = useState(false);
 
   const { data: user, isLoading } = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: () => authService.me(),
   });
+
+  const { data: mfaStatus } = useQuery({
+    queryKey: ['auth', 'mfa', 'status'],
+    queryFn: () => apiClient.get<{ mfa_enabled: boolean }>('/api/auth/mfa/status'),
+  });
+
+  const refreshMfaStatus = () => {
+    queryClient.invalidateQueries({ queryKey: ['auth', 'mfa', 'status'] });
+    queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+  };
+
+  const disableMfa = useMutation({
+    mutationFn: (password: string) =>
+      apiClient.post('/api/auth/mfa/disable', { password }),
+    onSuccess: () => {
+      notify({ type: 'success', message: 'MFA desactivado correctamente' });
+      refreshMfaStatus();
+    },
+    onError: (err: any) => {
+      notify({ type: 'error', message: err?.detail || 'Error al desactivar MFA' });
+    },
+  });
+
+  const [disablePassword, setDisablePassword] = useState('');
 
   const cambiarPassword = useMutation({
     mutationFn: (data: CambiarPasswordInput) =>
@@ -110,6 +138,63 @@ export default function PerfilPage() {
         </article>
       </section>
 
+      {/* MFA Section */}
+      <section className="glass-panel rounded-card p-6 space-y-4">
+        <h3 className="font-display text-base font-bold text-slate-800 flex items-center gap-2">
+          <Smartphone className="w-4 h-4 text-brand-primary" />
+          Autenticación de dos factores (MFA)
+        </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <p className="text-sm text-slate-600">
+              {mfaStatus?.mfa_enabled
+                ? 'Su cuenta está protegida con verificación en dos pasos.'
+                : 'Active la verificación en dos pasos para mayor seguridad.'}
+            </p>
+            {mfaStatus?.mfa_enabled && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <Check className="w-4 h-4 text-emerald-600" />
+                <span className="text-sm font-medium text-emerald-700">MFA activo</span>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-2">
+            {mfaStatus?.mfa_enabled ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="password"
+                  value={disablePassword}
+                  onChange={(e) => setDisablePassword(e.target.value)}
+                  placeholder="Contraseña actual"
+                  className="px-3 py-2 text-sm border border-slate-200 rounded-lg focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
+                />
+                <button
+                  onClick={() => {
+                    if (!disablePassword) {
+                      notify({ type: 'warning', message: 'Ingrese su contraseña para desactivar MFA' });
+                      return;
+                    }
+                    disableMfa.mutate(disablePassword);
+                    setDisablePassword('');
+                  }}
+                  disabled={disableMfa.isPending}
+                  className="px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-all disabled:opacity-50 bg-transparent cursor-pointer"
+                >
+                  Desactivar
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowMfaSetup(true)}
+                className="px-4 py-2 text-sm font-medium text-white bg-brand-primary rounded-lg hover:bg-brand-primary/90 transition-all cursor-pointer"
+              >
+                Configurar MFA
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* password change form */}
       <section className="glass-panel rounded-card p-6 space-y-4">
         <h3 className="font-display text-base font-bold text-slate-800 flex items-center gap-2">
@@ -171,6 +256,13 @@ export default function PerfilPage() {
         </form>
       </section>
     </div>
+
+    {/* MFA Setup Modal */}
+    <MfaSetupModal
+      open={showMfaSetup}
+      onOpenChange={setShowMfaSetup}
+      onComplete={() => refreshMfaStatus()}
+    />
     </>
   );
 }

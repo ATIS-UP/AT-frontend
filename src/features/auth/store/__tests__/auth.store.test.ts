@@ -26,10 +26,10 @@ describe('auth.store', () => {
         usuario: { id: '1', email: 'admin@unipamplona.edu.co', nombre: 'Admin', rol: Rol.ADMINISTRADOR },
       });
 
-      const user = await useAuthStore.getState().loginWithCredentials('admin', 'password');
+      const result = await useAuthStore.getState().loginWithCredentials('admin', 'password');
 
       expect(useAuthStore.getState().isAuthenticated).toBe(true);
-      expect(user.nombre).toBe('Admin');
+      expect((result as any).nombre).toBe('Admin');
       expect(localStorage.getItem('sat_access_token')).toBe('test-access-token');
     });
 

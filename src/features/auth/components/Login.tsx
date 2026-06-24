@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { createCharFilter, CharType } from '@/lib/validation';
 import { useAuthStore } from '../store/auth.store';
 import { useNavigate } from 'react-router-dom';
+import { MfaVerifyModal } from './MfaVerifyModal';
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,6 +13,7 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showCredits, setShowCredits] = useState(false);
+  const [showMfaModal, setShowMfaModal] = useState(false);
   const loginWithCredentials = useAuthStore((state) => state.loginWithCredentials);
   const navigate = useNavigate();
 
@@ -19,9 +21,16 @@ export const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
+
     try {
-      const user = await loginWithCredentials(email, password);
+      const result = await loginWithCredentials(email, password);
+
+      if (result && typeof result === 'object' && 'mfa_required' in result) {
+        setShowMfaModal(true);
+        return;
+      }
+
+      const user = result as { rol: string };
       if (user.rol === 'APOYO') {
         navigate('/apoyo');
       } else {
@@ -252,6 +261,9 @@ export const Login = () => {
           </div>
         </div>
       )}
+
+      {/* MFA Verify Modal */}
+      <MfaVerifyModal open={showMfaModal} onOpenChange={setShowMfaModal} />
     </div>
   );
 };
