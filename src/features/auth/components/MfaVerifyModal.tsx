@@ -32,6 +32,17 @@ export function MfaVerifyModal({ open, onOpenChange }: MfaVerifyModalProps) {
   const navigate = useNavigate();
   const { verifyMfaTotp, verifyMfaEmailOtp, verifyMfaBackupCode, requestMfaEmailOtp, mfaTempToken, mfaMethods } = useAuthStore();
 
+  const methods: MethodOption[] = [];
+  if (mfaMethods.includes('totp')) {
+    methods.push({ id: 'totp', label: 'Código Authenticator', icon: Smartphone, desc: 'Ingrese el código de 6 dígitos' });
+  }
+  if (mfaMethods.includes('email')) {
+    methods.push({ id: 'email', label: 'Código por correo', icon: Mail, desc: 'Reciba un código en su correo' });
+  }
+  if (mfaMethods.includes('backup_codes')) {
+    methods.push({ id: 'backup_code', label: 'Código de respaldo', icon: Key, desc: 'Use uno de sus códigos de respaldo' });
+  }
+
   useEffect(() => {
     if (!open) {
       setMethod(null);
@@ -44,6 +55,12 @@ export function MfaVerifyModal({ open, onOpenChange }: MfaVerifyModalProps) {
       setShowMethodPicker(true);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (open && methods.length === 1 && showMethodPicker) {
+      handleSelectMethod(methods[0].id);
+    }
+  }, [open, methods.length]);
 
   useEffect(() => {
     if (!open) return;
@@ -59,17 +76,6 @@ export function MfaVerifyModal({ open, onOpenChange }: MfaVerifyModalProps) {
     }, 1000);
     return () => clearInterval(timer);
   }, [open, onOpenChange]);
-
-  const methods: MethodOption[] = [];
-  if (mfaMethods.includes('totp')) {
-    methods.push({ id: 'totp', label: 'Código Authenticator', icon: Smartphone, desc: 'Ingrese el código de 6 dígitos' });
-  }
-  if (mfaMethods.includes('email')) {
-    methods.push({ id: 'email', label: 'Código por correo', icon: Mail, desc: 'Reciba un código en su correo' });
-  }
-  if (mfaMethods.includes('backup_codes')) {
-    methods.push({ id: 'backup_code', label: 'Código de respaldo', icon: Key, desc: 'Use uno de sus códigos de respaldo' });
-  }
 
   const handleSelectMethod = (m: string) => {
     setMethod(m);

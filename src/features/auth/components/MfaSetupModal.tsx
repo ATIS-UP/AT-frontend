@@ -90,6 +90,9 @@ export function MfaSetupModal({ open, onOpenChange, onComplete }: MfaSetupModalP
       setSetupData(data);
       if (backupCodes.length > 0) {
         setStep('backup-codes');
+      } else {
+        setStep('success');
+        setTimeout(() => { onComplete(); onOpenChange(false); }, 2000);
       }
     }
     setIsLoading(false);

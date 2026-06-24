@@ -67,6 +67,8 @@ export default function PerfilPage() {
   });
 
   const [disablePassword, setDisablePassword] = useState('');
+  const [showDisableConfirm, setShowDisableConfirm] = useState(false);
+  const [disablePasswordInput, setDisablePasswordInput] = useState('');
 
   const cambiarPassword = useMutation({
     mutationFn: (data: CambiarPasswordInput) =>
@@ -205,8 +207,10 @@ export default function PerfilPage() {
                   <div key={m} className="flex items-center gap-2 text-sm text-slate-700">
                     <Icon className="w-4 h-4 text-brand-primary" />
                     <span className="font-medium">{info.label}</span>
-                    {m === 'backup_codes' && (
-                      <span className="text-xs text-slate-400">({backupCodesLeft?.remaining ?? 0} restantes)</span>
+                    {m === 'backup_codes' && backupCodesLeft && (
+                      <span className={`text-xs ${backupCodesLeft.remaining === 0 ? 'text-red-500 font-semibold' : 'text-slate-400'}`}>
+                        ({backupCodesLeft.remaining === 0 ? 'AGOTADOS - regenere' : `${backupCodesLeft.remaining} restantes`})
+                      </span>
                     )}
                   </div>
                 );
@@ -292,54 +296,89 @@ export default function PerfilPage() {
         </div>
         <h2 className="text-xl font-bold text-slate-900 font-display mb-2">Modificar métodos MFA</h2>
         <p className="text-sm text-slate-500 mb-6">Seleccione los métodos que desea mantener activos.</p>
-        <div className="space-y-3 mb-6 text-left">
-          {[
-            { id: 'totp', label: 'Authenticator (TOTP)', icon: Smartphone, desc: 'Google Authenticator, Microsoft Authenticator' },
-            { id: 'email', label: 'Código por correo', icon: Mail, desc: 'Código de un solo uso al correo' },
-            { id: 'backup_codes', label: 'Códigos de respaldo', icon: Key, desc: '8 códigos de un solo uso' },
-          ].map((opt) => {
-            const Icon = opt.icon;
-            const isSelected = mfaStatus?.mfa_methods?.includes(opt.id);
-            return (
-              <button key={opt.id} onClick={async () => {
-                if (isSelected && mfaStatus?.mfa_methods?.length === 1) {
-                  notify({ type: 'warning', message: 'Debe mantener al menos un método activo' });
-                  return;
-                }
-                const newMethods = isSelected
-                  ? mfaStatus!.mfa_methods.filter((m) => m !== opt.id)
-                  : [...(mfaStatus?.mfa_methods ?? []), opt.id];
+        {showDisableConfirm ? (
+          <div className="space-y-4 mb-6">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+              Va a desmarcar todos los métodos. Esto desactivará MFA. Ingrese su contraseña para confirmar.
+            </div>
+            <input type="password" value={disablePasswordInput} onChange={(e) => setDisablePasswordInput(e.target.value)}
+              placeholder="Contraseña actual"
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none" />
+            <div className="flex gap-2">
+              <button onClick={() => { setShowDisableConfirm(false); setDisablePasswordInput(''); }}
+                className="flex-1 px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all bg-transparent cursor-pointer">
+                Cancelar
+              </button>
+              <button onClick={async () => {
+                if (!disablePasswordInput) { notify({ type: 'warning', message: 'Ingrese su contraseña' }); return; }
                 try {
-                  await apiClient.put('/api/auth/mfa/methods', { methods: newMethods });
+                  await apiClient.put('/api/auth/mfa/methods', { methods: [] });
                   refreshMfaStatus();
-                  notify({ type: 'success', message: 'Métodos actualizados' });
+                  setShowMfaSettings(false);
+                  setShowDisableConfirm(false);
+                  setDisablePasswordInput('');
+                  notify({ type: 'success', message: 'MFA desactivado' });
                 } catch (err: any) {
-                  notify({ type: 'error', message: err?.detail || 'Error al actualizar métodos' });
+                  notify({ type: 'error', message: err?.detail || 'Error al desactivar MFA' });
                 }
               }}
-                className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left bg-transparent cursor-pointer ${
-                  isSelected ? 'border-brand-primary bg-brand-primary/5' : 'border-slate-200'
-                }`}>
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isSelected ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-slate-800">{opt.label}</p>
-                  <p className="text-xs text-slate-500">{opt.desc}</p>
-                </div>
-                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                  isSelected ? 'border-brand-primary bg-brand-primary' : 'border-slate-300'
-                }`}>
-                  {isSelected && <Check className="w-3 h-3 text-white" />}
-                </div>
+                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-all cursor-pointer">
+                Desactivar MFA
               </button>
-            );
-          })}
-        </div>
-        <button onClick={() => setShowMfaSettings(false)}
-          className="px-6 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all bg-transparent cursor-pointer">
-          Cerrar
-        </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3 mb-6 text-left">
+            {[
+              { id: 'totp', label: 'Authenticator (TOTP)', icon: Smartphone, desc: 'Google Authenticator, Microsoft Authenticator' },
+              { id: 'email', label: 'Código por correo', icon: Mail, desc: 'Código de un solo uso al correo' },
+              { id: 'backup_codes', label: 'Códigos de respaldo', icon: Key, desc: '8 códigos de un solo uso' },
+            ].map((opt) => {
+              const Icon = opt.icon;
+              const isSelected = mfaStatus?.mfa_methods?.includes(opt.id);
+              return (
+                <button key={opt.id} onClick={async () => {
+                  if (isSelected && mfaStatus?.mfa_methods?.length === 1) {
+                    setShowDisableConfirm(true);
+                    return;
+                  }
+                  const newMethods = isSelected
+                    ? mfaStatus!.mfa_methods.filter((m) => m !== opt.id)
+                    : [...(mfaStatus?.mfa_methods ?? []), opt.id];
+                  try {
+                    await apiClient.put('/api/auth/mfa/methods', { methods: newMethods });
+                    refreshMfaStatus();
+                    notify({ type: 'success', message: 'Métodos actualizados' });
+                  } catch (err: any) {
+                    notify({ type: 'error', message: err?.detail || 'Error al actualizar métodos' });
+                  }
+                }}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left bg-transparent cursor-pointer ${
+                    isSelected ? 'border-brand-primary bg-brand-primary/5' : 'border-slate-200'
+                  }`}>
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isSelected ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-slate-800">{opt.label}</p>
+                    <p className="text-xs text-slate-500">{opt.desc}</p>
+                  </div>
+                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                    isSelected ? 'border-brand-primary bg-brand-primary' : 'border-slate-300'
+                  }`}>
+                    {isSelected && <Check className="w-3 h-3 text-white" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {!showDisableConfirm && (
+          <button onClick={() => setShowMfaSettings(false)}
+            className="px-6 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all bg-transparent cursor-pointer">
+            Cerrar
+          </button>
+        )}
       </div>
     </Modal>
 
