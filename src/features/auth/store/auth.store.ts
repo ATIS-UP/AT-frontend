@@ -27,9 +27,11 @@ interface LoginResponse {
     nombre: string;
     rol: Rol;
     mfa_enabled?: boolean;
+    mfa_methods?: string[];
   };
   mfa_required?: boolean;
   temp_token?: string;
+  mfa_methods?: string[];
 }
 
 interface MfaSetupResponse {
@@ -43,10 +45,12 @@ interface AuthStore {
   isAuthenticated: boolean;
   isLoading: boolean;
   mfaTempToken: string | null;
+  mfaMethods: string[];
   login: (tokens: Tokens, user: AuthUser) => void;
-  loginWithCredentials: (email: string, password: string) => Promise<AuthUser | { mfa_required: true; temp_token: string }>;
+  loginWithCredentials: (email: string, password: string) => Promise<AuthUser | { mfa_required: true; temp_token: string; mfa_methods: string[] }>;
   verifyMfaTotp: (tempToken: string, totpCode: string) => Promise<void>;
   verifyMfaEmailOtp: (tempToken: string, emailCode: string) => Promise<void>;
+  verifyMfaBackupCode: (tempToken: string, backupCode: string) => Promise<void>;
   requestMfaEmailOtp: (tempToken: string) => Promise<void>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
@@ -57,14 +61,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   isAuthenticated: false,
   isLoading: true,
   mfaTempToken: null,
+  mfaMethods: [],
 
   login: (tokens, user) => {
     localStorage.setItem(TOKEN_KEY, tokens.access_token);
     localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token);
-    set({ user, isAuthenticated: true, isLoading: false, mfaTempToken: null });
+    set({ user, isAuthenticated: true, isLoading: false, mfaTempToken: null, mfaMethods: [] });
   },
 
-  loginWithCredentials: async (email, password): Promise<AuthUser | { mfa_required: true; temp_token: string }> => {
+  loginWithCredentials: async (email, password): Promise<AuthUser | { mfa_required: true; temp_token: string; mfa_methods: string[] }> => {
     const fullEmail = email.includes('@') ? email : `${email}@unipamplona.edu.co`;
 
     try {
@@ -74,8 +79,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       });
 
       if (data.mfa_required && data.temp_token) {
-        set({ mfaTempToken: data.temp_token, isLoading: false });
-        return { mfa_required: true as const, temp_token: data.temp_token };
+        const methods = data.mfa_methods ?? [];
+        set({ mfaTempToken: data.temp_token, isLoading: false, mfaMethods: methods });
+        return { mfa_required: true as const, temp_token: data.temp_token, mfa_methods: methods };
       }
 
       localStorage.setItem(TOKEN_KEY, data.access_token!);
@@ -85,6 +91,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         isAuthenticated: true,
         isLoading: false,
         mfaTempToken: null,
+        mfaMethods: [],
       });
       return data.usuario!;
     } catch (error) {
@@ -106,6 +113,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       isAuthenticated: true,
       isLoading: false,
       mfaTempToken: null,
+      mfaMethods: [],
     });
   },
 
@@ -122,6 +130,24 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       isAuthenticated: true,
       isLoading: false,
       mfaTempToken: null,
+      mfaMethods: [],
+    });
+  },
+
+  verifyMfaBackupCode: async (tempToken: string, backupCode: string) => {
+    const data = await apiClient.post<LoginResponse>('/api/auth/mfa/verify-backup-code', {
+      temp_token: tempToken,
+      backup_code: backupCode,
+    });
+
+    localStorage.setItem(TOKEN_KEY, data.access_token!);
+    localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token ?? '');
+    set({
+      user: data.usuario!,
+      isAuthenticated: true,
+      isLoading: false,
+      mfaTempToken: null,
+      mfaMethods: [],
     });
   },
 
@@ -143,7 +169,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     } finally {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(REFRESH_TOKEN_KEY);
-      set({ user: null, isAuthenticated: false, isLoading: false, mfaTempToken: null });
+      set({ user: null, isAuthenticated: false, isLoading: false, mfaTempToken: null, mfaMethods: [] });
       window.location.href = '/login';
     }
   },
