@@ -41,7 +41,7 @@ export function CasosEspeciales() {
 
   const handleNuevoCasoSearch = async (query?: string) => {
     const q = query ?? buscarNuevoEstudiante;
-    if (q.length < 2) {
+    if (q.length < 3) {
       setStudentResults([]);
       return;
     }
@@ -62,7 +62,7 @@ export function CasosEspeciales() {
   // busca automaticamente al escribir (debounce 300ms)
   React.useEffect(() => {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    if (buscarNuevoEstudiante.length < 2) {
+    if (buscarNuevoEstudiante.length < 3) {
       setStudentResults([]);
       return;
     }
@@ -491,10 +491,10 @@ export function CasosEspeciales() {
               value={buscarNuevoEstudiante}
               onChange={(e) => setBuscarNuevoEstudiante(e.target.value)}
               className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none"
-              placeholder="Escriba al menos 2 caracteres para buscar..."
+              placeholder="Escriba al menos 3 caracteres para buscar..."
               autoFocus
             />
-            <Button onClick={() => handleNuevoCasoSearch()} disabled={buscarNuevoEstudiante.length < 2 || searching}>
+            <Button onClick={() => handleNuevoCasoSearch()} disabled={buscarNuevoEstudiante.length < 3 || searching}>
               <Search className="w-4 h-4 mr-2" />
               Buscar
             </Button>
@@ -506,7 +506,7 @@ export function CasosEspeciales() {
             </div>
           )}
 
-          {!searching && studentResults.length === 0 && buscarNuevoEstudiante.length >= 2 && (
+          {!searching && studentResults.length === 0 && buscarNuevoEstudiante.length >= 3 && (
             <p className="text-sm text-slate-500 text-center py-4">No se encontraron estudiantes</p>
           )}
 
