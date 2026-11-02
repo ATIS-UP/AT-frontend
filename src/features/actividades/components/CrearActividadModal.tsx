@@ -22,6 +22,7 @@ import {
 import type { ActividadFormData, ActividadInstitucional } from '../types/actividades.types';
 import type { AnexoActividad } from '../types/anexosActividades.types';
 import { Clock, Trash2, File, FileText, FileSpreadsheet } from 'lucide-react';
+import { fechaHoraActividad, horaGuardada } from "@/features/actividades/utils/fechaActividad";
 import { useWatch } from 'react-hook-form';
 
 interface CrearActividadModalProps {
@@ -39,12 +40,6 @@ interface AnexoFile {
 interface TimePickerProps {
   value: string;
   onChange: (val: string) => void;
-}
-
-function parseDateTime(dateStr: string, timeStr?: string): string {
-  if (!dateStr) return '';
-  if (timeStr) return `${dateStr}T${timeStr}:00`;
-  return `${dateStr}T00:00:00`;
 }
 
 function TimePicker({ value, onChange }: TimePickerProps) {
@@ -163,8 +158,8 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
   React.useEffect(() => {
     if (open) {
       setAnexos([]);
-      setHoraInicio('');
-      setHoraFin('');
+      setHoraInicio(actividad ? horaGuardada(actividad.fecha_inicio) : '');
+      setHoraFin(actividad ? horaGuardada(actividad.fecha_fin) : '');
       setTimeError('');
       reset(defaultValues);
     }
@@ -189,17 +184,18 @@ export function CrearActividadModal({ open, onOpenChange, actividad }: CrearActi
 
   const onSubmit = async (data: ActividadFormData) => {
     try {
-      const startDateTime = new Date(parseDateTime(data.fecha_inicio, horaInicio));
-      const endDateTime = new Date(parseDateTime(data.fecha_fin, horaFin));
+      // Enviar hora local sin toISOString(): la DB usa timestamp sin zona horaria.
+      const inicio = fechaHoraActividad(data.fecha_inicio, horaInicio || '00:00');
+      const fin = fechaHoraActividad(data.fecha_fin, horaFin || '00:00');
 
-      if (endDateTime < startDateTime) {
+      if (fin < inicio) {
         setTimeError('La fecha/hora de fin debe ser posterior a la de inicio');
         return;
       }
       setTimeError('');
 
-      data.fecha_inicio = startDateTime.toISOString();
-      data.fecha_fin = endDateTime.toISOString();
+      data.fecha_inicio = inicio;
+      data.fecha_fin = fin;
 
       if (data.modalidad === 'HIBRIDA') {
         data.lugar_enlace = `${data.lugar_enlace} | ${data.enlace || ''}`;

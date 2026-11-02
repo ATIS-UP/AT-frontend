@@ -1,3 +1,4 @@
+import { mostrarFechaActividad, mostrarHoraActividad } from "@/features/actividades/utils/fechaActividad";
 import React, { useState, useMemo } from 'react';
 import { useActividadesList, useEliminarActividad } from '../hooks/useActividades';
 import { Button } from '@/shared/components/ui/Button';
@@ -32,13 +33,11 @@ import type { ActividadInstitucional } from '../types/actividades.types';
 const ITEMS_PER_PAGE = 20;
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+  return mostrarFechaActividad(dateStr, 'short');
 }
 
 function formatTime(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+  return mostrarHoraActividad(dateStr);
 }
 
 export function Actividades() {
@@ -213,15 +212,34 @@ export function Actividades() {
                 </p>
 
                 {/* Meta info */}
-                <div className="space-y-1.5 text-sm text-slate-500 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{formatDate(act.fecha_inicio)}</span>
-                    <span className="text-slate-300 mx-0.5">·</span>
-                    <span>{formatTime(act.fecha_inicio)}</span>
-                    <span className="text-slate-300 mx-0.5">—</span>
-                    <span>{formatTime(act.fecha_fin)}</span>
-                  </div>
+                <div className="space-y-2 text-sm text-slate-500 mb-4">
+                <div className="flex items-start gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-1" />
+
+                  {act.fecha_inicio.slice(0, 10) === act.fecha_fin.slice(0, 10) ? (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span>{formatDate(act.fecha_inicio)}</span>
+                      <span className="text-slate-300">·</span>
+                      <span>{formatTime(act.fecha_inicio)}</span>
+                      <span className="text-slate-300">—</span>
+                      <span>{formatTime(act.fecha_fin)}</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-1">
+                      <span>
+                        <strong>Inicio:</strong> {formatDate(act.fecha_inicio)}
+                        {" · "}
+                        {formatTime(act.fecha_inicio)}
+                      </span>
+                      <span>
+                        <strong>Fin:</strong> {formatDate(act.fecha_fin)}
+                        {" · "}
+                        {formatTime(act.fecha_fin)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
                   <div className="flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span className="truncate">{act.lugar_enlace}</span>

@@ -6,7 +6,8 @@ import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
 import { Badge } from '@/shared/components/ui/Badge';
 import { Modal } from '@/shared/components/ui/Modal';
-import { Search, Plus, Eye, Trash2 } from 'lucide-react';
+import { Search, Plus, Eye, Trash2, Images } from 'lucide-react';
+import { EvidenciasFotograficas } from './EvidenciasFotograficas';
 import { useNotificationStore } from '@/shared/stores/notification.store';
 import { createCharFilter, CharType } from '@/lib/validation';
 import type { BusquedaEstudiante, EstudianteInfo, RegistroCaso, TipoRegistro } from '../types/casosEspeciales.types';
@@ -28,6 +29,7 @@ export function CasosEspeciales() {
   }, [searchTerm, filtroTipo, filtroEstado]);
   const [selectedEstudiante, setSelectedEstudiante] = useState<EstudianteInfo | null>(null);
   const [selectedRegistro, setSelectedRegistro] = useState<RegistroCaso | null>(null);
+  const [registroFotosId, setRegistroFotosId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -439,6 +441,20 @@ export function CasosEspeciales() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              className="text-blue-600 hover:text-blue-700"
+                              onClick={() =>
+                                setRegistroFotosId((actual) =>
+                                  actual === registro.id ? null : registro.id
+                                )
+                              }
+                            >
+                              <Images className="w-4 h-4 mr-1" />
+                              Fotos
+                            </Button>
+
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               className="text-red-500 hover:text-red-700"
                               onClick={() => handleDeleteClick(registro)}
                             >
@@ -451,6 +467,32 @@ export function CasosEspeciales() {
                   </tbody>
                 </table>
               </div>
+              {registroFotosId &&
+                result.registros.some(
+                  (registro) => registro.id === registroFotosId
+                ) && (
+                  <div className="mt-5 border-t border-slate-200 pt-5 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <h4 className="text-sm font-semibold text-slate-700">
+                        Evidencias del caso seleccionado
+                      </h4>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setRegistroFotosId(null)}
+                      >
+                        Cerrar
+                      </Button>
+                    </div>
+
+                    <EvidenciasFotograficas
+                     key={registroFotosId}
+                     registroId={String(registroFotosId)}
+                    />
+                  </div>
+                )}
+
               <div className="flex justify-end pt-2">
                 <Button
                   variant="outline"

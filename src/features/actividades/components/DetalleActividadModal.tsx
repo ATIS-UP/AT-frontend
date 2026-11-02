@@ -1,3 +1,4 @@
+import { mostrarFechaActividad, mostrarHoraActividad } from "@/features/actividades/utils/fechaActividad";
 import React, { useState } from 'react';
 import { Modal } from '@/shared/components/ui/Modal';
 import { Button } from '@/shared/components/ui/Button';
@@ -36,17 +37,11 @@ interface DetalleActividadModalProps {
 }
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('es-CO', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
+  return mostrarFechaActividad(dateStr, 'long');
 }
 
 function formatTime(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+  return mostrarHoraActividad(dateStr);
 }
 
 function docExt(name: string) {
