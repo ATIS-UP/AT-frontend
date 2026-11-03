@@ -7,6 +7,8 @@ import type {
   RegistroUpdate,
   HistorialCreate,
   NovedadCaso,
+  EvidenciaCaso,
+  EvidenciaCasoListResponse,
 } from '../types/casosEspeciales.types';
 
 export const casosEspecialesService = {
@@ -57,4 +59,18 @@ export const casosEspecialesService = {
 
   eliminarNovedad: (id: string) =>
     apiClient.delete(`/api/novedades-casos/${id}`),
+
+  listarEvidencias: (registroId: string) =>
+    apiClient.get<EvidenciaCasoListResponse>(`/api/registros-casos/${registroId}/evidencias`),
+
+  subirEvidencia: (registroId: string, file: File) =>
+    apiClient.upload<EvidenciaCaso>(`/api/registros-casos/${registroId}/evidencias`, file),
+
+  obtenerArchivoEvidencia: (evidenciaId: string) =>
+    apiClient
+      .downloadBlob(`/api/registros-casos/evidencias/${evidenciaId}/archivo`)
+      .then(({ blob }) => blob),
+
+  eliminarEvidencia: (evidenciaId: string) =>
+    apiClient.delete(`/api/registros-casos/evidencias/${evidenciaId}`),
 };

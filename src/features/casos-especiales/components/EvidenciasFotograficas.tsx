@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import {
@@ -9,25 +8,19 @@ import {
   Download,
   Loader2,
 } from "lucide-react";
+import { casosEspecialesService } from "../services/casosEspecialesService";
+import {
+  useArchivoEvidencia,
+  useEliminarEvidencia,
+  useEvidenciasCaso,
+  useSubirEvidencia,
+} from "../hooks/useEvidenciasCaso";
+import type { EvidenciaCaso } from "../types/casosEspeciales.types";
 
 interface EvidenciaLocal {
   id: string;
   file: File;
   preview: string;
-}
-
-interface EvidenciaGuardada {
-  id: string;
-  registro_id: string;
-  nombre: string;
-  tipo: string;
-  created_at: string | null;
-  preview?: string;
-}
-
-interface RespuestaEvidencias {
-  evidencias: EvidenciaGuardada[];
-  total: number;
 }
 
 interface Props {
@@ -37,156 +30,89 @@ interface Props {
 const MAX_BYTES = 5 * 1024 * 1024;
 const MAX_IMAGES = 10;
 
-const API_BASE = (
-  import.meta.env.VITE_API_URL || ""
-).replace(/\/$/, "");
+// apiClient lanza ApiError ({ message }) o, para HTTPException del backend, el cuerpo { detail }.
+function mensajeError(err: unknown, porDefecto: string): string {
+  const e = err as { message?: unknown; detail?: unknown } | null;
 
-function urlApi(ruta: string): string {
-  return `${API_BASE}${ruta}`;
+  if (typeof e?.message === "string" && e.message) return e.message;
+  if (typeof e?.detail === "string" && e.detail) return e.detail;
+
+  return porDefecto;
 }
 
-async function solicitar(
-  ruta: string,
-  opciones: RequestInit = {}
-): Promise<Response> {
-  const token = localStorage.getItem("sat_access_token");
+function MiniaturaEvidencia({ evidencia }: { evidencia: EvidenciaCaso }) {
+  const { data: blob, isLoading } = useArchivoEvidencia(evidencia.id);
+  const [preview, setPreview] = useState<string | null>(null);
 
-  const headers = new Headers(opciones.headers);
+  useEffect(() => {
+    if (!blob) return;
 
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
+    const url = URL.createObjectURL(blob);
+    setPreview(url);
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [blob]);
+
+  if (preview) {
+    return (
+      <img
+        src={preview}
+        alt={evidencia.nombre}
+        className="w-full h-36 object-cover"
+      />
+    );
   }
 
-  const respuesta = await fetch(urlApi(ruta), {
-    ...opciones,
-    headers,
-    credentials: "same-origin",
-  });
-
-  if (!respuesta.ok) {
-    let mensaje = `Error HTTP ${respuesta.status}`;
-
-    try {
-      const contenido = await respuesta.json();
-
-      if (typeof contenido.detail === "string") {
-        mensaje = contenido.detail;
-      }
-    } catch {
-      // La respuesta no contiene un mensaje JSON.
-    }
-
-    if (respuesta.status === 401) {
-      mensaje = "La sesión expiró. Inicia sesión nuevamente.";
-    }
-
-    if (respuesta.status === 403) {
-      mensaje = "No tienes permisos para realizar esta operación.";
-    }
-
-    throw new Error(mensaje);
-  }
-
-  return respuesta;
+  return (
+    <div className="h-36 flex items-center justify-center text-slate-400">
+      {isLoading ? (
+        <Loader2 className="w-5 h-5 animate-spin" />
+      ) : (
+        "Imagen no disponible"
+      )}
+    </div>
+  );
 }
 
 export function EvidenciasFotograficas({ registroId }: Props) {
   const [imagenes, setImagenes] = useState<EvidenciaLocal[]>([]);
-  const [guardadas, setGuardadas] = useState<EvidenciaGuardada[]>([]);
   const [error, setError] = useState("");
   const [mensaje, setMensaje] = useState("");
-  const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
-  const [eliminandoId, setEliminandoId] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const urlsLocales = useRef(new Set<string>());
-  const urlsGuardadas = useRef(new Set<string>());
-  const solicitudActual = useRef(0);
 
-  const cargarEvidencias = async () => {
-    const numeroSolicitud = ++solicitudActual.current;
+  const {
+    data,
+    isLoading: cargando,
+    error: errorCarga,
+  } = useEvidenciasCaso(registroId);
+  const subirEvidencia = useSubirEvidencia();
+  const eliminarEvidencia = useEliminarEvidencia();
 
-    setCargando(true);
-
-    try {
-      const respuesta = await solicitar(
-        `/api/registros-casos/${registroId}/evidencias`
-      );
-
-      const datos: RespuestaEvidencias = await respuesta.json();
-
-      const resultados = await Promise.all(
-        datos.evidencias.map(async (evidencia) => {
-          try {
-            const archivo = await solicitar(
-              `/api/registros-casos/evidencias/${evidencia.id}/archivo`
-            );
-
-            const blob = await archivo.blob();
-            const preview = URL.createObjectURL(blob);
-
-            return { ...evidencia, preview };
-          } catch {
-            return evidencia;
-          }
-        })
-      );
-
-      if (numeroSolicitud !== solicitudActual.current) {
-        resultados.forEach((evidencia) => {
-          if (evidencia.preview) {
-            URL.revokeObjectURL(evidencia.preview);
-          }
-        });
-        return;
-      }
-
-      urlsGuardadas.current.forEach((url) => {
-        URL.revokeObjectURL(url);
-      });
-
-      urlsGuardadas.current.clear();
-
-      resultados.forEach((evidencia) => {
-        if (evidencia.preview) {
-          urlsGuardadas.current.add(evidencia.preview);
-        }
-      });
-
-      setGuardadas(resultados);
-    } catch (err) {
-      if (numeroSolicitud === solicitudActual.current) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "No se pudieron cargar las evidencias."
-        );
-      }
-    } finally {
-      if (numeroSolicitud === solicitudActual.current) {
-        setCargando(false);
-      }
-    }
-  };
+  const guardadas = data?.evidencias ?? [];
+  const eliminandoId = eliminarEvidencia.isPending
+    ? eliminarEvidencia.variables?.evidenciaId
+    : null;
+  const errorVisible =
+    error ||
+    (errorCarga
+      ? mensajeError(errorCarga, "No se pudieron cargar las evidencias.")
+      : "");
 
   useEffect(() => {
-    void cargarEvidencias();
+    const urls = urlsLocales.current;
 
     return () => {
-      solicitudActual.current += 1;
-
-      urlsLocales.current.forEach((url) => {
+      urls.forEach((url) => {
         URL.revokeObjectURL(url);
       });
-      urlsLocales.current.clear();
-
-      urlsGuardadas.current.forEach((url) => {
-        URL.revokeObjectURL(url);
-      });
-      urlsGuardadas.current.clear();
+      urls.clear();
     };
-  }, [registroId]);
+  }, []);
 
   const seleccionarImagenes = (
     event: ChangeEvent<HTMLInputElement>
@@ -258,16 +184,10 @@ export function EvidenciasFotograficas({ registroId }: Props) {
 
     try {
       for (const imagen of imagenes) {
-        const formulario = new FormData();
-        formulario.append("file", imagen.file);
-
-        await solicitar(
-          `/api/registros-casos/${registroId}/evidencias`,
-          {
-            method: "POST",
-            body: formulario,
-          }
-        );
+        await subirEvidencia.mutateAsync({
+          registroId,
+          file: imagen.file,
+        });
 
         subidas.push(imagen.id);
       }
@@ -275,9 +195,7 @@ export function EvidenciasFotograficas({ registroId }: Props) {
       setMensaje("Las fotografías se guardaron correctamente.");
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "No se pudieron guardar todas las fotografías."
+        mensajeError(err, "No se pudieron guardar todas las fotografías.")
       );
     } finally {
       const subidasSet = new Set(subidas);
@@ -294,21 +212,18 @@ export function EvidenciasFotograficas({ registroId }: Props) {
       );
 
       setGuardando(false);
-      await cargarEvidencias();
     }
   };
 
   const descargarEvidencia = async (
-    evidencia: EvidenciaGuardada
+    evidencia: EvidenciaCaso
   ) => {
     try {
       setError("");
 
-      const respuesta = await solicitar(
-        `/api/registros-casos/evidencias/${evidencia.id}/archivo`
+      const blob = await casosEspecialesService.obtenerArchivoEvidencia(
+        evidencia.id
       );
-
-      const blob = await respuesta.blob();
       const url = URL.createObjectURL(blob);
 
       const enlace = document.createElement("a");
@@ -321,16 +236,12 @@ export function EvidenciasFotograficas({ registroId }: Props) {
 
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "No se pudo descargar la fotografía."
-      );
+      setError(mensajeError(err, "No se pudo descargar la fotografía."));
     }
   };
 
-  const eliminarEvidencia = async (
-    evidencia: EvidenciaGuardada
+  const confirmarEliminacion = async (
+    evidencia: EvidenciaCaso
   ) => {
     const confirmado = window.confirm(
       `¿Deseas eliminar la fotografía "${evidencia.nombre}"?`
@@ -338,26 +249,18 @@ export function EvidenciasFotograficas({ registroId }: Props) {
 
     if (!confirmado) return;
 
-    setEliminandoId(evidencia.id);
     setError("");
     setMensaje("");
 
     try {
-      await solicitar(
-        `/api/registros-casos/evidencias/${evidencia.id}`,
-        { method: "DELETE" }
-      );
+      await eliminarEvidencia.mutateAsync({
+        evidenciaId: evidencia.id,
+        registroId,
+      });
 
       setMensaje("La fotografía fue eliminada.");
-      await cargarEvidencias();
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "No se pudo eliminar la fotografía."
-      );
-    } finally {
-      setEliminandoId(null);
+      setError(mensajeError(err, "No se pudo eliminar la fotografía."));
     }
   };
 
@@ -411,9 +314,9 @@ export function EvidenciasFotograficas({ registroId }: Props) {
         </p>
       </div>
 
-      {error && (
+      {errorVisible && (
         <p role="alert" className="text-sm text-red-600">
-          {error}
+          {errorVisible}
         </p>
       )}
 
@@ -497,17 +400,7 @@ export function EvidenciasFotograficas({ registroId }: Props) {
                 key={evidencia.id}
                 className="border border-slate-200 rounded-lg overflow-hidden bg-slate-50"
               >
-                {evidencia.preview ? (
-                  <img
-                    src={evidencia.preview}
-                    alt={evidencia.nombre}
-                    className="w-full h-36 object-cover"
-                  />
-                ) : (
-                  <div className="h-36 flex items-center justify-center text-slate-400">
-                    Imagen no disponible
-                  </div>
-                )}
+                <MiniaturaEvidencia evidencia={evidencia} />
 
                 <div className="p-2 space-y-2">
                   <p
@@ -531,7 +424,7 @@ export function EvidenciasFotograficas({ registroId }: Props) {
                     <button
                       type="button"
                       disabled={eliminandoId === evidencia.id}
-                      onClick={() => eliminarEvidencia(evidencia)}
+                      onClick={() => confirmarEliminacion(evidencia)}
                       className="text-red-500 hover:text-red-700 disabled:opacity-50"
                       title="Eliminar fotografía"
                       aria-label={`Eliminar ${evidencia.nombre}`}

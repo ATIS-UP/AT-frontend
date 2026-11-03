@@ -80,6 +80,19 @@ export interface HistorialCreate {
   observaciones?: string;
 }
 
+export interface EvidenciaCaso {
+  id: string;
+  registro_id: string;
+  nombre: string;
+  tipo: string;
+  created_at: string | null;
+}
+
+export interface EvidenciaCasoListResponse {
+  evidencias: EvidenciaCaso[];
+  total: number;
+}
+
 export const TIPOS_REGISTRO: { value: TipoRegistro; label: string }[] = [
   { value: 'RENDIMIENTO_ACADEMICO', label: 'Académica' },
   { value: 'PSICOSOCIAL', label: 'Psicosocial y de Salud' },
