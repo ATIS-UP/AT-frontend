@@ -31,7 +31,7 @@ export function resultadosToCsv(data: EncuestaResultados): string {
         '',
         Number(r.promedio).toFixed(2),
       ]);
-    } else if (r.tipo === 'texto_libre' && r.respuestas_texto) {
+    } else if ((r.tipo === 'texto_libre' || r.tipo === 'fecha') && r.respuestas_texto) {
       for (const txt of r.respuestas_texto) {
         rows.push([r.texto, r.tipo, 'respuesta', txt, '', '']);
       }

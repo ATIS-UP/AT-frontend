@@ -45,7 +45,7 @@ export function ResultadosModal({
                 </div>
               </div>
 
-              {r.tipo === 'texto_libre' && r.respuestas_texto?.length > 0 && (
+              {(r.tipo === 'texto_libre' || r.tipo === 'fecha') && r.respuestas_texto?.length > 0 && (
                 <ul className="space-y-1.5">
                   {r.respuestas_texto.map((txt: string, i: number) => (
                     <li key={i} className="text-xs text-slate-600 bg-white border border-slate-200 rounded px-3 py-1.5 italic">

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { CharType, ERROR_MSGS } from '@/lib/validation';
 
-export const PREGUNTA_TIPOS = ['texto_libre', 'opcion_multiple', 'opcion_multiple_multi', 'escala_likert'] as const;
+export const PREGUNTA_TIPOS = ['texto_libre', 'opcion_multiple', 'opcion_multiple_multi', 'escala_likert', 'fecha'] as const;
 export type PreguntaTipo = (typeof PREGUNTA_TIPOS)[number];
 
 export const preguntaBackendSchema = z.object({
@@ -36,7 +36,7 @@ export const encuestaCreateSchema = z.object({
     .string()
     .min(5, 'Mínimo 5 caracteres')
     .max(255, 'Máximo 255 caracteres')
-    .regex(CharType.ALPHANUMERIC, ERROR_MSGS.ALPHANUMERIC),
+    .regex(CharType.FULL_TEXT, ERROR_MSGS.FULL_TEXT),
   descripcion: z
     .string()
     .max(500, 'Máximo 500 caracteres')
@@ -52,7 +52,7 @@ export const encuestaUpdateSchema = z.object({
     .string()
     .min(5, 'Mínimo 5 caracteres')
     .max(255, 'Máximo 255 caracteres')
-    .regex(CharType.ALPHANUMERIC, ERROR_MSGS.ALPHANUMERIC)
+    .regex(CharType.FULL_TEXT, ERROR_MSGS.FULL_TEXT)
     .optional(),
   descripcion: z
     .string()
@@ -91,6 +91,7 @@ export const PREGUNTA_TIPO_LABELS: Record<PreguntaTipo, string> = {
   opcion_multiple: 'Opción múltiple',
   opcion_multiple_multi: 'Opción múltiple (multi-respuesta)',
   escala_likert: 'Escala 1-5',
+  fecha: 'Fecha (DD/MM/AAAA)',
 };
 
 export const CAMPO_ESTUDIANTE = {

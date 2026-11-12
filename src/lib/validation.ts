@@ -5,7 +5,7 @@ export const CharType = {
   DIGITS: /^\d*$/,
   ALPHANUMERIC: /^[a-zA-ZáéíóúüñÑÁÉÍÓÚÜ0-9\s]*$/,
   EMAIL: /^[a-zA-Z0-9@._\-]*$/,
-  FULL_TEXT: /^[a-zA-ZáéíóúüñÑÁÉÍÓÚÜ0-9\s\-.,/#()!?;:_"']*$/,
+  FULL_TEXT: /^[a-zA-ZáéíóúüñÑÁÉÍÓÚÜ0-9\s\-.,/#()!?¿¡;:_"'@%$&+*=]*$/,
 } as const;
 
 export function createCharFilter(pattern: RegExp) {

@@ -95,4 +95,50 @@ describe('ResponderEncuesta', () => {
       expect(screen.getByText(/no coincide con un estudiante/)).toBeInTheDocument();
     });
   });
+
+  it('marks required questions and validates fecha before sending', async () => {
+    vi.mocked(encuestasService.obtenerInfoPublica).mockResolvedValue({
+      id: 'e1', titulo: 'Test', descripcion: null, preguntas: [],
+    });
+    vi.mocked(encuestasService.verificarEstudiante).mockResolvedValue({
+      existe: true, ya_respondio: false, puede_responder: true,
+      estudiante_nombre: 'Ana', estudiante_id: 'est-1',
+      preguntas: [
+        { id: 1, texto: 'Correo alterno', tipo: 'texto_libre', requerida: true, editable: true, valor_actual: null },
+        { id: 2, texto: 'Fecha de nacimiento', tipo: 'fecha', requerida: false, editable: true, valor_actual: null },
+      ],
+    });
+    vi.mocked(encuestasService.responderPublico).mockResolvedValue({} as any);
+
+    renderWithProviders(<ResponderEncuesta />);
+    await waitFor(() => screen.getByPlaceholderText('Número de documento'));
+    await userEvent.type(screen.getByPlaceholderText('Número de documento'), '12345678');
+    await userEvent.click(screen.getByText('Verificar'));
+    await waitFor(() => screen.getByText('Ana'));
+
+    expect(screen.getAllByTitle('Obligatoria')).toHaveLength(1);
+
+    await userEvent.click(screen.getByText('Enviar respuestas'));
+    expect(screen.getByText('Esta pregunta es obligatoria')).toBeInTheDocument();
+    expect(encuestasService.responderPublico).not.toHaveBeenCalled();
+
+    await userEvent.type(screen.getByPlaceholderText('Escribe tu respuesta...'), 'ana-maria@correo.com');
+    const fecha = screen.getByPlaceholderText('DD/MM/AAAA');
+    await userEvent.type(fecha, '31022024');
+    expect(fecha).toHaveValue('31/02/2024');
+    await userEvent.click(screen.getByText('Enviar respuestas'));
+    expect(screen.getByText(/fecha válida con formato DD\/MM\/AAAA/)).toBeInTheDocument();
+    expect(encuestasService.responderPublico).not.toHaveBeenCalled();
+
+    await userEvent.clear(fecha);
+    await userEvent.type(fecha, '15032004');
+    await userEvent.click(screen.getByText('Enviar respuestas'));
+    await waitFor(() => expect(encuestasService.responderPublico).toHaveBeenCalledWith('e1', {
+      documento: '12345678',
+      respuestas: [
+        { pregunta_id: 1, valor: 'ana-maria@correo.com' },
+        { pregunta_id: 2, valor: '15/03/2004' },
+      ],
+    }));
+  });
 });

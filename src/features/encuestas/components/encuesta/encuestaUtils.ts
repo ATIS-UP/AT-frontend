@@ -42,6 +42,30 @@ export function emptyPregunta(): PreguntaForm {
   return { id: generateLocalId(), texto: '', tipo: 'texto_libre', opciones: undefined, requerida: true };
 }
 
+/** True when an answer is empty (blank string, empty multi-select or missing). */
+export function esRespuestaVacia(valor: unknown): boolean {
+  if (valor == null) return true;
+  if (Array.isArray(valor)) return valor.length === 0;
+  return typeof valor === 'string' ? valor.trim() === '' : false;
+}
+
+/** Input mask for date answers: keeps digits and inserts slashes -> DD/MM/AAAA. */
+export function formatearFechaInput(raw: string): string {
+  const d = raw.replace(/\D/g, '').slice(0, 8);
+  if (d.length <= 2) return d;
+  if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`;
+  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
+}
+
+/** True when value is a real calendar date written as DD/MM/AAAA. */
+export function esFechaValida(valor: string): boolean {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(valor.trim());
+  if (!m) return false;
+  const [dia, mes, anio] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const fecha = new Date(anio, mes - 1, dia);
+  return fecha.getFullYear() === anio && fecha.getMonth() === mes - 1 && fecha.getDate() === dia;
+}
+
 export function validatePreguntas(preguntas: PreguntaForm[]): string | null {
   if (preguntas.length === 0) return 'Agregue al menos una pregunta';
   for (let i = 0; i < preguntas.length; i++) {

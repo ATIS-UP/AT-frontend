@@ -8,6 +8,7 @@ import { Card } from '@/shared/components/ui/Card';
 import { SearchableSelect } from '@/shared/components/ui/SearchableSelect';
 import { PROGRAMAS } from '@/features/estudiantes/constants/programas';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { esRespuestaVacia, esFechaValida, formatearFechaInput } from './encuesta/encuestaUtils';
 
 type Step = 'documento' | 'responder' | 'confirmacion' | 'error';
 
@@ -26,6 +27,17 @@ const CAMPO_ERROR_KEYWORDS: Record<string, string[]> = {
   programa: ['programa'],
 };
 
+function validarPregunta(pregunta: any, valor: string | string[] | undefined): string | null {
+  if (pregunta.editable === false) return null;
+  if (esRespuestaVacia(valor)) {
+    return pregunta.requerida !== false ? 'Esta pregunta es obligatoria' : null;
+  }
+  if (pregunta.tipo === 'fecha' && !esFechaValida(String(valor))) {
+    return 'Ingresa una fecha válida con formato DD/MM/AAAA';
+  }
+  return null;
+}
+
 export function ResponderEncuesta() {
   const { encuestaId } = useParams<{ encuestaId: string }>();
 
@@ -43,6 +55,7 @@ export function ResponderEncuesta() {
   const [preguntasConDatos, setPreguntasConDatos] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [campoErrors, setCampoErrors] = useState<Record<string, string>>({});
+  const [intentoEnvio, setIntentoEnvio] = useState(false);
 
   const { data: encuestaData, isLoading: loadingEncuesta } = useQuery({
     queryKey: ['encuesta-publica', encuestaId],
@@ -132,14 +145,12 @@ export function ResponderEncuesta() {
   const handleResponder = () => {
     setCampoErrors({});
     setErrorMsg(null);
-    const editableQuestions = preguntasConDatos.filter(
-      (p: any) => p.editable !== false && p.requerida !== false
-    );
-    const allAnswered = editableQuestions
-      .map((p: any) => respuestas[String(p.id)])
-      .every((v: string | string[]) => (Array.isArray(v) ? v.length > 0 : v && v.trim()));
-    if (editableQuestions.length > 0 && !allAnswered) {
-      setErrorMsg('Por favor responda todas las preguntas antes de enviar.');
+    setIntentoEnvio(true);
+    const conError = preguntasConDatos
+      .map((p: any, idx: number) => (validarPregunta(p, respuestas[String(p.id)]) ? idx + 1 : null))
+      .filter((n): n is number => n !== null);
+    if (conError.length > 0) {
+      setErrorMsg(`Revisa ${conError.length === 1 ? 'la pregunta' : 'las preguntas'} ${conError.join(', ')} antes de enviar.`);
       return;
     }
     responderMutation.mutate();
@@ -216,10 +227,15 @@ export function ResponderEncuesta() {
             <Card className="p-6">
               <h2 className="font-semibold text-slate-700 mb-4">Preguntas</h2>
               <div className="space-y-4">
-                {preguntasConDatos.map((pregunta: any, idx: number) => (
+                {preguntasConDatos.map((pregunta: any, idx: number) => {
+                  const errorPregunta = intentoEnvio ? validarPregunta(pregunta, respuestas[String(pregunta.id)]) : null;
+                  return (
                   <div key={pregunta.id}>
                     <label className="block text-sm font-medium text-slate-700 mb-1 break-words [overflow-wrap:anywhere]">
                       {idx + 1}. {pregunta.texto}
+                      {pregunta.editable !== false && pregunta.requerida !== false && (
+                        <span className="ml-0.5 text-red-500" title="Obligatoria">*</span>
+                      )}
                       {pregunta.campo && pregunta.editable === false && (
                         <span className="ml-1.5 text-[0.625rem] text-slate-400 font-normal">(informativo)</span>
                       )}
@@ -368,11 +384,33 @@ export function ResponderEncuesta() {
                         ))}
                       </div>
                     )}
-                    {campoErrors[pregunta.campo] && (
+                    {pregunta.editable !== false && pregunta.tipo === 'fecha' && (
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={(respuestas[String(pregunta.id)] as string) || ''}
+                        onChange={(e) => {
+                          const val = formatearFechaInput(e.target.value);
+                          setRespuestas((prev) => ({ ...prev, [String(pregunta.id)]: val }));
+                        }}
+                        className={`w-full sm:w-48 border rounded-lg px-3 py-2 text-sm focus:ring-1 outline-none ${
+                          errorPregunta
+                            ? 'border-red-400 focus:border-red-500 focus:ring-red-500'
+                            : 'border-slate-200 focus:border-brand-primary focus:ring-brand-primary'
+                        }`}
+                        placeholder="DD/MM/AAAA"
+                        maxLength={10}
+                        aria-label={`Fecha para la pregunta ${idx + 1}`}
+                      />
+                    )}
+                    {campoErrors[pregunta.campo] ? (
                       <p className="text-xs text-red-500 mt-1">{campoErrors[pregunta.campo]}</p>
+                    ) : errorPregunta && (
+                      <p className="text-xs text-red-500 mt-1">{errorPregunta}</p>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {errorMsg && (

@@ -299,7 +299,7 @@ export function Encuestas() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Título *</label>
-            <input type="text" value={form.titulo} onChange={(e) => setForm({ ...form, titulo: createCharFilter(CharType.ALPHANUMERIC)(e.target.value) })} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none" placeholder="Título de la encuesta" />
+            <input type="text" value={form.titulo} onChange={(e) => setForm({ ...form, titulo: createCharFilter(CharType.FULL_TEXT)(e.target.value) })} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none" placeholder="Título de la encuesta" />
           </div>
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Descripción</label>
@@ -349,6 +349,17 @@ export function Encuestas() {
                           <button type="button" onClick={() => removePregunta(pregunta.id)} disabled={isDragging} className="mt-2 text-red-400 hover:text-red-600 transition-colors text-xs font-bold disabled:opacity-30" title="Eliminar pregunta">✕</button>
                         )}
                       </div>
+                      {pregunta.editable !== false && (
+                        <label className="ml-8 inline-flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={pregunta.requerida}
+                            onChange={(e) => updatePregunta(pregunta.id, { requerida: e.target.checked })}
+                            className="accent-brand-primary"
+                          />
+                          Obligatoria
+                        </label>
+                      )}
                       {(pregunta.tipo === 'opcion_multiple' || pregunta.tipo === 'opcion_multiple_multi') && (
                         <OpcionesEditor
                           preguntaId={pregunta.id}
