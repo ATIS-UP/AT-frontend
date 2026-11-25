@@ -10,8 +10,10 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useQuery } from '@tanstack/react-query';
 import { dashboardService } from '../services/dashboardService';
 import { Badge } from '@/shared/components/ui/Badge';
+import { useNavigate } from 'react-router-dom';
 
 export const Dashboard = () => {
+  const navigate = useNavigate();
   const { data: resumen, isLoading: loadingResumen } = useQuery({
     queryKey: ['dashboard', 'resumen'],
     queryFn: () => dashboardService.resumen(),
@@ -317,8 +319,29 @@ export const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {actividadesData.actividades.map((act, idx) => (
-                    <tr key={act.id ?? idx} className="hover:bg-slate-50/50 transition-colors">
+                {actividadesData.actividades.map((act, idx) => (
+                  <tr
+                    key={act.id ?? idx}
+                    tabIndex={act.id ? 0 : -1}
+                    role={act.id ? 'link' : undefined}
+                    onClick={() => {
+                      if (act.id) {
+                        navigate(`/actividades?actividad=${encodeURIComponent(act.id)}`);
+                      }
+                    }}
+                    onKeyDown={(event) => {
+                      if (act.id && (event.key === 'Enter' || event.key === ' ')) {
+                        event.preventDefault();
+                        navigate(`/actividades?actividad=${encodeURIComponent(act.id)}`);
+                      }
+                    }}
+                    className={`transition-colors ${
+                      act.id
+                        ? 'cursor-pointer hover:bg-blue-50 focus:outline-none focus:bg-blue-50'
+                        : 'hover:bg-slate-50/50'
+                    }`}
+                    title={act.id ? 'Ver detalles de la actividad' : undefined}
+                  >
                       <td className="py-3 px-2 sm:px-4 lg:px-6">
                         <Badge variant="outline">{act.tipo}</Badge>
                       </td>

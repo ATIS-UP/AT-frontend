@@ -1,5 +1,7 @@
 import { mostrarFechaActividad, mostrarHoraActividad } from "@/features/actividades/utils/fechaActividad";
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { actividadesService } from '../services/actividadesService';
 import { useActividadesList, useEliminarActividad } from '../hooks/useActividades';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
@@ -30,7 +32,7 @@ import {
 } from '../types/actividades.types';
 import type { ActividadInstitucional } from '../types/actividades.types';
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 6;
 
 function formatDate(dateStr: string) {
   return mostrarFechaActividad(dateStr, 'short');
@@ -41,6 +43,17 @@ function formatTime(dateStr: string) {
 }
 
 export function Actividades() {
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const actividadIdUrl = searchParams.get('actividad');
+
+  const cerrarActividadUrl = () => {
+    const nuevosParametros = new URLSearchParams(searchParams);
+    nuevosParametros.delete('actividad');
+    setSearchParams(nuevosParametros, { replace: true });
+  };
+
+
   const [pagina, setPagina] = useState(1);
   const [filtroTipo, setFiltroTipo] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
@@ -59,6 +72,35 @@ export function Actividades() {
 
   const eliminarActividad = useEliminarActividad();
   const notification = useNotificationStore();
+  useEffect(() => {
+    if (!actividadIdUrl) return;
+
+    let cancelado = false;
+
+    const abrirActividad = async () => {
+      try {
+        const actividad = await actividadesService.obtener(actividadIdUrl);
+
+        if (!cancelado) {
+          setDetalleActividad(actividad);
+        }
+      } catch {
+        if (!cancelado) {
+          notification.add({
+            type: 'error',
+            message: 'No se pudo abrir la actividad seleccionada.',
+          });
+          cerrarActividadUrl();
+        }
+      }
+    };
+
+    void abrirActividad();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [actividadIdUrl]);
 
   const actividades = data?.actividades ?? [];
   const total = data?.total ?? 0;
@@ -188,12 +230,12 @@ export function Actividades() {
             {actividadesFiltradas.map((act) => (
               <div
                 key={act.id}
-                className={`glass-panel rounded-card flex flex-col min-h-[18.75rem] p-6 border-t-[3px] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group ${
+                className={`glass-panel rounded-card flex flex-col p-4 border-t-[3px] hover:shadow-md transition-all duration-200 group ${
                   TIPO_ACCENT[act.tipo] || 'border-t-slate-300'
                 }`}
               >
                 {/* Top section */}
-                <div className="flex items-start justify-between gap-2 mb-3">
+                <div className="flex items-start justify-between gap-2 mb-2">
                   <span
                     className={`px-2 py-0.5 border text-[0.625rem] font-bold uppercase tracking-wider shrink-0 ${TIPO_COLORS[act.tipo] || 'border-slate-200 text-slate-600 bg-slate-50'}`}
                   >
@@ -207,12 +249,12 @@ export function Actividades() {
                 </div>
 
                 {/* Description */}
-                <p className="text-sm font-semibold text-slate-800 leading-relaxed line-clamp-4 mb-3">
+                <p className="text-sm font-semibold text-slate-800 leading-relaxed line-clamp-2 mb-2">
                   {act.descripcion}
                 </p>
 
                 {/* Meta info */}
-                <div className="space-y-2 text-sm text-slate-500 mb-4">
+                <div className="space-y-1.5 text-sm text-slate-500 mb-3">
                 <div className="flex items-start gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-1" />
 
@@ -259,7 +301,7 @@ export function Actividades() {
                 </div>
 
                 {/* Actions row */}
-                <div className="flex items-center gap-2 pt-3 border-t border-slate-100 mt-auto">
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-100 mt-auto">
                   <button
                     onClick={() => setDetalleActividad(act)}
                     className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium
@@ -349,11 +391,17 @@ export function Actividades() {
 
       <DetalleActividadModal
         open={!!detalleActividad}
-        onOpenChange={(open) => { if (!open) setDetalleActividad(null); }}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDetalleActividad(null);
+            if (actividadIdUrl) cerrarActividadUrl();
+          }
+        }}
         actividad={detalleActividad}
         onEditar={() => {
           setEditActividad(detalleActividad);
           setDetalleActividad(null);
+          if (actividadIdUrl) cerrarActividadUrl();
         }}
         onEliminar={() => {
           if (detalleActividad) setDeleteConfirmId(detalleActividad.id);
