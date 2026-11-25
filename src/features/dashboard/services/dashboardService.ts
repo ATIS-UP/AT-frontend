@@ -34,6 +34,7 @@ export interface ActividadResumen {
   descripcion: string;
   encargado: string;
   modalidad: string;
+  fecha_inicio: string;
   created_at: string;
 }
 

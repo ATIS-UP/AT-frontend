@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { dashboardService } from '../services/dashboardService';
 import { Badge } from '@/shared/components/ui/Badge';
 import { useNavigate } from 'react-router-dom';
+import { mostrarFechaActividad } from '@/features/actividades/utils/fechaActividad';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -292,19 +293,19 @@ export const Dashboard = () => {
         )}
       </div>
 
-      {/* actividades recientes */}
+      {/* próximas actividades (el backend ordena próximas primero y luego pasadas) */}
       <div className="flex flex-col gap-4">
         <h2 className="font-display text-lg font-bold text-slate-900 flex items-center gap-2">
-          Actividades Recientes
+          Próximas actividades
           {actividadesData && actividadesData.actividades.length > 0 && (
             <span className="bg-slate-200 text-slate-600 text-[0.625rem] px-2 py-0.5 rounded-sm font-bold uppercase tracking-tight">
-              {actividadesData.actividades.length} recientes
+              {actividadesData.actividades.length} actividades
             </span>
           )}
         </h2>
 
         {!actividadesData || actividadesData.actividades.length === 0 ? (
-          <p className="text-sm text-slate-400">No hay actividades recientes registradas.</p>
+          <p className="text-sm text-slate-400">No hay actividades registradas.</p>
         ) : (
           <div className="glass-panel rounded-card overflow-hidden">
             <div className="overflow-x-auto">
@@ -357,7 +358,7 @@ export const Dashboard = () => {
                       <td className="py-3 px-2 sm:px-4 lg:px-6 text-sm text-slate-700">{act.encargado}</td>
                       <td className="py-3 px-2 sm:px-4 lg:px-6 text-xs text-slate-500">{act.modalidad}</td>
                       <td className="py-3 px-2 sm:px-4 lg:px-6 text-xs text-slate-400">
-                        {act.created_at ? new Date(act.created_at).toLocaleDateString('es-CO') : '—'}
+                        {act.fecha_inicio ? mostrarFechaActividad(act.fecha_inicio) : '—'}
                       </td>
                     </tr>
                   ))}

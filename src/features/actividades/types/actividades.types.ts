@@ -63,6 +63,7 @@ export interface ActividadListParams {
   por_pagina?: number;
   tipo?: string;
   estado?: string;
+  buscar?: string;
 }
 
 export const TIPO_OPTIONS = [

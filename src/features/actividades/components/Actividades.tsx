@@ -1,5 +1,5 @@
 import { mostrarFechaActividad, mostrarHoraActividad } from "@/features/actividades/utils/fechaActividad";
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { actividadesService } from '../services/actividadesService';
 import { useActividadesList, useEliminarActividad } from '../hooks/useActividades';
@@ -62,12 +62,20 @@ export function Actividades() {
   const [editActividad, setEditActividad] = useState<ActividadInstitucional | null>(null);
   const [detalleActividad, setDetalleActividad] = useState<ActividadInstitucional | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [busquedaDebounced, setBusquedaDebounced] = useState('');
+
+  // la busqueda la hace el backend; esperar 300ms sin teclear antes de consultar
+  useEffect(() => {
+    const timer = setTimeout(() => setBusquedaDebounced(busqueda.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [busqueda]);
 
   const { data, isLoading } = useActividadesList({
     pagina,
     por_pagina: ITEMS_PER_PAGE,
     ...(filtroTipo && { tipo: filtroTipo }),
     ...(filtroEstado && { estado: filtroEstado }),
+    ...(busquedaDebounced && { buscar: busquedaDebounced }),
   });
 
   const eliminarActividad = useEliminarActividad();
@@ -105,17 +113,6 @@ export function Actividades() {
   const actividades = data?.actividades ?? [];
   const total = data?.total ?? 0;
   const totalPaginas = Math.ceil(total / ITEMS_PER_PAGE);
-
-  const busquedaLower = busqueda.toLowerCase();
-  const actividadesFiltradas = useMemo(() => {
-    if (!busquedaLower) return actividades;
-    return actividades.filter(
-      (a) =>
-        a.descripcion.toLowerCase().includes(busquedaLower) ||
-        a.encargado.toLowerCase().includes(busquedaLower) ||
-        a.lugar_enlace.toLowerCase().includes(busquedaLower),
-    );
-  }, [actividades, busquedaLower]);
 
   const handleDelete = async () => {
     if (!deleteConfirmId) return;
@@ -167,7 +164,7 @@ export function Actividades() {
           />
           {busqueda && (
             <button
-              onClick={() => setBusqueda('')}
+              onClick={() => { setBusqueda(''); setPagina(1); }}
               className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
             >
               <X className="w-3.5 h-3.5" />
@@ -214,7 +211,7 @@ export function Actividades() {
         <div className="flex items-center justify-center min-h-[18.75rem]">
           <div className="w-8 h-8 border-3 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin" />
         </div>
-      ) : actividadesFiltradas.length === 0 ? (
+      ) : actividades.length === 0 ? (
         <Card className="flex flex-col items-center justify-center py-16 text-center">
           <Calendar className="w-12 h-12 text-slate-300 mb-4" />
           <p className="text-slate-500 font-medium">
@@ -227,7 +224,7 @@ export function Actividades() {
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {actividadesFiltradas.map((act) => (
+            {actividades.map((act) => (
               <div
                 key={act.id}
                 className={`glass-panel rounded-card flex flex-col p-4 border-t-[3px] hover:shadow-md transition-all duration-200 group ${
