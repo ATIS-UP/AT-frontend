@@ -1,6 +1,5 @@
-import React from 'react';
+import { useState } from 'react';
 import {
-  Users,
   TrendingUp,
   AlertTriangle,
   ClipboardList,
@@ -14,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { mostrarFechaActividad } from '@/features/actividades/utils/fechaActividad';
 
 export const Dashboard = () => {
+  const [paginaCasos, setPaginaCasos] = useState(1);
   const navigate = useNavigate();
   const { data: resumen, isLoading: loadingResumen } = useQuery({
     queryKey: ['dashboard', 'resumen'],
@@ -27,28 +27,35 @@ export const Dashboard = () => {
     staleTime: 30000,
   });
 
-  const { data: recientes, isLoading: loadingRecientes } = useQuery({
-    queryKey: ['dashboard', 'recientes'],
-    queryFn: () => dashboardService.recientes(10),
-    staleTime: 30000,
-  });
-
   const { data: actividadesData, isLoading: loadingActividades } = useQuery({
     queryKey: ['dashboard', 'actividades'],
     queryFn: () => dashboardService.actividadesRecientes(5),
     staleTime: 30000,
   });
 
-  const isLoading = loadingResumen || loadingEstados || loadingRecientes || loadingActividades;
+  const { data: casosData, isLoading: loadingCasos, isError: errorCasos } = useQuery({
+    queryKey: ['dashboard', 'casos-recientes', paginaCasos],
+    queryFn: () => dashboardService.casosRecientes(paginaCasos, 6),
+    staleTime: 30000,
+  });
+
+  const isLoading = loadingResumen || loadingEstados || loadingActividades;
 
   // extract real values
   const estudiantesActivos = resumen?.estudiantes?.activos ?? 0;
   const totalAlertas = resumen?.alertas?.total ?? 0;
   const pendientes = resumen?.alertas?.pendientes ?? 0;
   const enProceso = resumen?.alertas?.en_proceso ?? 0;
-  const resueltas = resumen?.alertas?.resueltas ?? 0;
-  const criticas = resumen?.alertas?.criticas ?? 0;
-  const casosTotal = pendientes + enProceso + resueltas || totalAlertas;
+  
+
+  // Indicadores de casos especiales, basados en registros_casos_especiales.
+  const casosTotal = resumen?.casos_especiales?.total ?? 0;
+  const casosPendientes = resumen?.casos_especiales?.pendientes ?? 0;
+  const casosActivos = resumen?.casos_especiales?.en_proceso ?? 0;
+  const casosCerrados = resumen?.casos_especiales?.resueltas ?? 0;
+  const casosDenominador = casosTotal || 1;
+  const casosRecientes = casosData?.casos ?? [];
+  const totalPaginasCasos = Math.ceil((casosData?.total ?? 0) / 6);
 
   // build trend data from resumen.tendencias (mostrar antiguo → reciente)
   const tendencias = resumen?.tendencias ?? [];
@@ -60,15 +67,6 @@ export const Dashboard = () => {
   const nivelData = estados?.niveles_riesgo
     ? estados.niveles_riesgo.map((n) => ({ name: n.nivel, value: n.total }))
     : [];
-
-  // risk breakdown for the bar
-  const totalRojo = nivelData.find((d) => d.name === 'ROJO')?.value ?? criticas;
-  const totalAmarillo = nivelData.find((d) => d.name === 'AMARILLO')?.value ?? 0;
-  const totalVerde = nivelData.find((d) => d.name === 'VERDE')?.value ?? 0;
-  const totalNiveles = totalRojo + totalAmarillo + totalVerde || 1;
-
-  // recent alerts
-  const alertasRecientes = recientes?.alertas_recientes ?? [];
 
   if (isLoading) {
     return (
@@ -109,7 +107,7 @@ export const Dashboard = () => {
 
         <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[7.5rem]">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-slate-500 font-display text-[0.9375rem] font-semibold">Encuestas</h3>
+            <h3 className="text-slate-500 font-display text-[0.9375rem] font-semibold">Alertas académicas</h3>
             <ClipboardList className="w-4 h-4 text-slate-400" />
           </div>
           <div className="flex flex-col gap-2">
@@ -119,7 +117,7 @@ export const Dashboard = () => {
                 <span>{pendientes}</span>
               </div>
               <div className="w-full bg-slate-200 h-1 rounded-sm overflow-hidden">
-                <div className="bg-brand-primary h-full" style={{ width: `${casosTotal ? (pendientes / casosTotal) * 100 : 0}%` }}></div>
+                <div className="bg-brand-primary h-full" style={{ width: `${totalAlertas ? (pendientes / totalAlertas) * 100 : 0}%` }}></div>
               </div>
             </div>
             <div className="flex flex-col gap-1">
@@ -128,41 +126,41 @@ export const Dashboard = () => {
                 <span>{enProceso}</span>
               </div>
               <div className="w-full bg-slate-200 h-1 rounded-sm overflow-hidden">
-                <div className="bg-brand-secondary h-full" style={{ width: `${casosTotal ? (enProceso / casosTotal) * 100 : 0}%` }}></div>
+                <div className="bg-brand-secondary h-full" style={{ width: `${totalAlertas ? (enProceso / totalAlertas) * 100 : 0}%` }}></div>
               </div>
             </div>
           </div>
         </div>
 
         <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[7.5rem]">
-          <h3 className="text-slate-500 font-display text-[0.9375rem] font-semibold">Casos en seguimiento</h3>
+          <h3 className="text-slate-500 font-display text-[0.9375rem] font-semibold">Casos Especiales</h3>
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-bold text-slate-900 leading-none">{casosTotal}</span>
               <span className="text-[0.75rem] text-slate-400">Totales</span>
             </div>
-            <div className="w-full h-2 rounded-sm overflow-hidden flex shadow-inner">
-              <div className="bg-red-500 h-full" style={{ width: `${(totalRojo / totalNiveles) * 100}%` }}></div>
-              <div className="bg-amber-400 h-full" style={{ width: `${(totalAmarillo / totalNiveles) * 100}%` }}></div>
-              <div className="bg-blue-300 h-full" style={{ width: `${(totalVerde / totalNiveles) * 100}%` }}></div>
+            <div className="w-full h-2 rounded-sm overflow-hidden flex shadow-inner bg-slate-200">
+              <div className="bg-amber-400 h-full" style={{ width: `${(casosPendientes / casosDenominador) * 100}%` }} />
+              <div className="bg-blue-400 h-full" style={{ width: `${(casosActivos / casosDenominador) * 100}%` }} />
+              <div className="bg-emerald-500 h-full" style={{ width: `${(casosCerrados / casosDenominador) * 100}%` }} />            
             </div>
             <div className="flex justify-between text-[0.625rem] text-slate-500 font-medium tracking-tight">
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-red-500 rounded-sm"></span>{totalRojo} Críticos</span>
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-amber-400 rounded-sm"></span>{totalAmarillo} Alerta</span>
-              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-blue-300 rounded-sm"></span>{totalVerde} Normal</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-amber-400 rounded-sm"></span>{casosPendientes} Pendientes</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-blue-400 rounded-sm"></span>{casosActivos} Activos</span>
+              <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-emerald-500 rounded-sm"></span>{casosCerrados} Cerrados</span>
             </div>
           </div>
         </div>
 
         <div className="glass-panel rounded-card p-5 flex flex-col justify-between min-h-[7.5rem] relative overflow-hidden">
-          <h3 className="text-slate-500 font-display text-[0.9375rem] font-semibold">Alertas resueltas</h3>
+          <h3 className="text-slate-500 font-display text-[0.9375rem] font-semibold">Casos cerrados</h3>
           <div className="flex items-end justify-between mt-auto">
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-brand-primary">{resueltas}</span>
+              <span className="text-2xl font-bold text-brand-primary">{casosCerrados}</span>
               <span className="text-sm text-slate-400">/ {casosTotal}</span>
             </div>
             <span className="text-[0.625rem] uppercase font-bold text-slate-500 tracking-wider">
-              {casosTotal ? Math.round((resueltas / casosTotal) * 100) : 0}% Resuelto
+              {casosTotal ? Math.round((casosCerrados / casosTotal) * 100) : 0}% Cerrado
             </span>
           </div>
           <div className="absolute -bottom-4 -right-4 opacity-10">
@@ -231,63 +229,88 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* alertas recientes */}
+      {/* Casos especiales recientes: datos reales y paginados */}
       <div className="flex flex-col gap-4">
-        <h2 className="font-display text-lg font-bold text-slate-900 flex items-center gap-2">
-          Alertas Recientes
-          {alertasRecientes.length > 0 && (
-            <span className="bg-slate-200 text-slate-600 text-[0.625rem] px-2 py-0.5 rounded-sm font-bold uppercase tracking-tight">
-              {alertasRecientes.length} recientes
-            </span>
-          )}
-        </h2>
+        <h2 className="font-display text-lg font-bold text-slate-900">Casos Especiales Recientes</h2>
 
-        {alertasRecientes.length === 0 && (
-          <p className="text-sm text-slate-400">No hay alertas recientes registradas.</p>
+        {loadingCasos ? (
+          <p className="text-sm text-slate-500">Cargando casos especiales...</p>
+        ) : errorCasos ? (
+          <p className="text-sm text-red-600">No fue posible cargar los casos especiales.</p>
+        ) : casosRecientes.length === 0 ? (
+          <p className="text-sm text-slate-400">No hay casos especiales registrados en esta página.</p>
+        ) : (
+          <>
+            <div className="glass-panel rounded-card overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-slate-500 bg-slate-50">
+                      <th className="py-3 px-4 font-semibold">Estudiante</th>
+                      <th className="py-3 px-4 font-semibold">Tipo</th>
+                      <th className="py-3 px-4 font-semibold">Estado</th>
+                      <th className="py-3 px-4 font-semibold">Responsable</th>
+                      <th className="py-3 px-4 font-semibold">Fecha</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {casosRecientes.map((caso) => (
+                      <tr
+                        key={caso.id}
+                        tabIndex={0}
+                        role="link"
+                        className="hover:bg-blue-50 focus:bg-blue-50 cursor-pointer transition-colors focus:outline-none"
+                        onClick={() => navigate(`/casos-especiales?caso=${encodeURIComponent(caso.id)}`)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            navigate(`/casos-especiales?caso=${encodeURIComponent(caso.id)}`);
+                          }
+                        }}
+                        title="Ir al módulo Casos Especiales"
+                      >
+                        <td className="py-3 px-4 font-medium text-slate-800">{caso.estudiante_nombre || 'Sin nombre'}</td>
+                        <td className="py-3 px-4 text-slate-600">{caso.tipo.replaceAll('_', ' ')}</td>
+                        <td className="py-3 px-4">
+                          <Badge variant={caso.estado === 'CERRADO' ? 'success' : caso.estado === 'ACTIVO' ? 'info' : 'warning'}>
+                            {caso.estado}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-slate-600">{caso.responsable_nombre}</td>
+                        <td className="py-3 px-4 text-slate-500">
+                          {caso.created_at ? new Date(caso.created_at).toLocaleDateString('es-CO') : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
 
-        {alertasRecientes.length > 0 && (
-          <div className="glass-panel rounded-card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[0.625rem] bg-slate-50/50">
-                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Estudiante</th>
-                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Nivel</th>
-                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Estado</th>
-                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Período</th>
-                    <th className="pb-3 pt-4 px-2 sm:px-4 lg:px-6 font-semibold">Fecha</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {alertasRecientes.map((alerta, idx) => (
-                    <tr key={alerta.id ?? idx} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="py-3 px-2 sm:px-4 lg:px-6 font-medium text-slate-800">
-                        {alerta.estudiante_nombre || `ID: ${alerta.estudiante_id?.slice(0, 8)}...`}
-                      </td>
-                      <td className="py-3 px-2 sm:px-4 lg:px-6">
-                        <Badge
-                          variant={
-                            alerta.nivel_riesgo === 'ROJO' ? 'error' :
-                            alerta.nivel_riesgo === 'AMARILLO' ? 'warning' : 'success'
-                          }
-                        >
-                          {alerta.nivel_riesgo}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-2 sm:px-4 lg:px-6">
-                        <Badge variant="outline">
-                          {alerta.estado_seguimiento?.replace('_', ' ')}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-2 sm:px-4 lg:px-6 text-xs text-slate-500">{alerta.periodo}</td>
-                      <td className="py-3 px-2 sm:px-4 lg:px-6 text-xs text-slate-400">
-                        {alerta.created_at ? new Date(alerta.created_at).toLocaleDateString('es-CO') : '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {!loadingCasos && !errorCasos && totalPaginasCasos > 1 && (
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <span className="text-sm text-slate-500">
+              Página {paginaCasos} de {totalPaginasCasos} · {casosData?.total} casos
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={paginaCasos <= 1}
+                onClick={() => setPaginaCasos((p) => Math.max(1, p - 1))}
+                className="px-3 py-2 border rounded-lg text-sm disabled:opacity-40 hover:bg-slate-50"
+              >
+                Anterior
+              </button>
+              <button
+                type="button"
+                disabled={paginaCasos >= totalPaginasCasos}
+                onClick={() => setPaginaCasos((p) => Math.min(totalPaginasCasos, p + 1))}
+                className="px-3 py-2 border rounded-lg text-sm disabled:opacity-40 hover:bg-slate-50"
+              >
+                Siguiente
+              </button>
             </div>
           </div>
         )}

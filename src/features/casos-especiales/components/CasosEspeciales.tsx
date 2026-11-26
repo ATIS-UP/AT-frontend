@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useListarRegistros, useCrearRegistro, useEliminarRegistro } from '../hooks/useCasosEspeciales';
+import { useListarRegistros, useCrearRegistro, useEliminarRegistro,useObtenerRegistro, } from '../hooks/useCasosEspeciales';
 import { useNovedadesCasos } from '../hooks/useNovedadesCasos';
 import { Button } from '@/shared/components/ui/Button';
 import { Card } from '@/shared/components/ui/Card';
@@ -16,12 +16,22 @@ import { HistorialRegistro } from './HistorialRegistro';
 import { apiClient } from '@/lib/api-client';
 import { RegistroCasoForm } from './casos/RegistroCasoForm';
 import { getEstadoVariant, getTipoLabel, OBSERVACIONES_MAX_LENGTH } from './casos/casosUtils';
+import { useSearchParams } from 'react-router-dom';
 
 export function CasosEspeciales() {
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const casoIdUrl = searchParams.get('caso');
+
+  const {
+    data: casoDesdeUrl,
+    isError: errorCasoDesdeUrl,
+  } = useObtenerRegistro(casoIdUrl ?? '', !!casoIdUrl);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [pagina, setPagina] = useState(1);
   const [filtroTipo, setFiltroTipo] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('ACTIVO');
+  const [filtroEstado, setFiltroEstado] = useState('TODOS');
   const ITEMS_PER_PAGE = 20;
 
   React.useEffect(() => {
@@ -102,6 +112,39 @@ export function CasosEspeciales() {
   const crearRegistro = useCrearRegistro();
   const eliminarRegistro = useEliminarRegistro();
   const notification = useNotificationStore();
+
+  const cerrarModalCaso = () => {
+    setShowViewModal(false);
+    setSelectedRegistro(null);
+    setHasUnsavedChanges(false);
+    setShowUnsavedAlert(false);
+  
+    if (casoIdUrl) {
+      const nuevosParametros = new URLSearchParams(searchParams);
+      nuevosParametros.delete('caso');
+      setSearchParams(nuevosParametros, { replace: true });
+    }
+  };
+
+  React.useEffect(() => {
+    if (!casoIdUrl || !casoDesdeUrl) return;
+
+    setSelectedRegistro(casoDesdeUrl);
+    setShowViewModal(true);
+  }, [casoIdUrl, casoDesdeUrl]);
+
+  React.useEffect(() => {
+    if (!casoIdUrl || !errorCasoDesdeUrl) return;
+
+    notification.add({
+      type: 'error',
+      message: 'No fue posible abrir el Caso Especial seleccionado.',
+    });
+
+    const nuevosParametros = new URLSearchParams(searchParams);
+    nuevosParametros.delete('caso');
+    setSearchParams(nuevosParametros, { replace: true });
+  }, [casoIdUrl, errorCasoDesdeUrl]);
 
   const allRegistros: RegistroCaso[] = registrosData?.registros || [];
 
@@ -691,13 +734,10 @@ export function CasosEspeciales() {
       <Modal
         open={showViewModal}
         onOpenChange={(open) => {
-          if (open || !hasUnsavedChanges) {
-            setShowViewModal(open);
-            if (!open) {
-              setSelectedRegistro(null);
-              setHasUnsavedChanges(false);
-              setShowUnsavedAlert(false);
-            }
+          if (open) {
+            setShowViewModal(true);
+          } else if (!hasUnsavedChanges) {
+            cerrarModalCaso();
           }
         }}
         title="Gestionar Registro de Caso Especial"
@@ -710,7 +750,7 @@ export function CasosEspeciales() {
         {selectedRegistro && (
           <RegistroCasoForm
             registro={selectedRegistro}
-            onClose={() => setShowViewModal(false)}
+            onClose={cerrarModalCaso}
             onHasChangesChange={setHasUnsavedChanges}
             showUnsavedAlert={showUnsavedAlert}
             onDismissAlert={() => setShowUnsavedAlert(false)}
